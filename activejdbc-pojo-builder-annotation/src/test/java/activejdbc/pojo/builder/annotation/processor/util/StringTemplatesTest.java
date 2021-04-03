@@ -45,4 +45,12 @@ public class StringTemplatesTest {
         System.out.println(StringTemplates.buildEquals(getters));
     }
 
+    @Test
+    public void test7() {
+        Set<String> getters = new HashSet<>();
+        getters.add("getProperty1");
+        getters.add("getProperty2");
+        System.out.println(StringTemplates.buildHashCode(getters));
+    }
+
 }

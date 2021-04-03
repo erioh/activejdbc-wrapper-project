@@ -45,9 +45,14 @@ public class ActiveJdbcRequiredPropertyWrapperFactory {
         // add equals
         generateEqualsMethod(stringBuilder);
         // and hashcode (using getters)
+        generateHashCode(stringBuilder);
         // close the class
         stringBuilder.append('}');
         return stringBuilder.toString();
+    }
+
+    private void generateHashCode(StringBuilder stringBuilder) {
+        stringBuilder.append(buildHashCode(propertyNamesAndGetters.values()));
     }
 
     private void generateEqualsMethod(StringBuilder stringBuilder) {

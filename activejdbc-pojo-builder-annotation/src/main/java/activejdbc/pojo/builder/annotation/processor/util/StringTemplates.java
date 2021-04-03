@@ -51,11 +51,25 @@ public final class StringTemplates {
      * 0. generated checks for equals
      */
     private static final String EQUALS_METHOD_TEMPLATE = "public boolean equals(Object o) {%n" +
-            "        if (this == o) return true;%n" +
-            "        if (o == null || getClass() != o.getClass()) return false;%n" +
-            "        TestClassWrapper that = (TestClassWrapper) o;%n" +
-            "        return %s;%n" +
-            "    }";
+            "if (this == o) return true;%n" +
+            "if (o == null || getClass() != o.getClass()) return false;%n" +
+            "TestClassWrapper that = (TestClassWrapper) o;%n" +
+            "return %s;%n" +
+            "}";
+    /**
+     * 0. generated call of getters
+     */
+    private static final String HASH_CODE_METHOD_TRMPLATE = "public int hashCode() {%n" +
+            "return java.util.Objects.hash(%s);%n" +
+            "}";
+
+    public static String buildHashCode(Collection<String> getters) {
+        StringJoiner stringJoiner = new StringJoiner(", ");
+        for (String getter : getters) {
+            stringJoiner.add(String.format("this.%s()", getter));
+        }
+        return String.format(HASH_CODE_METHOD_TRMPLATE, stringJoiner.toString());
+    }
 
     public static String buildEquals(Collection<String> getters) {
         StringJoiner stringJoiner = new StringJoiner(" && ");
