@@ -39,10 +39,11 @@ public class StringTemplatesTest {
 
     @Test
     public void test6() {
+        String wrappersClassName = "Wrapper";
         Set<String> getters = new HashSet<>();
         getters.add("getProperty1");
         getters.add("getProperty2");
-        System.out.println(StringTemplates.buildEquals(getters));
+        System.out.println(StringTemplates.buildEquals(wrappersClassName, getters));
     }
 
     @Test
