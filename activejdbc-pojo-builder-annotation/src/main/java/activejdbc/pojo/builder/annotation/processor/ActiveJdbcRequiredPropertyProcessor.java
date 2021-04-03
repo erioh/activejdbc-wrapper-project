@@ -1,24 +1,30 @@
 package activejdbc.pojo.builder.annotation.processor;
 
 import activejdbc.pojo.builder.annotation.ActiveJdbcRequiredProperties;
+import activejdbc.pojo.builder.annotation.ActiveJdbcRequiredProperty;
 import activejdbc.pojo.builder.annotation.processor.util.AnnotationValueExtractor;
 import com.google.auto.service.AutoService;
 
 import javax.annotation.processing.*;
 import javax.lang.model.SourceVersion;
-import javax.lang.model.element.*;
+import javax.lang.model.element.AnnotationMirror;
+import javax.lang.model.element.Element;
+import javax.lang.model.element.ElementKind;
+import javax.lang.model.element.TypeElement;
 import javax.tools.Diagnostic;
 import javax.tools.JavaFileObject;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
-@SupportedAnnotationTypes("activejdbc.pojo.builder.annotation.ActiveJdbcRequiredProperties")
+@SupportedAnnotationTypes({"activejdbc.pojo.builder.annotation.ActiveJdbcRequiredProperty", "activejdbc.pojo.builder.annotation.ActiveJdbcRequiredProperties"})
 @SupportedSourceVersion(SourceVersion.RELEASE_8)
 @AutoService(Processor.class)
 public class ActiveJdbcRequiredPropertyProcessor extends AbstractProcessor {
+
+    public static final String WRAPPER_SUFFIX = "Wrapper";
 
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
@@ -31,30 +37,34 @@ public class ActiveJdbcRequiredPropertyProcessor extends AbstractProcessor {
                             "Only classes can be annotated with ActiveJdbcRequiredProperty",
                             element);
                 }
-                List<? extends AnnotationMirror> annotationMirrors = element.getAnnotationMirrors();
-                annotationMirrors.stream()
-                        .filter(annotationMirror -> annotationMirror.getAnnotationType().toString().equals(ActiveJdbcRequiredProperties.class.getName()))
-                        .findFirst()
-                        .ifPresent(annotationMirror -> {
-                            String packageName = element.getEnclosingElement().toString();
-                            String className = element.getSimpleName().toString();
-                            Map<? extends ExecutableElement, ? extends AnnotationValue> elementValues = annotationMirror.getElementValues();
-                            AnnotationValue annotationValue = AnnotationValueExtractor.extract(elementValues, "value");
-                            List<AnnotationMirror> internalAnnotationMirrors = (List<AnnotationMirror>) annotationValue.getValue();
-                            ActiveJdbcRequiredPropertyWrapperFactory wrapperFactory = new ActiveJdbcRequiredPropertyWrapperFactory();
-                            String wrapperClassBody = wrapperFactory.build(packageName, className, internalAnnotationMirrors);
-                            try {
-                                JavaFileObject sourceFile = processingEnv.getFiler().createSourceFile(className + "Wrapper");
-                                try (PrintWriter out = new PrintWriter(sourceFile.openWriter())) {
-                                    out.print(wrapperClassBody);
-                                }
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                            }
-                        });
+                List<? extends AnnotationMirror> annotationMirrors = filterNeededAnnotationMirrors(element.getAnnotationMirrors());
+                String packageName = element.getEnclosingElement().toString();
+                String className = element.getSimpleName().toString();
+                ActiveJdbcRequiredPropertyWrapperFactory wrapperFactory = new ActiveJdbcRequiredPropertyWrapperFactory(WRAPPER_SUFFIX);
+                String wrapperClassBody = wrapperFactory.build(packageName, className, annotationMirrors);
+                try {
+                    JavaFileObject sourceFile = processingEnv.getFiler().createSourceFile(className + WRAPPER_SUFFIX);
+                    try (PrintWriter out = new PrintWriter(sourceFile.openWriter())) {
+                        out.print(wrapperClassBody);
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
 
         }
         return false;
+    }
+
+    private List<? extends AnnotationMirror> filterNeededAnnotationMirrors(List<? extends AnnotationMirror> annotationMirrors) {
+        return annotationMirrors.stream()
+                .filter(annotationMirror -> annotationMirror.getAnnotationType().toString().equals(ActiveJdbcRequiredProperties.class.getName()))
+                .map(AnnotationMirror::getElementValues)
+                .map(elementValues -> AnnotationValueExtractor.extract(elementValues, "value"))
+                .map(annotationValue -> (List<AnnotationMirror>) annotationValue.getValue())
+                .findFirst()
+                .orElseGet(() -> annotationMirrors.stream()
+                        .filter(annotationMirror -> annotationMirror.getAnnotationType().toString().equals(ActiveJdbcRequiredProperty.class.getName()))
+                        .collect(Collectors.toList()));
     }
 }

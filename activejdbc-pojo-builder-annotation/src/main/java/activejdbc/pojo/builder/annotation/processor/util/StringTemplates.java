@@ -48,12 +48,14 @@ public final class StringTemplates {
             "}";
 
     /**
-     * 0. generated checks for equals
+     * 0. wrapper class name
+     * 1. wrapper class name
+     * 2. generated checks for equals
      */
     private static final String EQUALS_METHOD_TEMPLATE = "public boolean equals(Object o) {%n" +
             "if (this == o) return true;%n" +
             "if (o == null || getClass() != o.getClass()) return false;%n" +
-            "TestClassWrapper that = (TestClassWrapper) o;%n" +
+            "%s that = (%s) o;%n" +
             "return %s;%n" +
             "}";
     /**
@@ -93,12 +95,12 @@ public final class StringTemplates {
         return String.format(HASH_CODE_METHOD_TRMPLATE, stringJoiner.toString());
     }
 
-    public static String buildEquals(Collection<String> getters) {
+    public static String buildEquals(String wrappersClassName, Collection<String> getters) {
         StringJoiner stringJoiner = new StringJoiner(" && ");
         for (String getter : getters) {
             stringJoiner.add(String.format("%njava.util.Objects.equals(this.%s(), that.%s())", getter, getter));
         }
-        return String.format(EQUALS_METHOD_TEMPLATE, stringJoiner.toString());
+        return String.format(EQUALS_METHOD_TEMPLATE, wrappersClassName, wrappersClassName, stringJoiner.toString());
     }
 
     public static String buildToString(Map<String, String> propertyNamesAndGetters) {

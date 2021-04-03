@@ -12,10 +12,15 @@ import static activejdbc.pojo.builder.annotation.processor.util.StringTemplates.
 import static activejdbc.pojo.builder.annotation.processor.util.StringUtils.*;
 
 public class ActiveJdbcRequiredPropertyWrapperFactory {
+    private final String wrapperSuffix;
     private final Map<String, String> propertyNamesAndGetters = new HashMap<>();
 
-    public String build(String packageName, String className, List<AnnotationMirror> annotationMirrors) {
-        String wrappersClassName = className + "Wrapper";
+    public ActiveJdbcRequiredPropertyWrapperFactory(String wrapperSuffix) {
+        this.wrapperSuffix = wrapperSuffix;
+    }
+
+    public String build(String packageName, String className, List<? extends AnnotationMirror> annotationMirrors) {
+        String wrappersClassName = className + wrapperSuffix;
         String activeJdbcObjectName = lowerCaseFirstCharacter(className);
         StringBuilder methodsContainer = new StringBuilder();
         // add setters
@@ -29,7 +34,7 @@ public class ActiveJdbcRequiredPropertyWrapperFactory {
         // add toString (using getters)
         generateToStringMethod(methodsContainer);
         // add equals
-        generateEqualsMethod(methodsContainer);
+        generateEqualsMethod(methodsContainer, wrappersClassName);
         // and hashcode (using getters)
         generateHashCode(methodsContainer);
         return buildClass(
@@ -45,8 +50,8 @@ public class ActiveJdbcRequiredPropertyWrapperFactory {
         stringBuilder.append(buildHashCode(propertyNamesAndGetters.values()));
     }
 
-    private void generateEqualsMethod(StringBuilder stringBuilder) {
-        stringBuilder.append(buildEquals(propertyNamesAndGetters.values()));
+    private void generateEqualsMethod(StringBuilder stringBuilder, String wrappersClassName) {
+        stringBuilder.append(buildEquals(wrappersClassName, propertyNamesAndGetters.values()));
     }
 
     private void generateToStringMethod(StringBuilder stringBuilder) {
@@ -61,7 +66,7 @@ public class ActiveJdbcRequiredPropertyWrapperFactory {
         stringBuilder.append(buildMethodGetObject(className, activeJdbcObjectName));
     }
 
-    private void generateGetters(StringBuilder stringBuilder, List<AnnotationMirror> annotationMirrors, String activeJdbcObjectName) {
+    private void generateGetters(StringBuilder stringBuilder, List<? extends AnnotationMirror> annotationMirrors, String activeJdbcObjectName) {
         annotationMirrors.forEach(annotationMirror -> {
             AnnotationValue clazz = AnnotationValueExtractor.extract(annotationMirror.getElementValues(), "clazz");
             AnnotationValue field = AnnotationValueExtractor.extract(annotationMirror.getElementValues(), "field");
@@ -73,7 +78,7 @@ public class ActiveJdbcRequiredPropertyWrapperFactory {
         });
     }
 
-    private void generateSetters(StringBuilder stringBuilder, List<AnnotationMirror> annotationMirrors, String activeJdbcObjectName) {
+    private void generateSetters(StringBuilder stringBuilder, List<? extends AnnotationMirror> annotationMirrors, String activeJdbcObjectName) {
         annotationMirrors.forEach(
                 annotationMirror -> {
                     AnnotationValue clazz = AnnotationValueExtractor.extract(annotationMirror.getElementValues(), "clazz");
