@@ -19,4 +19,9 @@ public class StringTemplatesTest {
         System.out.println(StringTemplates.buildMethodGetObject("Class", "object"));
     }
 
+    @Test
+    public void test4() {
+        System.out.println(StringTemplates.buildMethodSetObject("Class", "object"));
+    }
+
 }

@@ -34,8 +34,9 @@ public class ActiveJdbcRequiredPropertyWrapperFactory {
         // add getters
         generateGetters(stringBuilder, annotationMirrors, activeJdbcObjectName);
         // add from method
-        generateGetObject(stringBuilder, className, activeJdbcObjectName);
-        // add to method
+        generateGetActivejdbcObjectMethod(stringBuilder, className, activeJdbcObjectName);
+        // add put method
+        generateSetActivejdbcObjectMethod(stringBuilder, className, activeJdbcObjectName);
         // add toString (using getters)
         // add equals and hashcode (using getters)
         // close the class
@@ -43,7 +44,11 @@ public class ActiveJdbcRequiredPropertyWrapperFactory {
         return stringBuilder.toString();
     }
 
-    private static void generateGetObject(StringBuilder stringBuilder, String className, String activeJdbcObjectName) {
+    private static void generateSetActivejdbcObjectMethod(StringBuilder stringBuilder, String className, String activeJdbcObjectName) {
+        stringBuilder.append(buildMethodSetObject(className, activeJdbcObjectName));
+    }
+
+    private static void generateGetActivejdbcObjectMethod(StringBuilder stringBuilder, String className, String activeJdbcObjectName) {
         stringBuilder.append(buildMethodGetObject(className, activeJdbcObjectName));
     }
 

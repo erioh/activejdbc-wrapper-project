@@ -26,9 +26,20 @@ public final class StringTemplates {
      * 0. Class name
      * 1. activejdbc object
      */
-    private static final String METHOD_FROM_TEMPLATE = "public %s getActivejdbcObject() {%n" +
+    private static final String METHOD_GET_OBJECT_TEMPLATE = "public %s getActivejdbcObject() {%n" +
             "return %s;%n" +
             "}";
+    /**
+     * 0. Class name
+     * 1. activejdbc object
+     */
+    private static final String METHOD_SET_OBJECT_TEMPLATE = "public void setActivejdbcObject(%s %s) {%n" +
+            "this.%s = %s;%n" +
+            "}";
+
+    public static String buildMethodSetObject(String activejdbcClassName, String activeJdbcObjectName) {
+        return String.format(METHOD_SET_OBJECT_TEMPLATE, activejdbcClassName, activeJdbcObjectName, activeJdbcObjectName, activeJdbcObjectName);
+    }
 
     public static String buildGetter(String methodName, String type, String activejdbcObjectName, String columnName) {
         return String.format(GETTER_TEMPLATE, type, methodName, type, activejdbcObjectName, columnName);
@@ -39,6 +50,6 @@ public final class StringTemplates {
     }
 
     public static String buildMethodGetObject(String activejdbcClassName, String activeJdbcObjectName) {
-        return String.format(METHOD_FROM_TEMPLATE, activejdbcClassName, activeJdbcObjectName);
+        return String.format(METHOD_GET_OBJECT_TEMPLATE, activejdbcClassName, activeJdbcObjectName);
     }
 }
