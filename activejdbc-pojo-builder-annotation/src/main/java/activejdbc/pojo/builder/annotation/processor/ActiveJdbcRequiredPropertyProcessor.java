@@ -11,7 +11,6 @@ import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.TypeElement;
-import javax.tools.Diagnostic;
 import javax.tools.JavaFileObject;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -32,10 +31,7 @@ public class ActiveJdbcRequiredPropertyProcessor extends AbstractProcessor {
             Set<? extends Element> elementsAnnotatedWith = roundEnv.getElementsAnnotatedWith(annotation);
             for (Element element : elementsAnnotatedWith) {
                 if (element.getKind() != ElementKind.CLASS) {
-                    processingEnv.getMessager().printMessage(
-                            Diagnostic.Kind.ERROR,
-                            "Only classes can be annotated with ActiveJdbcRequiredProperty",
-                            element);
+                    throw new IllegalArgumentException("Only classes can be annotated with ActiveJdbcRequiredProperty");
                 }
                 List<? extends AnnotationMirror> annotationMirrors = filterNeededAnnotationMirrors(element.getAnnotationMirrors());
                 String packageName = element.getEnclosingElement().toString();
