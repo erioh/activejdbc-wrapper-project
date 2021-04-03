@@ -16,6 +16,11 @@
             <artifactId>activejdbc-pojo-builder-annotation-processor</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.javalite</groupId>
+            <artifactId>activejdbc</artifactId>
+            <version>2.2</version>
+        </dependency>
     </dependencies>
 
 </project>
