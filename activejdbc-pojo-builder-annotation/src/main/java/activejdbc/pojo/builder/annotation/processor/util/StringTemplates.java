@@ -1,5 +1,6 @@
 package activejdbc.pojo.builder.annotation.processor.util;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.StringJoiner;
 
@@ -45,6 +46,24 @@ public final class StringTemplates {
     private static final String TO_STRING_METHOD_TEMPLATE = "public java.lang.String toString() {%n" +
             "return %s;%n" +
             "}";
+
+    /**
+     * 0. generated checks for equals
+     */
+    private static final String EQUALS_METHOD_TEMPLATE = "public boolean equals(Object o) {%n" +
+            "        if (this == o) return true;%n" +
+            "        if (o == null || getClass() != o.getClass()) return false;%n" +
+            "        TestClassWrapper that = (TestClassWrapper) o;%n" +
+            "        return %s;%n" +
+            "    }";
+
+    public static String buildEquals(Collection<String> getters) {
+        StringJoiner stringJoiner = new StringJoiner(" && ");
+        for (String getter : getters) {
+            stringJoiner.add(String.format("%njava.util.Objects.equals(this.%s(), that.%s())", getter, getter));
+        }
+        return String.format(EQUALS_METHOD_TEMPLATE, stringJoiner.toString());
+    }
 
     public static String buildToString(Map<String, String> propertyNamesAndGetters) {
         StringBuilder stringBuilder = new StringBuilder();

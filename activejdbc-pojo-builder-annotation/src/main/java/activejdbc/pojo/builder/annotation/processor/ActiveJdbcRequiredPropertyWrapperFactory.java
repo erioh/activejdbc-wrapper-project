@@ -41,14 +41,20 @@ public class ActiveJdbcRequiredPropertyWrapperFactory {
         // add put method
         generateSetActivejdbcObjectMethod(stringBuilder, className, activeJdbcObjectName);
         // add toString (using getters)
-        generateToString(stringBuilder);
-        // add equals and hashcode (using getters)
+        generateToStringMethod(stringBuilder);
+        // add equals
+        generateEqualsMethod(stringBuilder);
+        // and hashcode (using getters)
         // close the class
         stringBuilder.append('}');
         return stringBuilder.toString();
     }
 
-    private void generateToString(StringBuilder stringBuilder) {
+    private void generateEqualsMethod(StringBuilder stringBuilder) {
+        stringBuilder.append(buildEquals(propertyNamesAndGetters.values()));
+    }
+
+    private void generateToStringMethod(StringBuilder stringBuilder) {
         stringBuilder.append(buildToString(propertyNamesAndGetters));
     }
 

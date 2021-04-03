@@ -3,7 +3,9 @@ package activejdbc.pojo.builder.annotation.processor.util;
 import org.junit.Test;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 public class StringTemplatesTest {
 
@@ -34,4 +36,13 @@ public class StringTemplatesTest {
         propertiesAndGetters.put("property2", "getProperty2");
         System.out.println(StringTemplates.buildToString(propertiesAndGetters));
     }
+
+    @Test
+    public void test6() {
+        Set<String> getters = new HashSet<>();
+        getters.add("getProperty1");
+        getters.add("getProperty2");
+        System.out.println(StringTemplates.buildEquals(getters));
+    }
+
 }
