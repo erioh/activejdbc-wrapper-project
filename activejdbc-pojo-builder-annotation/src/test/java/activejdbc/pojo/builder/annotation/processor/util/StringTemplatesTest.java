@@ -14,4 +14,9 @@ public class StringTemplatesTest {
         System.out.println(StringTemplates.buildSetter("setSomething", "java.lang.Long", "property", "object", "TEST_COLUMN"));
     }
 
+    @Test
+    public void test3() {
+        System.out.println(StringTemplates.buildMethodGetObject("Class", "object"));
+    }
+
 }

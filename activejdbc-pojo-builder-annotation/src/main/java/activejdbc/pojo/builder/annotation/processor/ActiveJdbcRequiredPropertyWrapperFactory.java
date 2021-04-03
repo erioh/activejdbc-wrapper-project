@@ -6,8 +6,7 @@ import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.AnnotationValue;
 import java.util.List;
 
-import static activejdbc.pojo.builder.annotation.processor.util.StringTemplates.buildGetter;
-import static activejdbc.pojo.builder.annotation.processor.util.StringTemplates.buildSetter;
+import static activejdbc.pojo.builder.annotation.processor.util.StringTemplates.*;
 import static activejdbc.pojo.builder.annotation.processor.util.StringUtils.*;
 
 public class ActiveJdbcRequiredPropertyWrapperFactory {
@@ -35,12 +34,17 @@ public class ActiveJdbcRequiredPropertyWrapperFactory {
         // add getters
         generateGetters(stringBuilder, annotationMirrors, activeJdbcObjectName);
         // add from method
+        generateGetObject(stringBuilder, className, activeJdbcObjectName);
         // add to method
         // add toString (using getters)
         // add equals and hashcode (using getters)
         // close the class
         stringBuilder.append('}');
         return stringBuilder.toString();
+    }
+
+    private static void generateGetObject(StringBuilder stringBuilder, String className, String activeJdbcObjectName) {
+        stringBuilder.append(buildMethodGetObject(className, activeJdbcObjectName));
     }
 
     private static void generateGetters(StringBuilder stringBuilder, List<AnnotationMirror> annotationMirrors, String activeJdbcObjectName) {

@@ -22,6 +22,13 @@ public final class StringTemplates {
     private static final String SETTER_TEMPLATE = "public void %s(%s %s) {%n" +
             "%s.set(\"%s\", %s);%n" +
             "}%n";
+    /**
+     * 0. Class name
+     * 1. activejdbc object
+     */
+    private static final String METHOD_FROM_TEMPLATE = "public %s getActivejdbcObject() {%n" +
+            "return %s;%n" +
+            "}";
 
     public static String buildGetter(String methodName, String type, String activejdbcObjectName, String columnName) {
         return String.format(GETTER_TEMPLATE, type, methodName, type, activejdbcObjectName, columnName);
@@ -29,5 +36,9 @@ public final class StringTemplates {
 
     public static String buildSetter(String methodName, String type, String propertyName, String activejdbcObjectName, String columnName) {
         return String.format(SETTER_TEMPLATE, methodName, type, propertyName, activejdbcObjectName, columnName, propertyName);
+    }
+
+    public static String buildMethodGetObject(String activejdbcClassName, String activeJdbcObjectName) {
+        return String.format(METHOD_FROM_TEMPLATE, activejdbcClassName, activeJdbcObjectName);
     }
 }
