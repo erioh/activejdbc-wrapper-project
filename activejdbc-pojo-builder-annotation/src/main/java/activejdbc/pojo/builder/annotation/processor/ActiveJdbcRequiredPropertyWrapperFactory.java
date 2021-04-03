@@ -5,9 +5,9 @@ import activejdbc.pojo.builder.annotation.processor.util.AnnotationValueExtracto
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.AnnotationValue;
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
+import static activejdbc.pojo.builder.annotation.processor.util.StringTemplates.buildGetter;
+import static activejdbc.pojo.builder.annotation.processor.util.StringTemplates.buildSetter;
 import static activejdbc.pojo.builder.annotation.processor.util.StringUtils.*;
 
 public class ActiveJdbcRequiredPropertyWrapperFactory {
@@ -47,11 +47,9 @@ public class ActiveJdbcRequiredPropertyWrapperFactory {
         annotationMirrors.forEach(annotationMirror -> {
             AnnotationValue clazz = AnnotationValueExtractor.extract(annotationMirror.getElementValues(), "clazz");
             AnnotationValue field = AnnotationValueExtractor.extract(annotationMirror.getElementValues(), "field");
-            stringBuilder.append("public ").append(clazz.getValue()).append(" ").append(buildMethodName(field.getValue().toString(), "get"))
-                    .append("() {").append(NEW_LINE)
-                    .append("return (").append(clazz.getValue()).append(") ")
-                    .append(activeJdbcObjectName).append(".get(\"").append(field.getValue().toString()).append("\");").append(NEW_LINE)
-                    .append('}');
+            String columnName = field.getValue().toString();
+            String getterName = buildMethodName(columnName, "get");
+            stringBuilder.append(buildGetter(getterName, clazz.getValue().toString(), activeJdbcObjectName, columnName));
         });
     }
 
@@ -60,22 +58,10 @@ public class ActiveJdbcRequiredPropertyWrapperFactory {
                 annotationMirror -> {
                     AnnotationValue clazz = AnnotationValueExtractor.extract(annotationMirror.getElementValues(), "clazz");
                     AnnotationValue field = AnnotationValueExtractor.extract(annotationMirror.getElementValues(), "field");
-                    stringBuilder.append("public void ").append(buildMethodName(field.getValue().toString(), "set"))
-                            .append('(').append(clazz.getValue()).append(' ').append(buildPropertyName(field.getValue().toString())).append(" ) {").append(NEW_LINE)
-                            .append(activeJdbcObjectName).append(".set(\"").append(field.getValue().toString()).append("\", ").append(buildPropertyName(field.getValue().toString())).append(");").append(NEW_LINE)
-                            .append('}').append(NEW_LINE);
-
+                    String settersName = buildMethodName(field.getValue().toString(), "set");
+                    String propertyName = buildPropertyName(field.getValue().toString());
+                    String columnName = field.getValue().toString();
+                    stringBuilder.append(buildSetter(settersName, clazz.getValue().toString(), propertyName, activeJdbcObjectName, columnName));
                 });
-    }
-
-    private static void addImportsFromAnnotation(StringBuilder stringBuilder, List<AnnotationMirror> annotationMirrors) {
-        Set<AnnotationValue> annotationValuesWithClasses = annotationMirrors.stream()
-                .map(annotationMirror -> AnnotationValueExtractor.extract(annotationMirror.getElementValues(), "clazz"))
-                .collect(Collectors.toSet());
-        for (AnnotationValue annotationValuesWithClass : annotationValuesWithClasses) {
-            stringBuilder.append("import ")
-                    .append(annotationValuesWithClass.getValue())
-                    .append(';').append(NEW_LINE);
-        }
     }
 }
