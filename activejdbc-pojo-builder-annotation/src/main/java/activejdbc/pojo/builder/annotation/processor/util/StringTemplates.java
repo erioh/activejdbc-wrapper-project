@@ -62,6 +62,28 @@ public final class StringTemplates {
     private static final String HASH_CODE_METHOD_TRMPLATE = "public int hashCode() {%n" +
             "return java.util.Objects.hash(%s);%n" +
             "}";
+    /**
+     * 0. package name
+     * 1. import activejbdc class package
+     * 2. activejbdc object class for import
+     * 3. wrapper class name
+     * 4. activejbdc object class
+     * 5. acitvejdbc object name
+     * 6. activejbdc object class
+     * 7. methods
+     */
+    private static final String CLASS_TEMPLATE = "package %s;%n" +
+            "import %s.%s;%n" +
+            "public class %s {%n" +
+            "%s %s = new %s();%n" +
+            "%s%n" +
+            "}";
+
+    public static String buildClass(String packageName, String activejdbcObjectClassName
+    , String wrapperClassName, String activejdbcObjectName, String methods) {
+        return String.format(CLASS_TEMPLATE, packageName, packageName, activejdbcObjectClassName,
+                wrapperClassName, activejdbcObjectClassName, activejdbcObjectName, activejdbcObjectClassName, methods);
+    }
 
     public static String buildHashCode(Collection<String> getters) {
         StringJoiner stringJoiner = new StringJoiner(", ");

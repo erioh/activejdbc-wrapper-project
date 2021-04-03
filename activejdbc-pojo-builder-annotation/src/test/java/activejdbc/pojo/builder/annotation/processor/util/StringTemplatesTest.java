@@ -53,4 +53,14 @@ public class StringTemplatesTest {
         System.out.println(StringTemplates.buildHashCode(getters));
     }
 
+    @Test
+    public void test8() {
+        String packageName = "com.package";
+        String activejdbcObjectClassName = "ActivejdbcClass";
+        String wrapperClassName = "ClassWrapper";
+        String activejdbcObjectName = "activejdbcClass";
+        String methods = "methods();";
+        System.out.println(StringTemplates.buildClass(packageName, activejdbcObjectClassName, wrapperClassName, activejdbcObjectName, methods));
+    }
+
 }

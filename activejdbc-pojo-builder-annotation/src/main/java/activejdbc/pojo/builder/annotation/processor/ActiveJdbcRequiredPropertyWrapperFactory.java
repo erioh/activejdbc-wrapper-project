@@ -12,43 +12,33 @@ import static activejdbc.pojo.builder.annotation.processor.util.StringTemplates.
 import static activejdbc.pojo.builder.annotation.processor.util.StringUtils.*;
 
 public class ActiveJdbcRequiredPropertyWrapperFactory {
-    private static final String NEW_LINE = System.getProperty("line.separator");
     private final Map<String, String> propertyNamesAndGetters = new HashMap<>();
 
     public String build(String packageName, String className, List<AnnotationMirror> annotationMirrors) {
         String wrappersClassName = className + "Wrapper";
-        // adding package
-        StringBuilder stringBuilder = new StringBuilder()
-                .append("package ").append(packageName).append(';').append(NEW_LINE);
-        // adding import of activejbdc entity
-        stringBuilder.append("import ").append(packageName).append('.').append(className).append(';').append(NEW_LINE);
-        // creating class name
-        stringBuilder.append("public class ").append(wrappersClassName).append(" {").append(NEW_LINE);
-        // create private instance of activejdbc class
         String activeJdbcObjectName = lowerCaseFirstCharacter(className);
-        stringBuilder.append("private ").append(className).append(" ")
-                .append(activeJdbcObjectName)
-                .append(" = new ")
-                .append(className)
-                .append("();")
-                .append(NEW_LINE);
+        StringBuilder methodsContainer = new StringBuilder();
         // add setters
-        generateSetters(stringBuilder, annotationMirrors, activeJdbcObjectName);
+        generateSetters(methodsContainer, annotationMirrors, activeJdbcObjectName);
         // add getters
-        generateGetters(stringBuilder, annotationMirrors, activeJdbcObjectName);
+        generateGetters(methodsContainer, annotationMirrors, activeJdbcObjectName);
         // add from method
-        generateGetActivejdbcObjectMethod(stringBuilder, className, activeJdbcObjectName);
+        generateGetActivejdbcObjectMethod(methodsContainer, className, activeJdbcObjectName);
         // add put method
-        generateSetActivejdbcObjectMethod(stringBuilder, className, activeJdbcObjectName);
+        generateSetActivejdbcObjectMethod(methodsContainer, className, activeJdbcObjectName);
         // add toString (using getters)
-        generateToStringMethod(stringBuilder);
+        generateToStringMethod(methodsContainer);
         // add equals
-        generateEqualsMethod(stringBuilder);
+        generateEqualsMethod(methodsContainer);
         // and hashcode (using getters)
-        generateHashCode(stringBuilder);
-        // close the class
-        stringBuilder.append('}');
-        return stringBuilder.toString();
+        generateHashCode(methodsContainer);
+        return buildClass(
+                packageName,
+                className,
+                wrappersClassName,
+                activeJdbcObjectName,
+                methodsContainer.toString()
+        );
     }
 
     private void generateHashCode(StringBuilder stringBuilder) {
