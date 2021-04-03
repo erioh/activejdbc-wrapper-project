@@ -41,7 +41,8 @@ public class ActiveJdbcRequiredPropertyProcessor extends AbstractProcessor {
                             Map<? extends ExecutableElement, ? extends AnnotationValue> elementValues = annotationMirror.getElementValues();
                             AnnotationValue annotationValue = AnnotationValueExtractor.extract(elementValues, "value");
                             List<AnnotationMirror> internalAnnotationMirrors = (List<AnnotationMirror>) annotationValue.getValue();
-                            String wrapperClassBody = ActiveJdbcRequiredPropertyWrapperFactory.build(packageName, className, internalAnnotationMirrors);
+                            ActiveJdbcRequiredPropertyWrapperFactory wrapperFactory = new ActiveJdbcRequiredPropertyWrapperFactory();
+                            String wrapperClassBody = wrapperFactory.build(packageName, className, internalAnnotationMirrors);
                             try {
                                 JavaFileObject sourceFile = processingEnv.getFiler().createSourceFile(className + "Wrapper");
                                 try (PrintWriter out = new PrintWriter(sourceFile.openWriter())) {

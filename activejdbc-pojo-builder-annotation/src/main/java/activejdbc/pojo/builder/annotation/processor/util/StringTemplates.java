@@ -1,5 +1,8 @@
 package activejdbc.pojo.builder.annotation.processor.util;
 
+import java.util.Map;
+import java.util.StringJoiner;
+
 public final class StringTemplates {
     /**
      * 0. return type
@@ -36,6 +39,24 @@ public final class StringTemplates {
     private static final String METHOD_SET_OBJECT_TEMPLATE = "public void setActivejdbcObject(%s %s) {%n" +
             "this.%s = %s;%n" +
             "}";
+    /**
+     * 0. toString implementation
+     */
+    private static final String TO_STRING_METHOD_TEMPLATE = "public java.lang.String toString() {%n" +
+            "return %s;%n" +
+            "}";
+
+    public static String buildToString(Map<String, String> propertyNamesAndGetters) {
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append('"')
+                .append('{');
+        StringJoiner stringJoiner = new StringJoiner(" + \", ");
+        propertyNamesAndGetters.forEach((propertyName, getter) ->
+                stringJoiner.add(String.format("'%s' = \" + this.%s()%n", propertyName, getter)));
+        stringBuilder.append(stringJoiner.toString());
+        stringBuilder.append(" + \"}\"");
+        return String.format(TO_STRING_METHOD_TEMPLATE, stringBuilder.toString());
+    }
 
     public static String buildMethodSetObject(String activejdbcClassName, String activeJdbcObjectName) {
         return String.format(METHOD_SET_OBJECT_TEMPLATE, activejdbcClassName, activeJdbcObjectName, activeJdbcObjectName, activeJdbcObjectName);
