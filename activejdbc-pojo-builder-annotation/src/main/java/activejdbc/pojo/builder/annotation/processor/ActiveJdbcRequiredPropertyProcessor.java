@@ -1,7 +1,6 @@
 package activejdbc.pojo.builder.annotation.processor;
 
 import activejdbc.pojo.builder.annotation.ActiveJdbcRequiredProperties;
-import activejdbc.pojo.builder.annotation.ActiveJdbcRequiredProperty;
 import com.google.auto.service.AutoService;
 
 import javax.annotation.processing.*;
@@ -11,6 +10,7 @@ import javax.tools.Diagnostic;
 import javax.tools.JavaFileObject;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -31,30 +31,28 @@ public class ActiveJdbcRequiredPropertyProcessor extends AbstractProcessor {
                             "Only classes can be annotated with ActiveJdbcRequiredProperty",
                             element);
                 }
-                ////
                 List<? extends AnnotationMirror> annotationMirrors = element.getAnnotationMirrors();
                 annotationMirrors.stream().findFirst().ifPresent(annotationMirror -> {
                     if (annotationMirror.getAnnotationType().toString().equals(ActiveJdbcRequiredProperties.class.getName())) {
+                        String packageName = element.getEnclosingElement().toString();
+                        String className = element.getSimpleName().toString();
                         Map<? extends ExecutableElement, ? extends AnnotationValue> elementValues = annotationMirror.getElementValues();
-                        elementValues.forEach((key, value) -> {
-
+                        // todo find a solution to extract one value
+                        Collection<? extends AnnotationValue> values = elementValues.values();
+                        values.forEach(annotationValue -> {
+                            List<AnnotationMirror> internalAnnotationMirrors = (List<AnnotationMirror>) annotationValue.getValue();
+                            String wrapperClassBody = ActiveJdbcRequiredPropertyWrapperFactory.build(packageName, className, internalAnnotationMirrors);
+                            try {
+                                JavaFileObject sourceFile = processingEnv.getFiler().createSourceFile(className + "Wrapper");
+                                try (PrintWriter out = new PrintWriter(sourceFile.openWriter())) {
+                                    out.print(wrapperClassBody);
+                                }
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
                         });
                     }
                 });
-                ////
-                ActiveJdbcRequiredProperties elementAnnotation = element.getAnnotation(ActiveJdbcRequiredProperties.class);
-                ActiveJdbcRequiredProperty[] annotationsWithExpectedFields = elementAnnotation.value();
-                String packageName = element.getEnclosingElement().toString();
-                String className = element.getSimpleName().toString();
-                String wrapperClassBody = ActiveJdbcRequiredPropertyWrapperFactory.build(packageName, className, annotationsWithExpectedFields);
-                try {
-                    JavaFileObject sourceFile = processingEnv.getFiler().createSourceFile(className + "Wrapper");
-                    try (PrintWriter out = new PrintWriter(sourceFile.openWriter())) {
-                        out.print(wrapperClassBody);
-                    }
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
             }
 
         }
