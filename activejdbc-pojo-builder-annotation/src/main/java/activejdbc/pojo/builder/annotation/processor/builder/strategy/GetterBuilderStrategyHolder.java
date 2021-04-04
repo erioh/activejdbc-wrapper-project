@@ -15,7 +15,7 @@ public class GetterBuilderStrategyHolder {
     private final Map<Class<?>, GetterBuilderStrategy> getterBuilderStrategies;
 
     public GetterBuilderStrategyHolder() {
-        defaultStrategy = new DefaultGetterBuilderStrategy();
+        defaultStrategy = new StringGetterBuilderStrategy();
         getterBuilderStrategies = new HashMap<>();
         getterBuilderStrategies.put(LocalDate.class, new LocalDateGetterBuilderStrategy());
         getterBuilderStrategies.put(LocalDateTime.class, new LocalDateTimeGetterBuilderStrategy());
@@ -28,6 +28,7 @@ public class GetterBuilderStrategyHolder {
         getterBuilderStrategies.putIfAbsent(Long.class, new LongGetterBuilderStrategy());
         getterBuilderStrategies.putIfAbsent(Time.class, new TimeGetterBuilderStrategy());
         getterBuilderStrategies.putIfAbsent(Short.class, new ShortGetterBuilderStrategy());
+        getterBuilderStrategies.putIfAbsent(String.class, defaultStrategy);
     }
 
     public GetterBuilderStrategy getStrategy(String type) {

@@ -1,12 +1,12 @@
 package activejdbc.pojo.builder.annotation.processor.builder.strategy;
 
-import activejdbc.pojo.builder.annotation.processor.builder.strategy.setter.DateSetterBuilderStrategy;
-import activejdbc.pojo.builder.annotation.processor.builder.strategy.setter.DefaultSetterBuilderStrategy;
-import activejdbc.pojo.builder.annotation.processor.builder.strategy.setter.SetterBuilderStrategy;
+import activejdbc.pojo.builder.annotation.processor.builder.strategy.setter.*;
 
 import java.sql.Date;
 import java.sql.Timestamp;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -18,9 +18,9 @@ public class SetterBuilderStrategyHolder {
         defaultStrategy = new DefaultSetterBuilderStrategy();
         setterBuilderStrategies = new HashMap<>();
         setterBuilderStrategies.put(Timestamp.class, new DateSetterBuilderStrategy());
-//        setterBuilderStrategies.put(LocalDateTime.class, new TimestampSetterBuilderStrategy());
+        setterBuilderStrategies.put(LocalDateTime.class, new LocalDateTimeSetterBuilderStrategy());
         setterBuilderStrategies.put(LocalDate.class, new DateSetterBuilderStrategy());
-//        setterBuilderStrategies.put(LocalTime.class, new TimestampSetterBuilderStrategy());
+        setterBuilderStrategies.put(LocalTime.class, new LocalTimeSetterBuilderStrategy());
         setterBuilderStrategies.put(Date.class, new DateSetterBuilderStrategy());
 
     }
