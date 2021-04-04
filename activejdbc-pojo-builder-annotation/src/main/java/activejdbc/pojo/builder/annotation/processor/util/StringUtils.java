@@ -5,16 +5,16 @@ public final class StringUtils {
         return Character.toLowerCase(string.charAt(0)) + string.substring(1);
     }
 
-    public static String buildPropertyName(String activejdbcPropertyName) {
-        String value = activejdbcPropertyName.toLowerCase();
+    public static String buildPropertyNameFromColumnName(String columnName) {
+        String value = columnName.toLowerCase();
         while (value.contains("_")) {
             value = value.replaceFirst("_[a-z]", String.valueOf(Character.toUpperCase(value.charAt(value.indexOf("_") + 1))));
         }
         return value;
     }
 
-    public static String buildMethodName(String activejdbcPropertyName, String prefix) {
-        String propertyName = buildPropertyName(activejdbcPropertyName);
+    public static String buildMethodName(String columnName, String prefix) {
+        String propertyName = buildPropertyNameFromColumnName(columnName);
         return prefix + Character.toUpperCase(propertyName.charAt(0)) + propertyName.substring(1);
     }
 

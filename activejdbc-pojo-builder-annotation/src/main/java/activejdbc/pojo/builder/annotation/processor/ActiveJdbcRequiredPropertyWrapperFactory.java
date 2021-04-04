@@ -1,92 +1,45 @@
 package activejdbc.pojo.builder.annotation.processor;
 
+import activejdbc.pojo.builder.annotation.processor.builder.WrapperClassBuilder;
 import activejdbc.pojo.builder.annotation.processor.util.AnnotationValueExtractor;
 
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.AnnotationValue;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-
-import static activejdbc.pojo.builder.annotation.processor.util.StringTemplates.*;
-import static activejdbc.pojo.builder.annotation.processor.util.StringUtils.*;
+import java.util.function.BiConsumer;
 
 public class ActiveJdbcRequiredPropertyWrapperFactory {
     private final String wrapperSuffix;
-    private final Map<String, String> propertyNamesAndGetters = new HashMap<>();
 
     public ActiveJdbcRequiredPropertyWrapperFactory(String wrapperSuffix) {
         this.wrapperSuffix = wrapperSuffix;
     }
 
     public String build(String packageName, String className, List<? extends AnnotationMirror> annotationMirrors) {
-        String wrappersClassName = className + wrapperSuffix;
-        String activeJdbcObjectName = lowerCaseFirstCharacter(className);
-        StringBuilder methodsContainer = new StringBuilder();
+        WrapperClassBuilder wrapperClassBuilder = new WrapperClassBuilder(packageName, className, wrapperSuffix);
         // add setters
-        generateSetters(methodsContainer, annotationMirrors, activeJdbcObjectName);
+        addMethod(annotationMirrors, wrapperClassBuilder::withSetter);
         // add getters
-        generateGetters(methodsContainer, annotationMirrors, activeJdbcObjectName);
-        // add from method
-        generateGetActivejdbcObjectMethod(methodsContainer, className, activeJdbcObjectName);
-        // add put method
-        generateSetActivejdbcObjectMethod(methodsContainer, className, activeJdbcObjectName);
+        addMethod(annotationMirrors, wrapperClassBuilder::withGetter);
+        // add get activejdbc object method
+        wrapperClassBuilder.withMethodGetActivejdbcObject();
+        // add set activejdbc object method
+        wrapperClassBuilder.withMethodSetActivejdbcObject();
         // add toString (using getters)
-        generateToStringMethod(methodsContainer);
+        wrapperClassBuilder.withToString();
         // add equals
-        generateEqualsMethod(methodsContainer, wrappersClassName);
+        wrapperClassBuilder.withEquals();
         // and hashcode (using getters)
-        generateHashCode(methodsContainer);
-        return buildClass(
-                packageName,
-                className,
-                wrappersClassName,
-                activeJdbcObjectName,
-                methodsContainer.toString()
-        );
+        wrapperClassBuilder.withHashCode();
+        return wrapperClassBuilder.buildClassBody();
     }
 
-    private void generateHashCode(StringBuilder stringBuilder) {
-        stringBuilder.append(buildHashCode(propertyNamesAndGetters.values()));
-    }
-
-    private void generateEqualsMethod(StringBuilder stringBuilder, String wrappersClassName) {
-        stringBuilder.append(buildEquals(wrappersClassName, propertyNamesAndGetters.values()));
-    }
-
-    private void generateToStringMethod(StringBuilder stringBuilder) {
-        stringBuilder.append(buildToString(propertyNamesAndGetters));
-    }
-
-    private void generateSetActivejdbcObjectMethod(StringBuilder stringBuilder, String className, String activeJdbcObjectName) {
-        stringBuilder.append(buildMethodSetObject(className, activeJdbcObjectName));
-    }
-
-    private void generateGetActivejdbcObjectMethod(StringBuilder stringBuilder, String className, String activeJdbcObjectName) {
-        stringBuilder.append(buildMethodGetObject(className, activeJdbcObjectName));
-    }
-
-    private void generateGetters(StringBuilder stringBuilder, List<? extends AnnotationMirror> annotationMirrors, String activeJdbcObjectName) {
+    private void addMethod(List<? extends AnnotationMirror> annotationMirrors, BiConsumer<String, String> classBuilderConsumer) {
         annotationMirrors.forEach(annotationMirror -> {
             AnnotationValue clazz = AnnotationValueExtractor.extract(annotationMirror.getElementValues(), "clazz");
             AnnotationValue field = AnnotationValueExtractor.extract(annotationMirror.getElementValues(), "field");
             String columnName = field.getValue().toString();
-            String propertyName = buildPropertyName(field.getValue().toString());
-            String getterName = buildMethodName(columnName, "get");
-            propertyNamesAndGetters.put(propertyName, getterName);
-            stringBuilder.append(buildGetter(getterName, clazz.getValue().toString(), activeJdbcObjectName, columnName));
+            classBuilderConsumer.accept(clazz.getValue().toString(), columnName);
         });
-    }
-
-    private void generateSetters(StringBuilder stringBuilder, List<? extends AnnotationMirror> annotationMirrors, String activeJdbcObjectName) {
-        annotationMirrors.forEach(
-                annotationMirror -> {
-                    AnnotationValue clazz = AnnotationValueExtractor.extract(annotationMirror.getElementValues(), "clazz");
-                    AnnotationValue field = AnnotationValueExtractor.extract(annotationMirror.getElementValues(), "field");
-                    String settersName = buildMethodName(field.getValue().toString(), "set");
-                    String propertyName = buildPropertyName(field.getValue().toString());
-                    String columnName = field.getValue().toString();
-                    stringBuilder.append(buildSetter(settersName, clazz.getValue().toString(), propertyName, activeJdbcObjectName, columnName));
-                });
     }
 }
