@@ -41,7 +41,7 @@ public class WrapperClassBuilder {
                 .append(equals)
                 .append(hashCode);
         return String.format(CLASS_TEMPLATE, packageName, packageName, activejdbcObjectClassName,
-                wrapperClassName, activejdbcObjectClassName, activejdbcObjectName, activejdbcObjectClassName, methods);
+                wrapperClassName, activejdbcObjectClassName, activejdbcObjectClassName, activejdbcObjectName, activejdbcObjectClassName, methods);
     }
 
     public WrapperClassBuilder withHashCode() {

@@ -15,7 +15,12 @@
         <dependency>
             <groupId>com.google.auto.service</groupId>
             <artifactId>auto-service</artifactId>
-            <version>1.0-rc7</version>
+            <version>${auto-service.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.javalite</groupId>
+            <artifactId>activejdbc</artifactId>
+            <version>${activejdbc.version}</version>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
@@ -25,5 +30,9 @@
         </dependency>
 
     </dependencies>
+    <properties>
+        <auto-service.version>1.0-rc7</auto-service.version>
+        <activejdbc.version>2.2</activejdbc.version>
+    </properties>
 
 </project>

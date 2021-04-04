@@ -16,14 +16,14 @@ public final class StringTemplates {
      * 0. Class name
      * 1. activejdbc object
      */
-    public static final String METHOD_GET_OBJECT_TEMPLATE = "public %s getActivejdbcObject() {%n" +
+    public static final String METHOD_GET_OBJECT_TEMPLATE = "protected %s getActivejdbcObject() {%n" +
             "return %s;%n" +
             "}";
     /**
      * 0. Class name
      * 1. activejdbc object
      */
-    public static final String METHOD_SET_OBJECT_TEMPLATE = "public void setActivejdbcObject(%s %s) {%n" +
+    public static final String METHOD_SET_OBJECT_TEMPLATE = "protected void setActivejdbcObject(%s %s) {%n" +
             "this.%s = %s;%n" +
             "}";
     /**
@@ -56,13 +56,14 @@ public final class StringTemplates {
      * 2. activejbdc object class for import
      * 3. wrapper class name
      * 4. activejdbc object class
+     * 5  activejdbc object class
      * 5. activejdbc object name
      * 6. activejdbc object class
      * 7. methods
      */
     public static final String CLASS_TEMPLATE = "package %s;%n" +
             "import %s.%s;%n" +
-            "public class %s {%n" +
+            "public class %s extends activejdbc.pojo.builder.annotation.processor.builder.ActivejdbcWrapper<%s>{%n" +
             "%s %s = new %s();%n" +
             "%s%n" +
             "}";

@@ -19,14 +19,18 @@
         <dependency>
             <groupId>org.javalite</groupId>
             <artifactId>activejdbc</artifactId>
-            <version>2.2</version>
+            <version>${activejdbc.version}</version>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>4.12</version>
+            <version>${junit.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
+    <properties>
+        <activejdbc.version>2.2</activejdbc.version>
+        <junit.version>4.12</junit.version>
+    </properties>
 
 </project>
