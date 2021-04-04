@@ -2,16 +2,6 @@ package activejdbc.pojo.builder.annotation.processor.util;
 
 public final class StringTemplates {
     /**
-     * 0. return type
-     * 1. method name
-     * 2. class for casting
-     * 3. activejdbc object
-     * 4. column name
-     */
-    public static final String GETTER_TEMPLATE = "public %s %s() {%n" +
-            "return (%s) %s.get(\"%s\");%n" +
-            "}%n";
-    /**
      * 0. setters name
      * 1. setters type
      * 2. property name

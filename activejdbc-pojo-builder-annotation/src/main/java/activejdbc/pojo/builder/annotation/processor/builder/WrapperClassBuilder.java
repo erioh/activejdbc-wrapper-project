@@ -1,5 +1,7 @@
 package activejdbc.pojo.builder.annotation.processor.builder;
 
+import activejdbc.pojo.builder.annotation.processor.builder.strategy.GetterBuilderStrategyHolder;
+import activejdbc.pojo.builder.annotation.processor.builder.strategy.getter.GetterBuilderStrategy;
 import activejdbc.pojo.builder.annotation.processor.util.StringUtils;
 
 import java.util.*;
@@ -7,6 +9,7 @@ import java.util.*;
 import static activejdbc.pojo.builder.annotation.processor.util.StringTemplates.*;
 
 public class WrapperClassBuilder {
+    private final GetterBuilderStrategyHolder getterBuilderStrategyHolder;
     private final String packageName;
     private final String activejdbcObjectClassName;
     private final String wrapperClassName;
@@ -21,6 +24,7 @@ public class WrapperClassBuilder {
     private String getObject = "";
 
     public WrapperClassBuilder(String packageName, String activejdbcObjectClassName, String wrapperSuffix) {
+        getterBuilderStrategyHolder = new GetterBuilderStrategyHolder();
         this.packageName = packageName;
         this.activejdbcObjectClassName = activejdbcObjectClassName;
         this.wrapperClassName = activejdbcObjectClassName + wrapperSuffix;
@@ -79,7 +83,8 @@ public class WrapperClassBuilder {
     public WrapperClassBuilder withGetter(String type, String columnName) {
         String propertyName = StringUtils.buildPropertyNameFromColumnName(columnName);
         String methodName = StringUtils.buildMethodName(columnName, "get");
-        gettersBody.add(String.format(GETTER_TEMPLATE, type, methodName, type, activejdbcObjectName, columnName));
+        GetterBuilderStrategy getterBuilderStrategy = getterBuilderStrategyHolder.getStrategy(type);
+        gettersBody.add(getterBuilderStrategy.buildGetterBody(type, methodName, activejdbcObjectName, columnName));
         propertyNamesAndGetters.put(propertyName, methodName);
         return this;
     }
