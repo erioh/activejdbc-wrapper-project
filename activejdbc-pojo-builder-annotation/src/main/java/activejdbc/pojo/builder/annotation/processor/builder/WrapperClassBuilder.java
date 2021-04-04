@@ -40,8 +40,12 @@ public class WrapperClassBuilder {
                 .append(toString)
                 .append(equals)
                 .append(hashCode);
+
+        String constructorWithoutParameters = String.format(CONSTRUCTOR_WITHOUT_PARAMETERS_TEMPLATE, wrapperClassName, activejdbcObjectName, activejdbcObjectClassName);
+        String constructorWithParameter = String.format(CONSTRUCTOR_WITH_PARAMETER_TEMPLATE, wrapperClassName, activejdbcObjectClassName, activejdbcObjectName, activejdbcObjectName, activejdbcObjectName);
+        String constructors = constructorWithoutParameters + constructorWithParameter;
         return String.format(CLASS_TEMPLATE, packageName, packageName, activejdbcObjectClassName,
-                wrapperClassName, activejdbcObjectClassName, activejdbcObjectClassName, activejdbcObjectName, activejdbcObjectClassName, methods);
+                wrapperClassName, activejdbcObjectClassName, activejdbcObjectClassName, activejdbcObjectName, constructors, methods);
     }
 
     public WrapperClassBuilder withHashCode() {

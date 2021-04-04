@@ -12,6 +12,13 @@
     <artifactId>activejdbc-pojobuilder-test</artifactId>
     <dependencies>
         <dependency>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
+            <version>${assertj-core.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
             <groupId>org.example</groupId>
             <artifactId>activejdbc-pojo-builder-annotation-processor</artifactId>
             <version>${project.version}</version>
@@ -28,9 +35,27 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.javalite</groupId>
+                <artifactId>activejdbc-instrumentation</artifactId>
+                <version>2.3.2-j8</version>
+                <executions>
+                    <execution>
+                        <phase>process-classes</phase>
+                        <goals>
+                            <goal>instrument</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
     <properties>
         <activejdbc.version>2.2</activejdbc.version>
         <junit.version>4.12</junit.version>
+        <assertj-core.version>3.19.0</assertj-core.version>
     </properties>
 
 </project>
