@@ -83,8 +83,8 @@ public class WrapperClassBuilder {
     public WrapperClassBuilder withGetter(String type, String columnName) {
         String propertyName = StringUtils.buildPropertyNameFromColumnName(columnName);
         String methodName = StringUtils.buildMethodName(columnName, "get");
-        GetterBuilderStrategy getterBuilderStrategy = getterBuilderStrategyHolder.getStrategy(type);
-        gettersBody.add(getterBuilderStrategy.buildGetterBody(type, methodName, activejdbcObjectName, columnName));
+        GetterBuilderStrategy strategy = getterBuilderStrategyHolder.getStrategy(type);
+        gettersBody.add(strategy.buildGetterBody(type, columnName, activejdbcObjectName));
         propertyNamesAndGetters.put(propertyName, methodName);
         return this;
     }

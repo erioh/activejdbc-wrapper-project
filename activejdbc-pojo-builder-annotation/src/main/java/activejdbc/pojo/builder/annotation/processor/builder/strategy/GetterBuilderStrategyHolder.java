@@ -1,6 +1,6 @@
 package activejdbc.pojo.builder.annotation.processor.builder.strategy;
 
-import activejdbc.pojo.builder.annotation.processor.builder.strategy.getter.DefaultGetterBuilderStrategies;
+import activejdbc.pojo.builder.annotation.processor.builder.strategy.getter.DefaultGetterBuilderStrategy;
 import activejdbc.pojo.builder.annotation.processor.builder.strategy.getter.GetterBuilderStrategy;
 import activejdbc.pojo.builder.annotation.processor.builder.strategy.getter.LocalDateGetterBuilderStrategy;
 
@@ -13,7 +13,7 @@ public class GetterBuilderStrategyHolder {
     private final Map<Class<?>, GetterBuilderStrategy> getterBuilderStrategies;
 
     public GetterBuilderStrategyHolder() {
-        defaultStrategy = new DefaultGetterBuilderStrategies();
+        defaultStrategy = new DefaultGetterBuilderStrategy();
         getterBuilderStrategies = new HashMap<>();
         getterBuilderStrategies.put(LocalDate.class, new LocalDateGetterBuilderStrategy());
     }
