@@ -65,9 +65,9 @@ public final class StringTemplates {
      * 1. import activejbdc class package
      * 2. activejbdc object class for import
      * 3. wrapper class name
-     * 4. activejbdc object class
-     * 5. acitvejdbc object name
-     * 6. activejbdc object class
+     * 4. activejdbc object class
+     * 5. activejdbc object name
+     * 6. activejdbc object class
      * 7. methods
      */
     public static final String CLASS_TEMPLATE = "package %s;%n" +
