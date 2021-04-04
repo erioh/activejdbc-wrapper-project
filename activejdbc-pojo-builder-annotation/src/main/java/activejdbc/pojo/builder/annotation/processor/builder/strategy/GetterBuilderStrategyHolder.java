@@ -18,6 +18,7 @@ public class GetterBuilderStrategyHolder {
         getterBuilderStrategies.put(LocalDate.class, new LocalDateGetterBuilderStrategy());
         getterBuilderStrategies.put(LocalDateTime.class, new LocalDateTimeGetterBuilderStrategy());
         getterBuilderStrategies.put(LocalTime.class, new LocalTimeGetterBuilderStrategy());
+        getterBuilderStrategies.put(Boolean.class, new BooleanGetterBuilderStrategy());
     }
 
     public GetterBuilderStrategy getStrategy(String type) {
