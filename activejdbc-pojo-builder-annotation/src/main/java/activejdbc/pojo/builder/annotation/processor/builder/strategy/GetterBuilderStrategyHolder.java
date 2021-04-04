@@ -2,6 +2,9 @@ package activejdbc.pojo.builder.annotation.processor.builder.strategy;
 
 import activejdbc.pojo.builder.annotation.processor.builder.strategy.getter.*;
 
+import java.math.BigDecimal;
+import java.sql.Clob;
+import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.time.LocalDate;
@@ -28,6 +31,9 @@ public class GetterBuilderStrategyHolder {
         getterBuilderStrategies.putIfAbsent(Long.class, new LongGetterBuilderStrategy());
         getterBuilderStrategies.putIfAbsent(Time.class, new TimeGetterBuilderStrategy());
         getterBuilderStrategies.putIfAbsent(Short.class, new ShortGetterBuilderStrategy());
+        getterBuilderStrategies.putIfAbsent(Clob.class, new ClobGetterBuilderStrategy());
+        getterBuilderStrategies.putIfAbsent(BigDecimal.class, new BigDecimalGetterBuilderStrategy());
+        getterBuilderStrategies.putIfAbsent(Date.class, new DateGetterBuilderStrategy());
         getterBuilderStrategies.putIfAbsent(String.class, defaultStrategy);
     }
 
