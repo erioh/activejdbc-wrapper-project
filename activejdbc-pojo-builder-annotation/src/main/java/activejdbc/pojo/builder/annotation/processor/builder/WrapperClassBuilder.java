@@ -1,7 +1,9 @@
 package activejdbc.pojo.builder.annotation.processor.builder;
 
 import activejdbc.pojo.builder.annotation.processor.builder.strategy.GetterBuilderStrategyHolder;
+import activejdbc.pojo.builder.annotation.processor.builder.strategy.SetterBuilderStrategyHolder;
 import activejdbc.pojo.builder.annotation.processor.builder.strategy.getter.GetterBuilderStrategy;
+import activejdbc.pojo.builder.annotation.processor.builder.strategy.setter.SetterBuilderStrategy;
 import activejdbc.pojo.builder.annotation.processor.util.StringUtils;
 
 import java.util.*;
@@ -10,6 +12,7 @@ import static activejdbc.pojo.builder.annotation.processor.util.StringTemplates.
 
 public class WrapperClassBuilder {
     private final GetterBuilderStrategyHolder getterBuilderStrategyHolder;
+    private final SetterBuilderStrategyHolder setterBuilderStrategyHolder;
     private final String packageName;
     private final String activejdbcObjectClassName;
     private final String wrapperClassName;
@@ -25,6 +28,7 @@ public class WrapperClassBuilder {
 
     public WrapperClassBuilder(String packageName, String activejdbcObjectClassName, String wrapperSuffix) {
         getterBuilderStrategyHolder = new GetterBuilderStrategyHolder();
+        setterBuilderStrategyHolder = new SetterBuilderStrategyHolder();
         this.packageName = packageName;
         this.activejdbcObjectClassName = activejdbcObjectClassName;
         this.wrapperClassName = activejdbcObjectClassName + wrapperSuffix;
@@ -94,9 +98,8 @@ public class WrapperClassBuilder {
     }
 
     public WrapperClassBuilder withSetter(String type, String columnName) {
-        String propertyName = StringUtils.buildPropertyNameFromColumnName(columnName);
-        String methodName = StringUtils.buildMethodName(columnName, "set");
-        settersBody.add(String.format(SETTER_TEMPLATE, methodName, type, propertyName, activejdbcObjectName, columnName, propertyName));
+        SetterBuilderStrategy strategy = setterBuilderStrategyHolder.getStrategy(type);
+        settersBody.add(strategy.buildSetterBody(type, columnName, activejdbcObjectName));
         return this;
     }
 

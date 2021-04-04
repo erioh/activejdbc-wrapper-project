@@ -2,7 +2,7 @@ package activejdbc.pojo.builder.annotation.processor.builder.strategy.getter;
 
 import activejdbc.pojo.builder.annotation.processor.util.StringUtils;
 
-public class LocalDateTimeGetterBuilderStrategy implements GetterBuilderStrategy{
+public class LongGetterBuilderStrategy implements GetterBuilderStrategy {
     /**
      * 1. return type
      * 2. method name
@@ -10,10 +10,10 @@ public class LocalDateTimeGetterBuilderStrategy implements GetterBuilderStrategy
      * 4. column name
      */
     private static final String GETTER_TEMPLATE = "public %s %s() {%n" +
-            "return java.util.Optional.ofNullable(%s.getTimestamp(\"%s\"))%n" +
-            ".map(java.sql.Timestamp::toLocalDateTime)%n" +
-            ".orElse(null);%n" +
+            "return %s.getLong(\"%s\");%n" +
             "}%n";
+
+
     @Override
     public String buildGetterBody(String type, String columnName, String activejdbcObjectName) {
         String methodName = StringUtils.buildMethodName(columnName, "get");

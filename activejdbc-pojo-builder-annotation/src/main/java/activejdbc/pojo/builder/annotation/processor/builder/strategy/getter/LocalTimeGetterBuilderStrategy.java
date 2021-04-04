@@ -9,7 +9,7 @@ public class LocalTimeGetterBuilderStrategy implements GetterBuilderStrategy {
      * 3. activejdbc object
      * 4. column name
      */
-    private static final String LOCAL_TIME_GETTER_TEMPLATE = "public %s %s() {%n" +
+    private static final String GETTER_TEMPLATE = "public %s %s() {%n" +
             "return java.util.Optional.ofNullable(%s.getTime(\"%s\"))%n" +
             ".map(java.sql.Time::toLocalTime)%n" +
             ".orElse(null);%n" +
@@ -18,6 +18,6 @@ public class LocalTimeGetterBuilderStrategy implements GetterBuilderStrategy {
     @Override
     public String buildGetterBody(String type, String columnName, String activejdbcObjectName) {
         String methodName = StringUtils.buildMethodName(columnName, "get");
-        return String.format(LOCAL_TIME_GETTER_TEMPLATE, type, methodName, activejdbcObjectName, columnName);
+        return String.format(GETTER_TEMPLATE, type, methodName, activejdbcObjectName, columnName);
     }
 }
