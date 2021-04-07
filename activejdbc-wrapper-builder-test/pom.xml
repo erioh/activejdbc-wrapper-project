@@ -29,7 +29,7 @@
 
         <dependency>
             <groupId>org.example</groupId>
-            <artifactId>activejdbc-pojo-builder-annotation-processor</artifactId>
+            <artifactId>activejdbc-wrapper</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

@@ -20,12 +20,13 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-@SupportedAnnotationTypes({"activejdbc.pojo.builder.annotation.ActiveJdbcRequiredProperty", "activejdbc.pojo.builder.annotation.ActiveJdbcRequiredProperties"})
+@SupportedAnnotationTypes({"activejdbc.wrapper.annotation.ActiveJdbcRequiredProperty", "activejdbc.wrapper.annotation.ActiveJdbcRequiredProperties"})
 @SupportedSourceVersion(SourceVersion.RELEASE_8)
 public class ActiveJdbcRequiredPropertyProcessor extends AbstractProcessor {
 
     public static final String WRAPPER_SUFFIX = "Wrapper";
     private final ActiveJdbcRequiredPropertyWrapperFactory wrapperFactory = new ActiveJdbcRequiredPropertyWrapperFactory(WRAPPER_SUFFIX);
+
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
         for (TypeElement annotation : annotations) {

@@ -9,7 +9,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>activejdbc-pojo-builder-annotation-processor</artifactId>
+    <artifactId>activejdbc-wrapper</artifactId>
     <dependencies>
          <dependency>
             <groupId>org.javalite</groupId>

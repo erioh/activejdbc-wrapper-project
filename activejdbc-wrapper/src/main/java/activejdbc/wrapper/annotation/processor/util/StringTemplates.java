@@ -49,7 +49,7 @@ public final class StringTemplates {
      */
     public static final String CLASS_TEMPLATE = "package %s;%n" +
             "import %s.%s;%n" +
-            "public class %s extends activejdbc.pojo.builder.annotation.processor.builder.ActivejdbcWrapper<%s>{%n" +
+            "public class %s extends activejdbc.wrapper.annotation.processor.builder.ActivejdbcWrapper<%s>{%n" +
             "%s %s;%n" +
             "%s%n" +
             "%s%n" +
