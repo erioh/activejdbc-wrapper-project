@@ -2,6 +2,10 @@ package activejdbc.pojo.builder.annotation.processor.builder.strategy.getter;
 
 import activejdbc.pojo.builder.annotation.processor.util.StringUtils;
 
+import java.time.LocalDate;
+import java.util.Collections;
+import java.util.Set;
+
 public class LocalDateGetterBuilderStrategy implements GetterBuilderStrategy {
 
     /**
@@ -20,5 +24,9 @@ public class LocalDateGetterBuilderStrategy implements GetterBuilderStrategy {
     public String buildGetterBody(String type, String columnName, String activejdbcObjectName) {
         String methodName = StringUtils.buildMethodName(columnName, "get");
         return String.format(GETTER_TEMPLATE, type, methodName, activejdbcObjectName, columnName);
+    }
+    @Override
+    public Set<Class<?>> typesToApply() {
+        return Collections.singleton(LocalDate.class);
     }
 }

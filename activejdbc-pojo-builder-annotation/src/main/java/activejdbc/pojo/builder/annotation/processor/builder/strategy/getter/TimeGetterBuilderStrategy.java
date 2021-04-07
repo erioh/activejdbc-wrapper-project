@@ -2,6 +2,10 @@ package activejdbc.pojo.builder.annotation.processor.builder.strategy.getter;
 
 import activejdbc.pojo.builder.annotation.processor.util.StringUtils;
 
+import java.sql.Time;
+import java.util.Collections;
+import java.util.Set;
+
 public class TimeGetterBuilderStrategy implements GetterBuilderStrategy {
     /**
      * 1. return type
@@ -13,10 +17,14 @@ public class TimeGetterBuilderStrategy implements GetterBuilderStrategy {
             "return new java.sql.Time(%s.getDate(\"%s\").getTime());%n" +
             "}%n";
 
-
     @Override
     public String buildGetterBody(String type, String columnName, String activejdbcObjectName) {
         String methodName = StringUtils.buildMethodName(columnName, "get");
         return String.format(GETTER_TEMPLATE, type, methodName, activejdbcObjectName, columnName);
+    }
+
+    @Override
+    public Set<Class<?>> typesToApply() {
+        return Collections.singleton(Time.class);
     }
 }

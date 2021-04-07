@@ -1,14 +1,11 @@
 package activejdbc.pojo.builder.annotation.processor.builder.strategy;
 
-import activejdbc.pojo.builder.annotation.processor.builder.strategy.setter.*;
+import activejdbc.pojo.builder.annotation.processor.builder.strategy.setter.DefaultSetterBuilderStrategy;
+import activejdbc.pojo.builder.annotation.processor.builder.strategy.setter.SetterBuilderStrategy;
 
-import java.sql.Date;
-import java.sql.Timestamp;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.ServiceLoader;
 
 public class SetterBuilderStrategyHolder {
     private final SetterBuilderStrategy defaultStrategy;
@@ -16,13 +13,16 @@ public class SetterBuilderStrategyHolder {
 
     public SetterBuilderStrategyHolder() {
         defaultStrategy = new DefaultSetterBuilderStrategy();
+        ServiceLoader<SetterBuilderStrategy> strategies = ServiceLoader.load(
+                SetterBuilderStrategy.class,
+                this.getClass().getClassLoader()
+        );
         setterBuilderStrategies = new HashMap<>();
-        setterBuilderStrategies.put(Timestamp.class, new DateSetterBuilderStrategy());
-        setterBuilderStrategies.put(LocalDateTime.class, new LocalDateTimeSetterBuilderStrategy());
-        setterBuilderStrategies.put(LocalDate.class, new DateSetterBuilderStrategy());
-        setterBuilderStrategies.put(LocalTime.class, new LocalTimeSetterBuilderStrategy());
-        setterBuilderStrategies.put(Date.class, new DateSetterBuilderStrategy());
-
+        for (SetterBuilderStrategy strategy : strategies) {
+            for (Class<?> clazz : strategy.typesToApply()) {
+                setterBuilderStrategies.put(clazz, strategy);
+            }
+        }
     }
 
     public SetterBuilderStrategy getStrategy(String type) {

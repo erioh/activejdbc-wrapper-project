@@ -2,6 +2,12 @@ package activejdbc.pojo.builder.annotation.processor.builder.strategy.setter;
 
 import activejdbc.pojo.builder.annotation.processor.util.StringUtils;
 
+import java.sql.Date;
+import java.time.LocalDate;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+
 public class DateSetterBuilderStrategy implements SetterBuilderStrategy {
     /**
      * 1. setters name
@@ -14,14 +20,16 @@ public class DateSetterBuilderStrategy implements SetterBuilderStrategy {
     public static final String SETTER_TEMPLATE = "public void %s(%s %s) {%n" +
             "%s.setDate(\"%s\", %s);%n" +
             "}%n";
-    /**
-     * 1. Class name
-     * 2. activejdbc object
-     */
+
     @Override
     public String buildSetterBody(String type, String columnName, String activejdbcObjectName) {
         String propertyName = StringUtils.buildPropertyNameFromColumnName(columnName);
         String methodName = StringUtils.buildMethodName(columnName, "set");
         return String.format(SETTER_TEMPLATE, methodName, type, propertyName, activejdbcObjectName, columnName, propertyName);
+    }
+
+    @Override
+    public Set<Class<?>> typesToApply() {
+        return new HashSet<>(Arrays.asList(LocalDate.class, Date.class));
     }
 }
