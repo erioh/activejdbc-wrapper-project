@@ -3,9 +3,11 @@ package activejdbc.pojo.builder.annotation.processor;
 import activejdbc.pojo.builder.annotation.ActiveJdbcRequiredProperties;
 import activejdbc.pojo.builder.annotation.ActiveJdbcRequiredProperty;
 import activejdbc.pojo.builder.annotation.processor.util.AnnotationValueExtractor;
-import com.google.auto.service.AutoService;
 
-import javax.annotation.processing.*;
+import javax.annotation.processing.AbstractProcessor;
+import javax.annotation.processing.RoundEnvironment;
+import javax.annotation.processing.SupportedAnnotationTypes;
+import javax.annotation.processing.SupportedSourceVersion;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
@@ -20,11 +22,10 @@ import java.util.stream.Collectors;
 
 @SupportedAnnotationTypes({"activejdbc.pojo.builder.annotation.ActiveJdbcRequiredProperty", "activejdbc.pojo.builder.annotation.ActiveJdbcRequiredProperties"})
 @SupportedSourceVersion(SourceVersion.RELEASE_8)
-@AutoService(Processor.class)
 public class ActiveJdbcRequiredPropertyProcessor extends AbstractProcessor {
 
     public static final String WRAPPER_SUFFIX = "Wrapper";
-
+    private final ActiveJdbcRequiredPropertyWrapperFactory wrapperFactory = new ActiveJdbcRequiredPropertyWrapperFactory(WRAPPER_SUFFIX);
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
         for (TypeElement annotation : annotations) {
@@ -36,7 +37,7 @@ public class ActiveJdbcRequiredPropertyProcessor extends AbstractProcessor {
                 List<? extends AnnotationMirror> annotationMirrors = filterNeededAnnotationMirrors(element.getAnnotationMirrors());
                 String packageName = element.getEnclosingElement().toString();
                 String className = element.getSimpleName().toString();
-                ActiveJdbcRequiredPropertyWrapperFactory wrapperFactory = new ActiveJdbcRequiredPropertyWrapperFactory(WRAPPER_SUFFIX);
+
                 String wrapperClassBody = wrapperFactory.build(packageName, className, annotationMirrors);
                 try {
                     JavaFileObject sourceFile = processingEnv.getFiler().createSourceFile(className + WRAPPER_SUFFIX);
