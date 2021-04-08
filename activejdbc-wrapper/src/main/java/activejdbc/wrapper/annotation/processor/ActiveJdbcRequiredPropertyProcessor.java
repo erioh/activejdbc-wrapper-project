@@ -5,7 +5,10 @@ import activejdbc.wrapper.annotation.ActiveJdbcRequiredProperty;
 import activejdbc.wrapper.annotation.processor.context.AnnotationProcessorContext;
 import activejdbc.wrapper.annotation.processor.util.AnnotationValueExtractor;
 
-import javax.annotation.processing.*;
+import javax.annotation.processing.AbstractProcessor;
+import javax.annotation.processing.ProcessingEnvironment;
+import javax.annotation.processing.RoundEnvironment;
+import javax.annotation.processing.SupportedAnnotationTypes;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
@@ -19,7 +22,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @SupportedAnnotationTypes({"activejdbc.wrapper.annotation.ActiveJdbcRequiredProperty", "activejdbc.wrapper.annotation.ActiveJdbcRequiredProperties"})
-@SupportedSourceVersion(SourceVersion.RELEASE_8)
 public class ActiveJdbcRequiredPropertyProcessor extends AbstractProcessor {
 
     public static final String WRAPPER_SUFFIX = "Wrapper";
@@ -70,5 +72,10 @@ public class ActiveJdbcRequiredPropertyProcessor extends AbstractProcessor {
         super.init(processingEnv);
         this.annotationProcessorContext = new AnnotationProcessorContext(WRAPPER_SUFFIX);
         this.wrapperFactory = annotationProcessorContext.init();
+    }
+
+    @Override
+    public SourceVersion getSupportedSourceVersion() {
+        return SourceVersion.latestSupported();
     }
 }
