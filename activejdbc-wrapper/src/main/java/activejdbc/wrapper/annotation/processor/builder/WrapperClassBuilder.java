@@ -1,9 +1,9 @@
 package activejdbc.wrapper.annotation.processor.builder;
 
-import activejdbc.wrapper.annotation.processor.builder.strategy.GetterBuilderStrategyHolder;
-import activejdbc.wrapper.annotation.processor.builder.strategy.SetterBuilderStrategyHolder;
+import activejdbc.wrapper.annotation.processor.builder.strategy.StrategyHolder;
 import activejdbc.wrapper.annotation.processor.builder.strategy.getter.GetterBuilderStrategy;
 import activejdbc.wrapper.annotation.processor.builder.strategy.setter.SetterBuilderStrategy;
+import activejdbc.wrapper.annotation.processor.context.AnnotationProcessorContext;
 import activejdbc.wrapper.annotation.processor.util.StringUtils;
 
 import java.util.*;
@@ -11,8 +11,8 @@ import java.util.*;
 import static activejdbc.wrapper.annotation.processor.util.StringTemplates.*;
 
 public class WrapperClassBuilder {
-    private final GetterBuilderStrategyHolder getterBuilderStrategyHolder;
-    private final SetterBuilderStrategyHolder setterBuilderStrategyHolder;
+    private final StrategyHolder<GetterBuilderStrategy> getterBuilderStrategyHolder;
+    private final StrategyHolder<SetterBuilderStrategy> setterBuilderStrategyHolder;
     private final String packageName;
     private final String activejdbcObjectClassName;
     private final String wrapperClassName;
@@ -26,12 +26,12 @@ public class WrapperClassBuilder {
     private String setObject = "";
     private String getObject = "";
 
-    public WrapperClassBuilder(String packageName, String activejdbcObjectClassName, String wrapperSuffix) {
-        getterBuilderStrategyHolder = new GetterBuilderStrategyHolder();
-        setterBuilderStrategyHolder = new SetterBuilderStrategyHolder();
+    public WrapperClassBuilder(String packageName, String activejdbcObjectClassName, AnnotationProcessorContext annotationProcessorContext) {
+        getterBuilderStrategyHolder = annotationProcessorContext.getGetterBuilderStrategyHolder();
+        setterBuilderStrategyHolder = annotationProcessorContext.getSetterBuilderStrategyHolder();
         this.packageName = packageName;
         this.activejdbcObjectClassName = activejdbcObjectClassName;
-        this.wrapperClassName = activejdbcObjectClassName + wrapperSuffix;
+        this.wrapperClassName = activejdbcObjectClassName + annotationProcessorContext.getWrapperSuffix();
         this.activejdbcObjectName = StringUtils.lowerCaseFirstCharacter(activejdbcObjectClassName);
     }
 

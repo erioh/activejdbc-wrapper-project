@@ -1,6 +1,7 @@
 package activejdbc.wrapper.annotation.processor;
 
 import activejdbc.wrapper.annotation.processor.builder.WrapperClassBuilder;
+import activejdbc.wrapper.annotation.processor.context.AnnotationProcessorContext;
 import activejdbc.wrapper.annotation.processor.util.AnnotationValueExtractor;
 
 import javax.lang.model.element.AnnotationMirror;
@@ -9,14 +10,14 @@ import java.util.List;
 import java.util.function.BiConsumer;
 
 public class ActiveJdbcRequiredPropertyWrapperFactory {
-    private final String wrapperSuffix;
+    private final AnnotationProcessorContext annotationProcessorContext;
 
-    public ActiveJdbcRequiredPropertyWrapperFactory(String wrapperSuffix) {
-        this.wrapperSuffix = wrapperSuffix;
+    public ActiveJdbcRequiredPropertyWrapperFactory(AnnotationProcessorContext annotationProcessorContext) {
+        this.annotationProcessorContext = annotationProcessorContext;
     }
 
     public String build(String packageName, String className, List<? extends AnnotationMirror> annotationMirrors) {
-        WrapperClassBuilder wrapperClassBuilder = new WrapperClassBuilder(packageName, className, wrapperSuffix);
+        WrapperClassBuilder wrapperClassBuilder = new WrapperClassBuilder(packageName, className, annotationProcessorContext);
         // add setters
         addMethod(annotationMirrors, wrapperClassBuilder::withSetter);
         // add getters

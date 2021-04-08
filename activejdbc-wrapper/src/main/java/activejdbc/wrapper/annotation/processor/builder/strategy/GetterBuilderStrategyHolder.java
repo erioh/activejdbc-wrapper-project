@@ -1,30 +1,20 @@
 package activejdbc.wrapper.annotation.processor.builder.strategy;
 
-import activejdbc.wrapper.annotation.processor.builder.strategy.getter.DefaultGetterBuilderStrategy;
 import activejdbc.wrapper.annotation.processor.builder.strategy.getter.GetterBuilderStrategy;
 
-import java.util.HashMap;
 import java.util.Map;
-import java.util.ServiceLoader;
 
-public class GetterBuilderStrategyHolder {
+public class GetterBuilderStrategyHolder implements StrategyHolder<GetterBuilderStrategy>{
     private final GetterBuilderStrategy defaultStrategy;
     private final Map<Class<?>, GetterBuilderStrategy> getterBuilderStrategies;
 
-    public GetterBuilderStrategyHolder() {
-        ServiceLoader<GetterBuilderStrategy> strategies = ServiceLoader.load(
-                GetterBuilderStrategy.class,
-                this.getClass().getClassLoader()
-        );
-        this.getterBuilderStrategies = new HashMap<>();
-        for (GetterBuilderStrategy strategy : strategies) {
-            for (Class<?> clazz : strategy.typesToApply()) {
-                getterBuilderStrategies.put(clazz, strategy);
-            }
-        }
-        defaultStrategy = new DefaultGetterBuilderStrategy();
+    public GetterBuilderStrategyHolder(GetterBuilderStrategy defaultStrategy, Map<Class<?>, GetterBuilderStrategy> getterBuilderStrategies) {
+        this.defaultStrategy = defaultStrategy;
+
+        this.getterBuilderStrategies = getterBuilderStrategies;
     }
 
+    @Override
     public GetterBuilderStrategy getStrategy(String type) {
         return getterBuilderStrategies.getOrDefault(getClass(type), defaultStrategy);
     }

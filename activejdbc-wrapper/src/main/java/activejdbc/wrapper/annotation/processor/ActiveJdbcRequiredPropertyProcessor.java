@@ -2,12 +2,10 @@ package activejdbc.wrapper.annotation.processor;
 
 import activejdbc.wrapper.annotation.ActiveJdbcRequiredProperties;
 import activejdbc.wrapper.annotation.ActiveJdbcRequiredProperty;
+import activejdbc.wrapper.annotation.processor.context.AnnotationProcessorContext;
 import activejdbc.wrapper.annotation.processor.util.AnnotationValueExtractor;
 
-import javax.annotation.processing.AbstractProcessor;
-import javax.annotation.processing.RoundEnvironment;
-import javax.annotation.processing.SupportedAnnotationTypes;
-import javax.annotation.processing.SupportedSourceVersion;
+import javax.annotation.processing.*;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
@@ -25,7 +23,8 @@ import java.util.stream.Collectors;
 public class ActiveJdbcRequiredPropertyProcessor extends AbstractProcessor {
 
     public static final String WRAPPER_SUFFIX = "Wrapper";
-    private final ActiveJdbcRequiredPropertyWrapperFactory wrapperFactory = new ActiveJdbcRequiredPropertyWrapperFactory(WRAPPER_SUFFIX);
+    private ActiveJdbcRequiredPropertyWrapperFactory wrapperFactory;
+    private AnnotationProcessorContext annotationProcessorContext;
 
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
@@ -64,5 +63,12 @@ public class ActiveJdbcRequiredPropertyProcessor extends AbstractProcessor {
                 .orElseGet(() -> annotationMirrors.stream()
                         .filter(annotationMirror -> annotationMirror.getAnnotationType().toString().equals(ActiveJdbcRequiredProperty.class.getName()))
                         .collect(Collectors.toList()));
+    }
+
+    @Override
+    public synchronized void init(ProcessingEnvironment processingEnv) {
+        super.init(processingEnv);
+        this.annotationProcessorContext = new AnnotationProcessorContext(WRAPPER_SUFFIX);
+        this.wrapperFactory = annotationProcessorContext.init();
     }
 }
