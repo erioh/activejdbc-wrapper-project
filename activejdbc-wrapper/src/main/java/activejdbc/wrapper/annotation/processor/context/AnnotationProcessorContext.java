@@ -36,10 +36,7 @@ public class AnnotationProcessorContext {
     }
 
     private SetterBuilderStrategyHolder initSetterBuilderStrategyHolder() {
-        ServiceLoader<SetterBuilderStrategy> strategies = ServiceLoader.load(
-                SetterBuilderStrategy.class,
-                this.getClass().getClassLoader()
-        );
+        ServiceLoader<SetterBuilderStrategy> strategies = ServiceLoader.load(SetterBuilderStrategy.class);
         Map<Class<?>, SetterBuilderStrategy> setterBuilderStrategies = new HashMap<>();
         for (SetterBuilderStrategy strategy : strategies) {
             for (Class<?> clazz : strategy.typesToApply()) {
