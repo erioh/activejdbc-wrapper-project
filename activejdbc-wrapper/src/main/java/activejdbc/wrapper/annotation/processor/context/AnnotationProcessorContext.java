@@ -4,14 +4,19 @@ import activejdbc.wrapper.annotation.processor.ActiveJdbcRequiredPropertyWrapper
 import activejdbc.wrapper.annotation.processor.builder.strategy.GetterBuilderStrategyHolder;
 import activejdbc.wrapper.annotation.processor.builder.strategy.SetterBuilderStrategyHolder;
 import activejdbc.wrapper.annotation.processor.builder.strategy.StrategyHolder;
-import activejdbc.wrapper.annotation.processor.builder.strategy.getter.DefaultGetterBuilderStrategy;
-import activejdbc.wrapper.annotation.processor.builder.strategy.getter.GetterBuilderStrategy;
-import activejdbc.wrapper.annotation.processor.builder.strategy.setter.DefaultSetterBuilderStrategy;
-import activejdbc.wrapper.annotation.processor.builder.strategy.setter.SetterBuilderStrategy;
+import activejdbc.wrapper.annotation.processor.builder.strategy.getter.*;
+import activejdbc.wrapper.annotation.processor.builder.strategy.setter.*;
 
+import java.math.BigDecimal;
+import java.sql.Clob;
+import java.sql.Date;
+import java.sql.Time;
+import java.sql.Timestamp;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.ServiceLoader;
 
 public class AnnotationProcessorContext {
     private final StrategyHolder<SetterBuilderStrategy> setterBuilderStrategyHolder;
@@ -25,24 +30,34 @@ public class AnnotationProcessorContext {
     }
 
     private GetterBuilderStrategyHolder initGetterBuilderStrategyHolder() {
-        ServiceLoader<GetterBuilderStrategy> strategies = ServiceLoader.load(GetterBuilderStrategy.class);
+        // todo initialize it using service locator
         Map<Class<?>, GetterBuilderStrategy> getterBuilderStrategies = new HashMap<>();
-        for (GetterBuilderStrategy strategy : strategies) {
-            for (Class<?> clazz : strategy.typesToApply()) {
-                getterBuilderStrategies.put(clazz, strategy);
-            }
-        }
+        getterBuilderStrategies.put(BigDecimal.class, new BigDecimalGetterBuilderStrategy());
+        getterBuilderStrategies.put(Boolean.class, new BooleanGetterBuilderStrategy());
+        getterBuilderStrategies.put(Clob.class, new ClobGetterBuilderStrategy());
+        getterBuilderStrategies.put(Date.class, new DateGetterBuilderStrategy());
+        getterBuilderStrategies.put(Double.class, new DoubleGetterBuilderStrategy());
+        getterBuilderStrategies.put(Float.class, new FloatGetterBuilderStrategy());
+        getterBuilderStrategies.put(Integer.class, new IntegerGetterBuilderStrategy());
+        getterBuilderStrategies.put(LocalDate.class, new LocalDateGetterBuilderStrategy());
+        getterBuilderStrategies.put(LocalDateTime.class, new LocalDateTimeGetterBuilderStrategy());
+        getterBuilderStrategies.put(LocalTime.class, new LocalTimeGetterBuilderStrategy());
+        getterBuilderStrategies.put(Long.class, new LongGetterBuilderStrategy());
+        getterBuilderStrategies.put(Short.class, new ShortGetterBuilderStrategy());
+        getterBuilderStrategies.put(String.class, new StringGetterBuilderStrategy());
+        getterBuilderStrategies.put(Time.class, new TimeGetterBuilderStrategy());
+        getterBuilderStrategies.put(Timestamp.class, new TimestampGetterBuilderStrategy());
         return new GetterBuilderStrategyHolder(new DefaultGetterBuilderStrategy(), getterBuilderStrategies);
     }
 
     private SetterBuilderStrategyHolder initSetterBuilderStrategyHolder() {
-        ServiceLoader<SetterBuilderStrategy> strategies = ServiceLoader.load(SetterBuilderStrategy.class);
+        // todo initialize it using service locator
         Map<Class<?>, SetterBuilderStrategy> setterBuilderStrategies = new HashMap<>();
-        for (SetterBuilderStrategy strategy : strategies) {
-            for (Class<?> clazz : strategy.typesToApply()) {
-                setterBuilderStrategies.put(clazz, strategy);
-            }
-        }
+        setterBuilderStrategies.put(Date.class, new DateSetterBuilderStrategy());
+        setterBuilderStrategies.put(LocalDate.class, new DateSetterBuilderStrategy());
+        setterBuilderStrategies.put(LocalDateTime.class, new LocalDateTimeSetterBuilderStrategy());
+        setterBuilderStrategies.put(LocalTime.class, new LocalTimeSetterBuilderStrategy());
+        setterBuilderStrategies.put(Timestamp.class, new TimestampSetterBuilderStrategy());
         return new SetterBuilderStrategyHolder(new DefaultSetterBuilderStrategy(), setterBuilderStrategies);
     }
 
