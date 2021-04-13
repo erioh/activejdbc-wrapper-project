@@ -10,10 +10,7 @@ import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.RoundEnvironment;
 import javax.annotation.processing.SupportedAnnotationTypes;
 import javax.lang.model.SourceVersion;
-import javax.lang.model.element.AnnotationMirror;
-import javax.lang.model.element.Element;
-import javax.lang.model.element.ElementKind;
-import javax.lang.model.element.TypeElement;
+import javax.lang.model.element.*;
 import javax.tools.JavaFileObject;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -37,10 +34,10 @@ public class ActiveJdbcRequiredPropertyProcessor extends AbstractProcessor {
                     throw new IllegalArgumentException("Only classes can be annotated with ActiveJdbcRequiredProperty");
                 }
                 List<? extends AnnotationMirror> annotationMirrors = filterNeededAnnotationMirrors(element.getAnnotationMirrors());
-                String packageName = element.getEnclosingElement().toString();
+                PackageElement packageElement = processingEnv.getElementUtils().getPackageOf(element);
                 String className = element.getSimpleName().toString();
 
-                String wrapperClassBody = wrapperFactory.build(packageName, className, annotationMirrors);
+                String wrapperClassBody = wrapperFactory.build(packageElement.getQualifiedName().toString(), className, annotationMirrors);
                 try {
                     JavaFileObject sourceFile = processingEnv.getFiler().createSourceFile(className + WRAPPER_SUFFIX);
                     try (PrintWriter out = new PrintWriter(sourceFile.openWriter())) {

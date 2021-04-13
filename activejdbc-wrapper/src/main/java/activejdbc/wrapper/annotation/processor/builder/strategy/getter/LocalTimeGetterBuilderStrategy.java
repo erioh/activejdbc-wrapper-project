@@ -21,7 +21,7 @@ public class LocalTimeGetterBuilderStrategy implements GetterBuilderStrategy {
 
     @Override
     public String buildGetterBody(String type, String columnName, String activejdbcObjectName) {
-        String methodName = StringUtils.buildMethodName(columnName, "get");
+        String methodName = StringUtils.buildMethodName(columnName, PREFIX);
         return String.format(GETTER_TEMPLATE, type, methodName, activejdbcObjectName, columnName);
     }
     @Override

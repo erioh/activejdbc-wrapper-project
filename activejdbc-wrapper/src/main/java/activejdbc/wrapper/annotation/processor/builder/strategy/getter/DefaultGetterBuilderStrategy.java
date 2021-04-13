@@ -19,7 +19,7 @@ public class DefaultGetterBuilderStrategy implements GetterBuilderStrategy {
 
     @Override
     public String buildGetterBody(String type, String columnName, String activejdbcObjectName) {
-        String methodName = StringUtils.buildMethodName(columnName, "get");
+        String methodName = StringUtils.buildMethodName(columnName, PREFIX);
         return String.format(DEFAULT_GETTER_TEMPLATE, type, methodName, type, activejdbcObjectName, columnName);
     }
 

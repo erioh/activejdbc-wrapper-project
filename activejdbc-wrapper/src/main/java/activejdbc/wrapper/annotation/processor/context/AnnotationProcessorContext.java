@@ -25,10 +25,7 @@ public class AnnotationProcessorContext {
     }
 
     private GetterBuilderStrategyHolder initGetterBuilderStrategyHolder() {
-        ServiceLoader<GetterBuilderStrategy> strategies = ServiceLoader.load(
-                GetterBuilderStrategy.class,
-                this.getClass().getClassLoader()
-        );
+        ServiceLoader<GetterBuilderStrategy> strategies = ServiceLoader.load(GetterBuilderStrategy.class);
         Map<Class<?>, GetterBuilderStrategy> getterBuilderStrategies = new HashMap<>();
         for (GetterBuilderStrategy strategy : strategies) {
             for (Class<?> clazz : strategy.typesToApply()) {

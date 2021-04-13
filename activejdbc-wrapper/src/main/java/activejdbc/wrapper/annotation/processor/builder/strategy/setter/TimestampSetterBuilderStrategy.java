@@ -22,7 +22,7 @@ public class TimestampSetterBuilderStrategy implements SetterBuilderStrategy {
     @Override
     public String buildSetterBody(String type, String columnName, String activejdbcObjectName) {
         String propertyName = StringUtils.buildPropertyNameFromColumnName(columnName);
-        String methodName = StringUtils.buildMethodName(columnName, "set");
+        String methodName = StringUtils.buildMethodName(columnName, PREFIX);
         return String.format(SETTER_TEMPLATE, methodName, type, propertyName, activejdbcObjectName, columnName, propertyName);
     }
 
