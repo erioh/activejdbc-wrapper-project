@@ -33,7 +33,7 @@ public final class StringTemplates {
     /**
      * 1. generated call of getters
      */
-    public static final String HASH_CODE_METHOD_TRMPLATE = "public int hashCode() {%n" +
+    public static final String HASH_CODE_METHOD_TEMPLATE = "public int hashCode() {%n" +
             "return java.util.Objects.hash(%s);%n" +
             "}%n";
     /**

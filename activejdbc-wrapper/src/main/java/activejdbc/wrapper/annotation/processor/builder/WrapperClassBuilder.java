@@ -57,7 +57,7 @@ public class WrapperClassBuilder {
         for (String getter : propertyNamesAndGetters.values()) {
             stringJoiner.add(String.format("this.%s()", getter));
         }
-        hashCode = String.format(HASH_CODE_METHOD_TRMPLATE, stringJoiner.toString());
+        hashCode = String.format(HASH_CODE_METHOD_TEMPLATE, stringJoiner);
         return this;
     }
 
@@ -77,9 +77,9 @@ public class WrapperClassBuilder {
         StringJoiner stringJoiner = new StringJoiner(" + \", ");
         propertyNamesAndGetters.forEach((propertyName, getter) ->
                 stringJoiner.add(String.format("%s = \" + \"'\" + this.%s() + \"'\"%n", propertyName, getter)));
-        stringBuilder.append(stringJoiner.toString());
+        stringBuilder.append(stringJoiner);
         stringBuilder.append(" + \"}\"");
-        toString = String.format(TO_STRING_METHOD_TEMPLATE, stringBuilder.toString());
+        toString = String.format(TO_STRING_METHOD_TEMPLATE, stringBuilder);
         return this;
     }
 
