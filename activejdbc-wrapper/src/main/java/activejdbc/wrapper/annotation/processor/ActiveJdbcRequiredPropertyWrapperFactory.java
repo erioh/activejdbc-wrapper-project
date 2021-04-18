@@ -24,8 +24,6 @@ public class ActiveJdbcRequiredPropertyWrapperFactory {
         addMethod(annotationMirrors, wrapperClassBuilder::withGetter);
         // add get activejdbc object method
         wrapperClassBuilder.withMethodGetActivejdbcObject();
-        // add set activejdbc object method
-        wrapperClassBuilder.withMethodSetActivejdbcObject();
         // add toString (using getters)
         wrapperClassBuilder.withToString();
         // add equals

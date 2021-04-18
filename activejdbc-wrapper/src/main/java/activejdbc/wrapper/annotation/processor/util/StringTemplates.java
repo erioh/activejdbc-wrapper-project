@@ -6,13 +6,6 @@ public final class StringTemplates {
             "return %s;%n" +
             "}%n";
     /**
-     * 1. Class name
-     * 2. activejdbc object
-     */
-    public static final String METHOD_SET_OBJECT_TEMPLATE = "protected void setActivejdbcObject(%s %s) {%n" +
-            "this.%s = %s;%n" +
-            "}%n";
-    /**
      * 1. toString implementation
      */
     public static final String TO_STRING_METHOD_TEMPLATE = "public java.lang.String toString() {%n" +

@@ -23,7 +23,6 @@ public class WrapperClassBuilder {
     private String hashCode = "";
     private String equals = "";
     private String toString = "";
-    private String setObject = "";
     private String getObject = "";
 
     public WrapperClassBuilder(String packageName, String activejdbcObjectClassName, AnnotationProcessorContext annotationProcessorContext) {
@@ -39,8 +38,7 @@ public class WrapperClassBuilder {
         StringBuilder methods = new StringBuilder();
         gettersBody.forEach(methods::append);
         settersBody.forEach(methods::append);
-        methods.append(setObject)
-                .append(getObject)
+        methods.append(getObject)
                 .append(toString)
                 .append(equals)
                 .append(hashCode);
@@ -66,7 +64,7 @@ public class WrapperClassBuilder {
         for (String getter : propertyNamesAndGetters.values()) {
             stringJoiner.add(String.format("%njava.util.Objects.equals(this.%s(), that.%s())", getter, getter));
         }
-        equals = String.format(EQUALS_METHOD_TEMPLATE, wrapperClassName, wrapperClassName, stringJoiner.toString());
+        equals = String.format(EQUALS_METHOD_TEMPLATE, wrapperClassName, wrapperClassName, stringJoiner);
         return this;
     }
 
@@ -80,11 +78,6 @@ public class WrapperClassBuilder {
         stringBuilder.append(stringJoiner);
         stringBuilder.append(" + \"}\"");
         toString = String.format(TO_STRING_METHOD_TEMPLATE, stringBuilder);
-        return this;
-    }
-
-    public WrapperClassBuilder withMethodSetActivejdbcObject() {
-        setObject = String.format(METHOD_SET_OBJECT_TEMPLATE, activejdbcObjectClassName, activejdbcObjectName, activejdbcObjectName, activejdbcObjectName);
         return this;
     }
 
