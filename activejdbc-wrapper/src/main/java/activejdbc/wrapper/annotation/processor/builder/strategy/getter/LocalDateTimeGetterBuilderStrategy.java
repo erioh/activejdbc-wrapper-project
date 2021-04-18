@@ -1,12 +1,10 @@
 package activejdbc.wrapper.annotation.processor.builder.strategy.getter;
 
-import activejdbc.wrapper.annotation.processor.util.StringUtils;
-
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.Set;
 
-public class LocalDateTimeGetterBuilderStrategy implements GetterBuilderStrategy{
+public class LocalDateTimeGetterBuilderStrategy implements GetterBuilderStrategy {
     /**
      * 1. return type
      * 2. method name
@@ -20,10 +18,10 @@ public class LocalDateTimeGetterBuilderStrategy implements GetterBuilderStrategy
             "}%n";
 
     @Override
-    public String buildGetterBody(String type, String columnName, String activejdbcObjectName) {
-        String methodName = StringUtils.buildMethodName(columnName, PREFIX);
-        return String.format(GETTER_TEMPLATE, type, methodName, activejdbcObjectName, columnName);
+    public String getTemplate() {
+        return GETTER_TEMPLATE;
     }
+
     @Override
     public Set<Class<?>> typesToApply() {
         return Collections.singleton(LocalDateTime.class);

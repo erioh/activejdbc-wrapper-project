@@ -17,7 +17,6 @@
             <version>${assertj-core.version}</version>
             <scope>test</scope>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/com.oracle/orai18n -->
         <dependency>
             <groupId>com.oracle.ojdbc</groupId>
             <artifactId>ojdbc8</artifactId>
@@ -59,8 +58,6 @@
     </build>
     <properties>
         <activejdbc.version>2.5-j8</activejdbc.version>
-        <junit.version>4.12</junit.version>
-        <assertj-core.version>3.19.0</assertj-core.version>
     </properties>
 
 </project>

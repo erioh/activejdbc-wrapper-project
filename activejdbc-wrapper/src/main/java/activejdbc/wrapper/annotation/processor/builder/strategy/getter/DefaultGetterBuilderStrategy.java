@@ -13,14 +13,19 @@ public class DefaultGetterBuilderStrategy implements GetterBuilderStrategy {
      * 4. activejdbc object
      * 5. column name
      */
-    private static final String DEFAULT_GETTER_TEMPLATE = "public %s %s() {%n" +
+    private static final String GETTER_TEMPLATE = "public %s %s() {%n" +
             "return (%s) %s.get(\"%s\");%n" +
             "}%n";
 
     @Override
     public String buildGetterBody(String type, String columnName, String activejdbcObjectName) {
-        String methodName = StringUtils.buildMethodName(columnName, PREFIX);
-        return String.format(DEFAULT_GETTER_TEMPLATE, type, methodName, type, activejdbcObjectName, columnName);
+        String methodName = StringUtils.buildMethodName(columnName, "get");
+        return String.format(getTemplate(), type, methodName, type, activejdbcObjectName, columnName);
+    }
+
+    @Override
+    public String getTemplate() {
+        return GETTER_TEMPLATE;
     }
 
     @Override

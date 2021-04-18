@@ -1,7 +1,5 @@
 package activejdbc.wrapper.annotation.processor.builder.strategy.setter;
 
-import activejdbc.wrapper.annotation.processor.util.StringUtils;
-
 import java.sql.Timestamp;
 import java.util.Collections;
 import java.util.Set;
@@ -20,10 +18,8 @@ public class TimestampSetterBuilderStrategy implements SetterBuilderStrategy {
             "}%n";
 
     @Override
-    public String buildSetterBody(String type, String columnName, String activejdbcObjectName) {
-        String propertyName = StringUtils.buildPropertyNameFromColumnName(columnName);
-        String methodName = StringUtils.buildMethodName(columnName, PREFIX);
-        return String.format(SETTER_TEMPLATE, methodName, type, propertyName, activejdbcObjectName, columnName, propertyName);
+    public String getTemplate() {
+        return SETTER_TEMPLATE;
     }
 
     @Override

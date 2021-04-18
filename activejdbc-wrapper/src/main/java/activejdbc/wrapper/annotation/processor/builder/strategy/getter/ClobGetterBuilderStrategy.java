@@ -1,7 +1,5 @@
 package activejdbc.wrapper.annotation.processor.builder.strategy.getter;
 
-import activejdbc.wrapper.annotation.processor.util.StringUtils;
-
 import java.sql.Clob;
 import java.util.Collections;
 import java.util.Set;
@@ -16,11 +14,9 @@ public class ClobGetterBuilderStrategy implements GetterBuilderStrategy {
     private static final String GETTER_TEMPLATE = "public %s %s() {%n" +
             "return %s.getClob(\"%s\");%n" +
             "}%n";
-
     @Override
-    public String buildGetterBody(String type, String columnName, String activejdbcObjectName) {
-        String methodName = StringUtils.buildMethodName(columnName, PREFIX);
-        return String.format(GETTER_TEMPLATE, type, methodName, activejdbcObjectName, columnName);
+    public String getTemplate() {
+        return GETTER_TEMPLATE;
     }
 
     @Override

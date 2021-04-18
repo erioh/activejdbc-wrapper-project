@@ -23,10 +23,24 @@
             <version>${junit.version}</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
+            <version>${assertj-core.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/com.tngtech.java/junit-dataprovider -->
+        <dependency>
+            <groupId>com.tngtech.java</groupId>
+            <artifactId>junit-dataprovider</artifactId>
+            <version>${junit-dataprovider.version}</version>
+            <scope>test</scope>
+        </dependency>
+
     </dependencies>
     <properties>
         <activejdbc.version>2.2</activejdbc.version>
-        <junit.version>4.12</junit.version>
+        <junit-dataprovider.version>1.13.1</junit-dataprovider.version>
     </properties>
 
     <build>

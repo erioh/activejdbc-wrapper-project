@@ -8,6 +8,10 @@
     <artifactId>activejdbc-wrapper-project</artifactId>
     <packaging>pom</packaging>
     <version>1.0-SNAPSHOT</version>
+    <properties>
+        <junit.version>4.12</junit.version>
+        <assertj-core.version>3.19.0</assertj-core.version>
+    </properties>
     <modules>
         <module>activejdbc-wrapper</module>
         <module>activejdbc-wrapper-test</module>
