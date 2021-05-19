@@ -11,6 +11,25 @@ import java.util.*;
 import static activejdbc.wrapper.annotation.processor.util.StringTemplates.*;
 
 public class WrapperClassBuilder {
+    /**
+     * 1. package name
+     * 2. import activejbdc class package
+     * 3. activejbdc object class for import
+     * 4. wrapper class name
+     * 5. activejdbc object class
+     * 6  activejdbc object class
+     * 7. activejdbc object name
+     * 8. constructors
+     * 9. methods
+     */
+    public static final String CLASS_TEMPLATE = "package %s;%n" +
+            "import %s.%s;%n" +
+            "public class %s extends activejdbc.wrapper.annotation.processor.builder.ActivejdbcWrapper<%s>{%n" +
+            "%s %s;%n" +
+            "%s%n" +
+            "%s%n" +
+            "}";
+
     private final StrategyHolder<GetterBuilderStrategy> getterBuilderStrategyHolder;
     private final StrategyHolder<SetterBuilderStrategy> setterBuilderStrategyHolder;
     private final String packageName;

@@ -1,0 +1,28 @@
+package package.name;
+import package.name.ObjectClassName;
+public class ObjectClassNameWrapper extends activejdbc.wrapper.annotation.processor.builder.ActivejdbcWrapper<ObjectClassName>{
+ObjectClassName objectClassName;
+ public ObjectClassNameWrapper() {
+this.objectClassName = new ObjectClassName();
+}
+ public ObjectClassNameWrapper(ObjectClassName objectClassName) {
+this.objectClassName = objectClassName;
+}
+
+getter() {}
+public java.lang.String toString() {
+return "{stringColumn = " + "'" + this.getStringColumn() + "'"
+ + "}";
+}
+public boolean equals(Object o) {
+if (this == o) return true;
+if (o == null || getClass() != o.getClass()) return false;
+ObjectClassNameWrapper that = (ObjectClassNameWrapper) o;
+return
+java.util.Objects.equals(this.getStringColumn(), that.getStringColumn());
+}
+public int hashCode() {
+return java.util.Objects.hash(this.getStringColumn());
+}
+
+}

@@ -21,31 +21,13 @@ public final class StringTemplates {
             "if (this == o) return true;%n" +
             "if (o == null || getClass() != o.getClass()) return false;%n" +
             "%s that = (%s) o;%n" +
-            "return %s;%n" +
+            "return%s;%n" +
             "}%n";
     /**
      * 1. generated call of getters
      */
     public static final String HASH_CODE_METHOD_TEMPLATE = "public int hashCode() {%n" +
             "return java.util.Objects.hash(%s);%n" +
-            "}%n";
-    /**
-     * 1. package name
-     * 2. import activejbdc class package
-     * 3. activejbdc object class for import
-     * 4. wrapper class name
-     * 5. activejdbc object class
-     * 6  activejdbc object class
-     * 7. activejdbc object name
-     * 8. constructors
-     * 9. methods
-     */
-    public static final String CLASS_TEMPLATE = "package %s;%n" +
-            "import %s.%s;%n" +
-            "public class %s extends activejdbc.wrapper.annotation.processor.builder.ActivejdbcWrapper<%s>{%n" +
-            "%s %s;%n" +
-            "%s%n" +
-            "%s%n" +
             "}%n";
 
     /**
