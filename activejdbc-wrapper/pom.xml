@@ -10,11 +10,13 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>activejdbc-wrapper</artifactId>
+    <name>ActiveJDBC Wrapper</name>
+
     <dependencies>
-         <dependency>
+        <dependency>
             <groupId>org.javalite</groupId>
             <artifactId>activejdbc</artifactId>
-             <scope>provided</scope>
+            <scope>provided</scope>
             <version>${activejdbc.version}</version>
         </dependency>
         <dependency>
@@ -66,7 +68,9 @@
                         <configuration>
                             <compilerArgument>-proc:none</compilerArgument>
                             <includes>
-                                <include>activejdbc\wrapper\annotation\processor\ActiveJdbcRequiredPropertyProcessor.java</include>
+                                <include>
+                                    activejdbc\wrapper\annotation\processor\ActiveJdbcRequiredPropertyProcessor.java
+                                </include>
                             </includes>
                         </configuration>
                     </execution>
