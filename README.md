@@ -29,7 +29,7 @@ do something like that.
 All setters and getters should be generated automatically.
 Methods equals/hashCode/toString would be overridden automatically as well, so they are ready to use.
 
-So, what do we need to start?
+# So, what do we need to start?
 0. Let's assume that you already have some ActiveJDBC classes, everything works and you want only to simplify usage of these classes.
 ```java
 @Table("FANCY_TABLE")
@@ -101,3 +101,9 @@ That's it. In the same package where your ActiveJDBC classes are placed (in the 
 
 That's pretty it :) 
 Enjoy!
+
+# License
+
+Apache License
+Version 2.0, January 2004
+http://www.apache.org/licenses/
