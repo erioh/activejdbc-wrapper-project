@@ -21,7 +21,7 @@ public final class StringUtils {
     public static String buildPropertyNameFromColumnName(String columnName) {
         String value = columnName.toLowerCase();
         while (value.contains("_")) {
-            value = value.replaceFirst("_[a-z]", String.valueOf(Character.toUpperCase(value.charAt(value.indexOf("_") + 1))));
+            value = value.replaceFirst("_[a-z,0-9]", String.valueOf(Character.toUpperCase(value.charAt(value.indexOf("_") + 1))));
         }
         return value;
     }
