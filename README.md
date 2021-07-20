@@ -42,7 +42,7 @@ public class FancyTable extends Model {
         <dependency>
             <groupId>com.github.erioh</groupId>
             <artifactId>activejdbc-wrapper</artifactId>
-            <version>1.0</version>
+            <version>1.0.0</version>
         </dependency>
 ```
 2. Put ActiveJdbcRequiredProperty annotation with provided column name and expected type
