@@ -21,7 +21,11 @@ public final class StringUtils {
     public static String buildPropertyNameFromColumnName(String columnName) {
         String value = columnName.toLowerCase();
         while (value.contains("_")) {
-            value = value.replaceFirst("_[a-z,0-9]", String.valueOf(Character.toUpperCase(value.charAt(value.indexOf("_") + 1))));
+            String temp = value.replaceFirst("_[a-z,0-9]", String.valueOf(Character.toUpperCase(value.charAt(value.indexOf("_") + 1))));
+            if (temp.equals(value)) {
+                throw new IllegalArgumentException(String.format("It's not possible to process column name '%s'", columnName));
+            }
+            value = temp;
         }
         return value;
     }
