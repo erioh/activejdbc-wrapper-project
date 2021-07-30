@@ -40,7 +40,7 @@ public class FancyTable extends Model {
 1. You need to add new dependency into your pom.xml file.
 ```xml
         <dependency>
-            <groupId>com.github.erioh</groupId>
+            <groupId>io.github.erioh</groupId>
             <artifactId>activejdbc-wrapper</artifactId>
             <version>1.0.1</version>
         </dependency>
