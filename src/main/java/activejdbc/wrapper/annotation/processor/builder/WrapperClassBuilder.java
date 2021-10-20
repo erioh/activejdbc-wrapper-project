@@ -38,7 +38,7 @@ public class WrapperClassBuilder {
     public static final String CLASS_TEMPLATE = "package %s;%n" +
             "import %s.%s;%n" +
             "public class %s extends activejdbc.wrapper.annotation.processor.builder.ActivejdbcWrapper<%s>{%n" +
-            "%s %s;%n" +
+            "private %s %s;%n" +
             "%s%n" +
             "%s%n" +
             "}";
