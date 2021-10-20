@@ -62,4 +62,24 @@ public final class StringTemplates {
     public static final String CONSTRUCTOR_WITH_PARAMETER_TEMPLATE = " public %s(%s %s) {%n" +
             "this.%s = %s;%n" +
             "}%n";
+    /**
+     * 1. Wrapper class name
+     */
+    public static final String BUILDER_METHOD_TEMPLATE = " public static %s builder() {%n" +
+            "return new %s();%n" +
+            "}%n";
+
+    /**
+     * 1. Builder class name
+     * 2. Method name
+     * 3. Column type
+     * 4. Column name
+     * 5. Activejdbc wrapper object name
+     * 6. Setters name
+     * 7. Column name
+     */
+    public static final String BUILDER_SETTER_TEMPLATE = " public %s %s(%s %s) {%n" +
+            "this.%s.%s(%s);%n" +
+            "return this;%n" +
+            "}%n";
 }

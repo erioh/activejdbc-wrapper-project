@@ -26,6 +26,13 @@ do something like that.
         fancyTableWrapper.setAmount(BigDecimal.TEN);
         fancyTableWrapper.setActivated(false);
 ```
+In case if you prefer to use builders, you can use them as well :)
+```java
+        SomeTableWrapper someTableWrapper = SomeTableWrapper.builder()
+                .withSomeId(1L)
+                .withAaa("some value")
+                .build();
+```
 All setters and getters should be generated automatically.
 Methods equals/hashCode/toString would be overridden automatically as well, so they are ready to use.
 

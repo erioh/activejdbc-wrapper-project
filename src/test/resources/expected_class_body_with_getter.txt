@@ -25,4 +25,5 @@ public int hashCode() {
 return java.util.Objects.hash(this.getStringColumn());
 }
 
+
 }

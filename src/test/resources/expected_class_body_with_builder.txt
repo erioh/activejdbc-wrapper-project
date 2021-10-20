@@ -9,7 +9,15 @@ this.objectClassName = new ObjectClassName();
 this.objectClassName = objectClassName;
 }
 
-setter() {}
 
+ public static ObjectClassNameWrapperBuilder builder() {
+return new ObjectClassNameWrapperBuilder();
+}
+ public static class ObjectClassNameWrapperBuilder {
+private final ObjectClassNameWrapper objectClassNameWrapper = new ObjectClassNameWrapper();
 
+public ObjectClassNameWrapper build() {
+return objectClassNameWrapper;
+}
+}
 }

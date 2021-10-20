@@ -1,0 +1,11 @@
+ public static class WrapperClassNameBuilder {
+private final WrapperClassName wrapperClassName = new WrapperClassName();
+ public WrapperClassNameBuilder withColumnName(java.lang.ClassName columnName) {
+this.wrapperClassName.setColumnName(columnName);
+return this;
+}
+
+public WrapperClassName build() {
+return wrapperClassName;
+}
+}

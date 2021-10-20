@@ -24,6 +24,7 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.HashMap;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
@@ -113,6 +114,22 @@ public class WrapperClassBuilderTest {
         // when
         WrapperClassBuilder wrapperClassBuilder = new WrapperClassBuilder(packageName, activejdbcObjectClassName, annotationProcessorContext);
         wrapperClassBuilder.withMethodGetActivejdbcObject();
+        String classBody = wrapperClassBuilder.buildClassBody();
+        // then
+        assertThat(classBody).isEqualTo(expectedBody);
+    }
+
+    @Test
+    public void should_create_body_with_builder() throws IOException, URISyntaxException {
+        // given
+        String packageName = "package.name";
+        String activejdbcObjectClassName = "ObjectClassName";
+        AnnotationProcessorContext annotationProcessorContext = mock(AnnotationProcessorContext.class);
+        given(annotationProcessorContext.getWrapperSuffix()).willReturn("Wrapper");
+        String expectedBody = ContentExtractor.fromFile("expected_class_body_with_builder.txt");
+        // when
+        WrapperClassBuilder wrapperClassBuilder = new WrapperClassBuilder(packageName, activejdbcObjectClassName, annotationProcessorContext);
+        wrapperClassBuilder.withBuilder(new HashMap<>());
         String classBody = wrapperClassBuilder.buildClassBody();
         // then
         assertThat(classBody).isEqualTo(expectedBody);

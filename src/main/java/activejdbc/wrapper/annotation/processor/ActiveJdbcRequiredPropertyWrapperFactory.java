@@ -19,7 +19,9 @@ import activejdbc.wrapper.annotation.processor.util.AnnotationValueExtractor;
 
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.AnnotationValue;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.BiConsumer;
 
 public class ActiveJdbcRequiredPropertyWrapperFactory {
@@ -43,6 +45,8 @@ public class ActiveJdbcRequiredPropertyWrapperFactory {
         wrapperClassBuilder.withEquals();
         // and hashcode (using getters)
         wrapperClassBuilder.withHashCode();
+        // add builder method with builder class
+        wrapperClassBuilder.withBuilder(extractColumnNameAndType(annotationMirrors));
         return wrapperClassBuilder.buildClassBody();
     }
 
@@ -53,5 +57,17 @@ public class ActiveJdbcRequiredPropertyWrapperFactory {
             String columnName = field.getValue().toString();
             classBuilderConsumer.accept(clazz.getValue().toString(), columnName);
         });
+    }
+
+    private Map<String, String> extractColumnNameAndType(List<? extends AnnotationMirror> annotationMirrors) {
+        Map<String, String> columnNameAndType = new HashMap<>();
+        annotationMirrors.forEach(annotationMirror -> {
+            AnnotationValue clazz = AnnotationValueExtractor.extract(annotationMirror.getElementValues(), "clazz");
+            AnnotationValue field = AnnotationValueExtractor.extract(annotationMirror.getElementValues(), "field");
+            String columnName = field.getValue().toString();
+            String className = clazz.getValue().toString();
+            columnNameAndType.put(columnName, className);
+        });
+        return columnNameAndType;
     }
 }

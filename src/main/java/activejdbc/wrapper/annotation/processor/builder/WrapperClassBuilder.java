@@ -14,6 +14,7 @@ limitations under the License.
 package activejdbc.wrapper.annotation.processor.builder;
 
 import activejdbc.wrapper.annotation.processor.builder.strategy.StrategyHolder;
+import activejdbc.wrapper.annotation.processor.builder.strategy.WrapperBuilderClassBuilder;
 import activejdbc.wrapper.annotation.processor.builder.strategy.getter.GetterBuilderStrategy;
 import activejdbc.wrapper.annotation.processor.builder.strategy.setter.SetterBuilderStrategy;
 import activejdbc.wrapper.annotation.processor.context.AnnotationProcessorContext;
@@ -34,11 +35,13 @@ public class WrapperClassBuilder {
      * 7. activejdbc object name
      * 8. constructors
      * 9. methods
+     * 10. builder method and builder class
      */
     public static final String CLASS_TEMPLATE = "package %s;%n" +
             "import %s.%s;%n" +
             "public class %s extends activejdbc.wrapper.annotation.processor.builder.ActivejdbcWrapper<%s>{%n" +
             "private %s %s;%n" +
+            "%s%n" +
             "%s%n" +
             "%s%n" +
             "}";
@@ -56,6 +59,7 @@ public class WrapperClassBuilder {
     private String equals = "";
     private String toString = "";
     private String getObject = "";
+    private String builderAndBuilderClass = "";
 
     public WrapperClassBuilder(String packageName, String activejdbcObjectClassName, AnnotationProcessorContext annotationProcessorContext) {
         getterBuilderStrategyHolder = annotationProcessorContext.getGetterBuilderStrategyHolder();
@@ -79,7 +83,7 @@ public class WrapperClassBuilder {
         String constructorWithParameter = String.format(CONSTRUCTOR_WITH_PARAMETER_TEMPLATE, wrapperClassName, activejdbcObjectClassName, activejdbcObjectName, activejdbcObjectName, activejdbcObjectName);
         String constructors = constructorWithoutParameters + constructorWithParameter;
         return String.format(CLASS_TEMPLATE, packageName, packageName, activejdbcObjectClassName,
-                wrapperClassName, activejdbcObjectClassName, activejdbcObjectClassName, activejdbcObjectName, constructors, methods);
+                wrapperClassName, activejdbcObjectClassName, activejdbcObjectClassName, activejdbcObjectName, constructors, methods, builderAndBuilderClass);
     }
 
     public WrapperClassBuilder withHashCode() {
@@ -130,6 +134,15 @@ public class WrapperClassBuilder {
 
     public WrapperClassBuilder withMethodGetActivejdbcObject() {
         getObject = String.format(METHOD_GET_OBJECT_TEMPLATE, activejdbcObjectClassName, activejdbcObjectName);
+        return this;
+    }
+
+    public WrapperClassBuilder withBuilder(Map<String, String> columnNameWithType) {
+        StringBuilder stringBuilder = new StringBuilder();
+        String builderClassName = wrapperClassName + "Builder";
+        stringBuilder.append(String.format(BUILDER_METHOD_TEMPLATE, builderClassName, builderClassName));
+        stringBuilder.append(new WrapperBuilderClassBuilder(wrapperClassName, builderClassName, columnNameWithType).buildClassBody());
+        builderAndBuilderClass = stringBuilder.toString();
         return this;
     }
 }
