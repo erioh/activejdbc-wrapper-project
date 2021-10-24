@@ -14,6 +14,15 @@ limitations under the License.
 package activejdbc.wrapper.annotation.processor.util;
 
 public final class StringUtils {
+
+    public static boolean isEmpty(String string) {
+        return string == null || string.length() == 0;
+    }
+
+    public static String deleteInvalidCharacters(String string) {
+        return string.replaceAll("[\\\\/:*?\"<>|\\s\\[\\]]", "");
+    }
+
     public static String lowerCaseFirstCharacter(String string) {
         return Character.toLowerCase(string.charAt(0)) + string.substring(1);
     }

@@ -106,6 +106,28 @@ That's it. In the same package where your ActiveJDBC classes are placed (in the 
     }
 ```
 
+5. If you are not happy with the default suffix, you can easily override it by providing your own suffix using `activejdbc.wrapper.suffix` option 
+```xml
+ <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.8.1</version>
+                <configuration>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                    <encoding>UTF-8</encoding>
+                    <generatedSourcesDirectory>${project.build.directory}/generated-sources/annotations</generatedSourcesDirectory>
+                    <annotationProcessors>
+                        <annotationProcessor>
+                            activejdbc.wrapper.annotation.processor.ActiveJdbcRequiredPropertyProcessor
+                        </annotationProcessor>
+                    </annotationProcessors>
+                    <compilerArgs>
+                        <arg>-Aactivejdbc.wrapper.suffix=NewWrapperSuffix</arg>
+                    </compilerArgs>
+                </configuration>
+            </plugin>
+```
 That's pretty it :) 
 Enjoy!
 
