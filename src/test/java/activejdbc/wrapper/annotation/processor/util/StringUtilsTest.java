@@ -19,6 +19,7 @@ public class StringUtilsTest {
                 {"ADDRESS_LINE", "addressLine"},
                 {"NEW_ADDRESS_LINE", "newAddressLine"},
                 {"ADDRESS__LINE", "addressLine"},
+                {"A_D_L", "aDL"},
                 {"ADDRESS", "address"},
                 {"ADDRESS_", "address"},
                 {"_ADDRESS", "address"},
