@@ -13,21 +13,36 @@ limitations under the License.
 
 package activejdbc.wrapper.annotation.processor.util;
 
+import java.util.Arrays;
+import java.util.stream.Collectors;
+
 public final class StringUtils {
+
+    public static boolean isBlank(String string) {
+        return string == null || string.trim().length() == 0;
+    }
+
+    public static boolean isValid(String string) {
+        return string.trim().matches("^[a-zA-Z0-9_]+$");
+    }
+
     public static String lowerCaseFirstCharacter(String string) {
         return Character.toLowerCase(string.charAt(0)) + string.substring(1);
     }
 
     public static String buildPropertyNameFromColumnName(String columnName) {
         String value = columnName.toLowerCase();
-        while (value.contains("_")) {
-            String temp = value.replaceFirst("_[a-z,0-9]", String.valueOf(Character.toUpperCase(value.charAt(value.indexOf("_") + 1))));
-            if (temp.equals(value)) {
-                throw new IllegalArgumentException(String.format("It's not possible to process column name '%s'", columnName));
-            }
-            value = temp;
-        }
-        return value;
+        String[] strings = value.split("_");
+        return changeCapitalizationOfTheFirstCharacter(Arrays.stream(strings)
+                .filter(string -> !StringUtils.isBlank(string))
+                .map(string -> changeCapitalizationOfTheFirstCharacter(string, true))
+                .collect(Collectors.joining()), false);
+    }
+
+    private static String changeCapitalizationOfTheFirstCharacter(String string, boolean toUppercase) {
+        String firstCharacter = string.substring(0, 1);
+        String allOtherCharacters = string.substring(1);
+        return toUppercase ? firstCharacter.toUpperCase() + allOtherCharacters : firstCharacter.toLowerCase() + allOtherCharacters;
     }
 
     public static String buildMethodName(String columnName, String prefix) {

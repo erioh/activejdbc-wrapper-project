@@ -16,14 +16,14 @@ package activejdbc.wrapper.annotation.processor;
 import activejdbc.wrapper.annotation.ActiveJdbcRequiredProperties;
 import activejdbc.wrapper.annotation.ActiveJdbcRequiredProperty;
 import activejdbc.wrapper.annotation.processor.context.AnnotationProcessorContext;
+import activejdbc.wrapper.annotation.processor.exception.AnnotationProcessorException;
 import activejdbc.wrapper.annotation.processor.util.AnnotationValueExtractor;
+import activejdbc.wrapper.annotation.processor.util.StringUtils;
 
-import javax.annotation.processing.AbstractProcessor;
-import javax.annotation.processing.ProcessingEnvironment;
-import javax.annotation.processing.RoundEnvironment;
-import javax.annotation.processing.SupportedAnnotationTypes;
+import javax.annotation.processing.*;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.*;
+import javax.tools.Diagnostic;
 import javax.tools.JavaFileObject;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -32,11 +32,12 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @SupportedAnnotationTypes({"activejdbc.wrapper.annotation.ActiveJdbcRequiredProperty", "activejdbc.wrapper.annotation.ActiveJdbcRequiredProperties"})
+@SupportedOptions(ActiveJdbcRequiredPropertyProcessor.ACTIVEJDBC_WRAPPER_SUFFIX)
 public class ActiveJdbcRequiredPropertyProcessor extends AbstractProcessor {
 
-    public static final String WRAPPER_SUFFIX = "Wrapper";
+    private static final String DEFAULT_WRAPPER_SUFFIX = "Wrapper";
+    public static final String ACTIVEJDBC_WRAPPER_SUFFIX = "activejdbc.wrapper.suffix";
     private ActiveJdbcRequiredPropertyWrapperFactory wrapperFactory;
-    private AnnotationProcessorContext annotationProcessorContext;
 
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
@@ -46,18 +47,19 @@ public class ActiveJdbcRequiredPropertyProcessor extends AbstractProcessor {
                 if (element.getKind() != ElementKind.CLASS) {
                     throw new IllegalArgumentException("Only classes can be annotated with ActiveJdbcRequiredProperty");
                 }
+                processingEnv.getMessager().printMessage(Diagnostic.Kind.NOTE, "found @ActiveJdbcRequiredProperty at " + element);
                 List<? extends AnnotationMirror> annotationMirrors = filterNeededAnnotationMirrors(element.getAnnotationMirrors());
                 PackageElement packageElement = processingEnv.getElementUtils().getPackageOf(element);
                 String className = element.getSimpleName().toString();
 
                 String wrapperClassBody = wrapperFactory.build(packageElement.getQualifiedName().toString(), className, annotationMirrors);
                 try {
-                    JavaFileObject sourceFile = processingEnv.getFiler().createSourceFile(className + WRAPPER_SUFFIX);
+                    JavaFileObject sourceFile = processingEnv.getFiler().createSourceFile(className + getWrapperSuffix());
                     try (PrintWriter out = new PrintWriter(sourceFile.openWriter())) {
                         out.print(wrapperClassBody);
                     }
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    throw new AnnotationProcessorException(e);
                 }
             }
 
@@ -80,12 +82,25 @@ public class ActiveJdbcRequiredPropertyProcessor extends AbstractProcessor {
     @Override
     public synchronized void init(ProcessingEnvironment processingEnv) {
         super.init(processingEnv);
-        this.annotationProcessorContext = new AnnotationProcessorContext(WRAPPER_SUFFIX);
+        AnnotationProcessorContext annotationProcessorContext = new AnnotationProcessorContext(getWrapperSuffix());
         this.wrapperFactory = annotationProcessorContext.init();
     }
 
     @Override
     public SourceVersion getSupportedSourceVersion() {
         return SourceVersion.latestSupported();
+    }
+
+    private String getWrapperSuffix() {
+        String suffix = this.processingEnv.getOptions().get(ACTIVEJDBC_WRAPPER_SUFFIX);
+        if (StringUtils.isBlank(suffix)) {
+            processingEnv.getMessager().printMessage(Diagnostic.Kind.NOTE, String.format("Custom suffix is not set. Suffix [%s] will be used instead.\r\n", DEFAULT_WRAPPER_SUFFIX));
+            return DEFAULT_WRAPPER_SUFFIX;
+        }
+
+        if (!StringUtils.isValid(suffix)) {
+            throw new IllegalArgumentException("Custom suffix has illegal characters. Please use only characters in uppercase and lowercase, underscore, and numbers.");
+        }
+        return suffix;
     }
 }

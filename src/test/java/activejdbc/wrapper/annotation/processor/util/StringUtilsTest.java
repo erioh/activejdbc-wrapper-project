@@ -17,7 +17,12 @@ public class StringUtilsTest {
         return new Object[][] {
                 {"ADDRESS_LINE_1", "addressLine1"},
                 {"ADDRESS_LINE", "addressLine"},
-                {"ADDRESS", "address"}
+                {"NEW_ADDRESS_LINE", "newAddressLine"},
+                {"ADDRESS__LINE", "addressLine"},
+                {"A_D_L", "aDL"},
+                {"ADDRESS", "address"},
+                {"ADDRESS_", "address"},
+                {"_ADDRESS", "address"},
         };
     }
 
@@ -59,5 +64,42 @@ public class StringUtilsTest {
     @UseDataProvider("build_method_name")
     public void should_build_method_name(String property, String expectedValue) {
         assertThat(StringUtils.buildMethodName(property, "get")).isEqualTo(expectedValue);
+    }
+
+
+    @DataProvider
+    public static Object[][] is_blank() {
+        return new Object[][] {
+                {"", true},
+                {" ", true},
+                {null, true},
+                {"1", false}
+        };
+    }
+    @Test
+    @UseDataProvider("is_blank")
+    public void should_test_is_blank_method(String string, boolean result) {
+        assertThat(StringUtils.isBlank(string)).isEqualTo(result);
+    }
+
+    @DataProvider
+    public static Object[][] is_valid() {
+        return new Object[][] {
+                {"", false},
+                {" ", false},
+                {"-", false},
+                {"d-d", false},
+                {"d*d", false},
+                {"dd", true},
+                {"dDd", true},
+                {"d_Dd", true},
+                {" d_Dd   ", true},
+                {" 1d_Dd   ", true}
+        };
+    }
+    @Test
+    @UseDataProvider("is_valid")
+    public void should_test_is_valid_method(String string, boolean result) {
+        assertThat(StringUtils.isValid(string)).isEqualTo(result);
     }
 }
