@@ -16,6 +16,7 @@ package activejdbc.wrapper.annotation.processor;
 import activejdbc.wrapper.annotation.ActiveJdbcRequiredProperties;
 import activejdbc.wrapper.annotation.ActiveJdbcRequiredProperty;
 import activejdbc.wrapper.annotation.processor.context.AnnotationProcessorContext;
+import activejdbc.wrapper.annotation.processor.exception.AnnotationProcessorException;
 import activejdbc.wrapper.annotation.processor.util.AnnotationValueExtractor;
 import activejdbc.wrapper.annotation.processor.util.StringUtils;
 
@@ -58,7 +59,7 @@ public class ActiveJdbcRequiredPropertyProcessor extends AbstractProcessor {
                         out.print(wrapperClassBody);
                     }
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    throw new AnnotationProcessorException(e);
                 }
             }
 
@@ -92,14 +93,14 @@ public class ActiveJdbcRequiredPropertyProcessor extends AbstractProcessor {
 
     private String getWrapperSuffix() {
         String suffix = this.processingEnv.getOptions().get(ACTIVEJDBC_WRAPPER_SUFFIX);
-        if (StringUtils.isEmpty(suffix)) {
+        if (StringUtils.isBlank(suffix)) {
             processingEnv.getMessager().printMessage(Diagnostic.Kind.NOTE, String.format("Custom suffix is not set. Suffix [%s] will be used instead.\r\n", DEFAULT_WRAPPER_SUFFIX));
             return DEFAULT_WRAPPER_SUFFIX;
         }
-        String actualSuffix = StringUtils.deleteInvalidCharacters(suffix);
-        if (!suffix.equals(actualSuffix)) {
-            processingEnv.getMessager().printMessage(Diagnostic.Kind.WARNING, String.format("Custom suffix has illegal characters [/:*?\"<>| []]. Suffix [%s] will be used instead.\r\n", actualSuffix));
+
+        if (!StringUtils.isValid(suffix)) {
+            throw new IllegalArgumentException("Custom suffix has illegal characters. Please use only characters in uppercase and lowercase, underscore, and numbers.");
         }
-        return actualSuffix;
+        return suffix;
     }
 }

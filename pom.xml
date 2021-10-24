@@ -20,6 +20,7 @@
         <activejdbc.version>2.2</activejdbc.version>
         <junit-dataprovider.version>1.13.1</junit-dataprovider.version>
         <mockito-core.version>3.9.0</mockito-core.version>
+        <compile-testing.version>0.19</compile-testing.version>
     </properties>
 
     <dependencies>
@@ -53,6 +54,13 @@
             <version>${mockito-core.version}</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>com.google.testing.compile</groupId>
+            <artifactId>compile-testing</artifactId>
+            <version>${compile-testing.version}</version>
+            <scope>test</scope>
+        </dependency>
+
     </dependencies>
 
 
