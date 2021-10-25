@@ -34,7 +34,7 @@ public final class StringUtils {
         String value = columnName.toLowerCase();
         String[] strings = value.split("_");
         return changeCapitalizationOfTheFirstCharacter(Arrays.stream(strings)
-                .filter(string -> !StringUtils.isBlank(string))
+                .filter(string -> !isBlank(string))
                 .map(string -> changeCapitalizationOfTheFirstCharacter(string, true))
                 .collect(Collectors.joining()), false);
     }
@@ -45,9 +45,8 @@ public final class StringUtils {
         return toUppercase ? firstCharacter.toUpperCase() + allOtherCharacters : firstCharacter.toLowerCase() + allOtherCharacters;
     }
 
-    public static String buildMethodName(String columnName, String prefix) {
-        String propertyName = buildPropertyNameFromColumnName(columnName);
-        return prefix + Character.toUpperCase(propertyName.charAt(0)) + propertyName.substring(1);
+    public static String buildMethodName(String propertyName, String prefix) {
+        return prefix + changeCapitalizationOfTheFirstCharacter(propertyName, true);
     }
 
     private StringUtils() {

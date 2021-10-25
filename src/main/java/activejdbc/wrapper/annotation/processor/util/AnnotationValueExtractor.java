@@ -16,16 +16,17 @@ package activejdbc.wrapper.annotation.processor.util;
 import javax.lang.model.element.AnnotationValue;
 import javax.lang.model.element.ExecutableElement;
 import java.util.Map;
+import java.util.Optional;
 
 public class AnnotationValueExtractor {
-    public static AnnotationValue extract(Map<? extends ExecutableElement, ? extends AnnotationValue> elementValues, String expectedPropertyName) {
+    public static Optional<AnnotationValue> extract(Map<? extends ExecutableElement, ? extends AnnotationValue> elementValues, String expectedPropertyName) {
 
         for (Map.Entry<? extends ExecutableElement, ? extends AnnotationValue> entry : elementValues.entrySet()) {
             String propertyName = entry.getKey().getSimpleName().toString();
             if (propertyName.equalsIgnoreCase(expectedPropertyName)) {
-                return entry.getValue();
+                return Optional.ofNullable(entry.getValue());
             }
         }
-        throw new IllegalArgumentException(String.format("Unknown property [%s]", expectedPropertyName));
+        return Optional.empty();
     }
 }

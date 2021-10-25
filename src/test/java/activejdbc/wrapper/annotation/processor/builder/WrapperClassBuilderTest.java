@@ -13,6 +13,7 @@ limitations under the License.
 
 package activejdbc.wrapper.annotation.processor.builder;
 
+import activejdbc.wrapper.annotation.processor.ColumnContext;
 import activejdbc.wrapper.annotation.processor.builder.strategy.GetterBuilderStrategyHolder;
 import activejdbc.wrapper.annotation.processor.builder.strategy.SetterBuilderStrategyHolder;
 import activejdbc.wrapper.annotation.processor.builder.strategy.StrategyHolder;
@@ -20,16 +21,21 @@ import activejdbc.wrapper.annotation.processor.builder.strategy.getter.GetterBui
 import activejdbc.wrapper.annotation.processor.builder.strategy.setter.SetterBuilderStrategy;
 import activejdbc.wrapper.annotation.processor.context.AnnotationProcessorContext;
 import activejdbc.wrapper.annotation.processor.test.util.ContentExtractor;
+import com.tngtech.java.junit.dataprovider.DataProvider;
+import com.tngtech.java.junit.dataprovider.DataProviderRunner;
+import com.tngtech.java.junit.dataprovider.UseDataProvider;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.util.HashMap;
+import java.util.ArrayList;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
+@RunWith(DataProviderRunner.class)
 public class WrapperClassBuilderTest {
 
     @Test
@@ -49,8 +55,17 @@ public class WrapperClassBuilderTest {
         assertThat(classBody).isEqualTo(expectedBody);
     }
 
+    @DataProvider
+    public static Object[][] desired_field_name() {
+        return new Object[][]{
+                {""},
+                {"customName"}
+        };
+    }
+
     @Test
-    public void should_create_body_with_setter() throws IOException, URISyntaxException {
+    @UseDataProvider("desired_field_name")
+    public void should_create_body_with_setter(String desiredFieldName) throws IOException, URISyntaxException {
 
         // given
         String packageName = "package.name";
@@ -61,21 +76,32 @@ public class WrapperClassBuilderTest {
         String expectedBody = ContentExtractor.fromFile("expected_class_body_with_setter.txt");
         StrategyHolder<SetterBuilderStrategy> setterStrategyHolder = mock(SetterBuilderStrategyHolder.class);
         SetterBuilderStrategy stringStrategy = mock(SetterBuilderStrategy.class);
-        given(stringStrategy.buildSetterBody("String", "STRING_COLUMN", activejdbcObjectName))
+        ColumnContext columnContext = new ColumnContext("String", "STRING_COLUMN", desiredFieldName);
+        given(stringStrategy.buildSetterBody(columnContext, activejdbcObjectName))
                 .willReturn(String.format("setter() {}%n"));
         given(setterStrategyHolder.getStrategy("String")).willReturn(stringStrategy);
         given(annotationProcessorContext.getSetterBuilderStrategyHolder()).willReturn(setterStrategyHolder);
 
         // when
         WrapperClassBuilder wrapperClassBuilder = new WrapperClassBuilder(packageName, activejdbcObjectClassName, annotationProcessorContext);
-        wrapperClassBuilder.withSetter("String", "STRING_COLUMN");
+        wrapperClassBuilder.withSetter(columnContext);
         String classBody = wrapperClassBuilder.buildClassBody();
         // then
         assertThat(classBody).isEqualTo(expectedBody);
     }
 
+    @DataProvider
+    public static Object[][] desired_field_name_for_equals_and_hashcode() {
+        return new Object[][]{
+                {"", "expected_class_body_with_getter.txt"},
+                {"customName", "expected_class_body_with_getter_with_custom_fields.txt"}
+        };
+    }
+
+
     @Test
-    public void should_create_body_with_getter_plus_equals_and_hash_code_and_toString() throws IOException, URISyntaxException {
+    @UseDataProvider("desired_field_name_for_equals_and_hashcode")
+    public void should_create_body_with_getter_plus_equals_and_hash_code_and_toString(String desiredFieldName, String file) throws IOException, URISyntaxException {
 
         // given
         String packageName = "package.name";
@@ -83,17 +109,18 @@ public class WrapperClassBuilderTest {
         String activejdbcObjectName = "objectClassName";
         AnnotationProcessorContext annotationProcessorContext = mock(AnnotationProcessorContext.class);
         given(annotationProcessorContext.getWrapperSuffix()).willReturn("Wrapper");
-        String expectedBody = ContentExtractor.fromFile("expected_class_body_with_getter.txt");
+        String expectedBody = ContentExtractor.fromFile(file);
         StrategyHolder<GetterBuilderStrategy> getterStrategyHolder = mock(GetterBuilderStrategyHolder.class);
         given(annotationProcessorContext.getGetterBuilderStrategyHolder()).willReturn(getterStrategyHolder);
         GetterBuilderStrategy getterStrategy = mock(GetterBuilderStrategy.class);
         given(getterStrategyHolder.getStrategy("String"))
                 .willReturn(getterStrategy);
-        given(getterStrategy.buildGetterBody("String", "STRING_COLUMN", activejdbcObjectName))
+        ColumnContext columnContext = new ColumnContext("String", "STRING_COLUMN", desiredFieldName);
+        given(getterStrategy.buildGetterBody(columnContext, activejdbcObjectName))
                 .willReturn(String.format("getter() {}%n"));
         // when
         WrapperClassBuilder wrapperClassBuilder = new WrapperClassBuilder(packageName, activejdbcObjectClassName, annotationProcessorContext);
-        wrapperClassBuilder.withGetter("String", "STRING_COLUMN");
+        wrapperClassBuilder.withGetter(columnContext);
         wrapperClassBuilder.withEquals();
         wrapperClassBuilder.withHashCode();
         wrapperClassBuilder.withToString();
@@ -129,7 +156,7 @@ public class WrapperClassBuilderTest {
         String expectedBody = ContentExtractor.fromFile("expected_class_body_with_builder.txt");
         // when
         WrapperClassBuilder wrapperClassBuilder = new WrapperClassBuilder(packageName, activejdbcObjectClassName, annotationProcessorContext);
-        wrapperClassBuilder.withBuilder(new HashMap<>());
+        wrapperClassBuilder.withBuilder(new ArrayList<>());
         String classBody = wrapperClassBuilder.buildClassBody();
         // then
         assertThat(classBody).isEqualTo(expectedBody);

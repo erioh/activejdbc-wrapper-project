@@ -13,6 +13,7 @@ limitations under the License.
 
 package activejdbc.wrapper.annotation.processor.builder.strategy.setter;
 
+import activejdbc.wrapper.annotation.processor.ColumnContext;
 import com.tngtech.java.junit.dataprovider.DataProvider;
 import com.tngtech.java.junit.dataprovider.DataProviderRunner;
 import com.tngtech.java.junit.dataprovider.UseDataProvider;
@@ -30,25 +31,30 @@ import static org.assertj.core.api.Assertions.assertThat;
 @RunWith(DataProviderRunner.class)
 public class DateSetterBuilderStrategyTest {
     private final SetterBuilderStrategy setterBuilderStrategy = new DateSetterBuilderStrategy();
+
     @DataProvider
     public static Object[][] getSetterTypes() {
-        return new Object[][] {
-                {"LocalDate"},
-                {"Date"}
+        return new Object[][]{
+                {"LocalDate", "", "setColumnName", "columnName"},
+                {"Date", "", "setColumnName", "columnName"},
+                {"LocalDate", "customName", "setCustomName", "customName"},
+                {"Date", "customName", "setCustomName", "customName"},
         };
     }
+
     @Test
     @UseDataProvider("getSetterTypes")
-    public void should_generate_setter(String type) {
+    public void should_generate_setter(String type, String desiredFieldName, String expectedMethodName, String expectedColumnName) {
         // given
         String columnName = "COLUMN_NAME";
         String objectName = "object";
-        String expectedGetter = String.format("public void setColumnName(%s columnName) {%n" +
-                "object.setDate(\"COLUMN_NAME\", columnName);%n" +
-                "}%n", type);
+        String expectedGetter = String.format("public void %s(%s %s) {%n" +
+                "object.setDate(\"COLUMN_NAME\", %s);%n" +
+                "}%n", expectedMethodName, type, expectedColumnName, expectedColumnName);
+        ColumnContext columnContext = new ColumnContext(type, columnName, desiredFieldName);
 
         // when
-        String getterBody = setterBuilderStrategy.buildSetterBody(type, columnName, objectName);
+        String getterBody = setterBuilderStrategy.buildSetterBody(columnContext, objectName);
 
         // then
         assertThat(getterBody).isEqualTo(expectedGetter);

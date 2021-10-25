@@ -14,29 +14,45 @@ limitations under the License.
 package activejdbc.wrapper.annotation.processor.builder.strategy.getter;
 
 
+import activejdbc.wrapper.annotation.processor.ColumnContext;
+import com.tngtech.java.junit.dataprovider.DataProvider;
+import com.tngtech.java.junit.dataprovider.DataProviderRunner;
+import com.tngtech.java.junit.dataprovider.UseDataProvider;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.math.BigDecimal;
 import java.util.Collections;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@RunWith(DataProviderRunner.class)
 public class BigDecimalGetterBuilderStrategyTest {
 
     private final GetterBuilderStrategy getterBuilderStrategy = new BigDecimalGetterBuilderStrategy();
 
+    @DataProvider
+    public static Object[][] desired_field_name() {
+        return new Object[][]{
+                {"", "getColumnName"},
+                {"customFieldName", "getCustomFieldName"},
+        };
+    }
+
     @Test
-    public void should_generate_getter() {
+    @UseDataProvider("desired_field_name")
+    public void should_generate_getter(String desiredFieldName, String expectedMethod) {
         // given
         String columnName = "COLUMN_NAME";
         String type = "String";
         String objectName = "object";
-        String expectedGetter = String.format("public String getColumnName() {%n" +
+        String expectedGetter = String.format("public String %s() {%n" +
                 "return object.getBigDecimal(\"COLUMN_NAME\");%n" +
-                "}%n");
+                "}%n", expectedMethod);
+        ColumnContext columnContext = new ColumnContext(type, columnName, desiredFieldName);
 
         // when
-        String getterBody = getterBuilderStrategy.buildGetterBody(type, columnName, objectName);
+        String getterBody = getterBuilderStrategy.buildGetterBody(columnContext, objectName);
 
         // then
         assertThat(getterBody).isEqualTo(expectedGetter);

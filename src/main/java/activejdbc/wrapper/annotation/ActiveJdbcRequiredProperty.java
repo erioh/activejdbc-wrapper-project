@@ -19,7 +19,9 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.SOURCE)
 @Repeatable(value = ActiveJdbcRequiredProperties.class)
 public @interface ActiveJdbcRequiredProperty {
-    String field();
+    String columnName();
 
     Class<?> clazz();
+
+    String desiredFieldName() default "";
 }

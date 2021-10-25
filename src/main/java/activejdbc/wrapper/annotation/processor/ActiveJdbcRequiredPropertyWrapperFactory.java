@@ -19,10 +19,10 @@ import activejdbc.wrapper.annotation.processor.util.AnnotationValueExtractor;
 
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.AnnotationValue;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.function.BiConsumer;
+import java.util.Objects;
+import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 public class ActiveJdbcRequiredPropertyWrapperFactory {
     private final AnnotationProcessorContext annotationProcessorContext;
@@ -32,11 +32,14 @@ public class ActiveJdbcRequiredPropertyWrapperFactory {
     }
 
     public String build(String packageName, String className, List<? extends AnnotationMirror> annotationMirrors) {
+        List<ColumnContext> columnContexts = annotationMirrors.stream()
+                .map(this::getColumnContext)
+                .collect(Collectors.toList());
         WrapperClassBuilder wrapperClassBuilder = new WrapperClassBuilder(packageName, className, annotationProcessorContext);
         // add setters
-        addMethod(annotationMirrors, wrapperClassBuilder::withSetter);
+        addMethod(columnContexts, wrapperClassBuilder::withSetter);
         // add getters
-        addMethod(annotationMirrors, wrapperClassBuilder::withGetter);
+        addMethod(columnContexts, wrapperClassBuilder::withGetter);
         // add get activejdbc object method
         wrapperClassBuilder.withMethodGetActivejdbcObject();
         // add toString (using getters)
@@ -46,28 +49,24 @@ public class ActiveJdbcRequiredPropertyWrapperFactory {
         // and hashcode (using getters)
         wrapperClassBuilder.withHashCode();
         // add builder method with builder class
-        wrapperClassBuilder.withBuilder(extractColumnNameAndType(annotationMirrors));
+        wrapperClassBuilder.withBuilder(columnContexts);
         return wrapperClassBuilder.buildClassBody();
     }
 
-    private void addMethod(List<? extends AnnotationMirror> annotationMirrors, BiConsumer<String, String> classBuilderConsumer) {
-        annotationMirrors.forEach(annotationMirror -> {
-            AnnotationValue clazz = AnnotationValueExtractor.extract(annotationMirror.getElementValues(), "clazz");
-            AnnotationValue field = AnnotationValueExtractor.extract(annotationMirror.getElementValues(), "field");
-            String columnName = field.getValue().toString();
-            classBuilderConsumer.accept(clazz.getValue().toString(), columnName);
-        });
+    private ColumnContext getColumnContext(AnnotationMirror annotationMirror) {
+        String clazz = extract(annotationMirror, "clazz");
+        String columnName = extract(annotationMirror, "columnName");
+        String desiredFieldName = extract(annotationMirror, "desiredFieldName");
+        return new ColumnContext(clazz, columnName, desiredFieldName);
     }
 
-    private Map<String, String> extractColumnNameAndType(List<? extends AnnotationMirror> annotationMirrors) {
-        Map<String, String> columnNameAndType = new HashMap<>();
-        annotationMirrors.forEach(annotationMirror -> {
-            AnnotationValue clazz = AnnotationValueExtractor.extract(annotationMirror.getElementValues(), "clazz");
-            AnnotationValue field = AnnotationValueExtractor.extract(annotationMirror.getElementValues(), "field");
-            String columnName = field.getValue().toString();
-            String className = clazz.getValue().toString();
-            columnNameAndType.put(columnName, className);
-        });
-        return columnNameAndType;
+    private String extract(AnnotationMirror annotationMirror, String property) {
+        return AnnotationValueExtractor.extract(annotationMirror.getElementValues(), property)
+                .map(AnnotationValue::getValue)
+                .map(Objects::toString)
+                .orElse("");
+    }
+    private void addMethod(List<ColumnContext> columnContexts, Consumer<ColumnContext> classBuilderConsumer) {
+        columnContexts.forEach(classBuilderConsumer);
     }
 }

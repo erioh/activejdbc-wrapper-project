@@ -13,30 +13,46 @@ limitations under the License.
 
 package activejdbc.wrapper.annotation.processor.builder.strategy.getter;
 
+import activejdbc.wrapper.annotation.processor.ColumnContext;
+import com.tngtech.java.junit.dataprovider.DataProvider;
+import com.tngtech.java.junit.dataprovider.DataProviderRunner;
+import com.tngtech.java.junit.dataprovider.UseDataProvider;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@RunWith(DataProviderRunner.class)
 public class LocalDateTimeGetterBuilderStrategyTest {
     private final GetterBuilderStrategy getterBuilderStrategy = new LocalDateTimeGetterBuilderStrategy();
 
+    @DataProvider
+    public static Object[][] desired_field_name() {
+        return new Object[][]{
+                {"", "getColumnName"},
+                {"customFieldName", "getCustomFieldName"},
+        };
+    }
+
     @Test
-    public void should_generate_getter() {
+    @UseDataProvider("desired_field_name")
+    public void should_generate_getter(String desiredFieldName, String expectedMethod) {
         // given
         String columnName = "COLUMN_NAME";
         String type = "LocalDateTime";
         String objectName = "object";
-        String expectedGetter = String.format("public LocalDateTime getColumnName() {%n" +
+        String expectedGetter = String.format("public LocalDateTime %s() {%n" +
                 "return java.util.Optional.ofNullable(object.getTimestamp(\"COLUMN_NAME\"))%n" +
                 ".map(java.sql.Timestamp::toLocalDateTime)%n" +
                 ".orElse(null);%n" +
-                "}%n");
+                "}%n", expectedMethod);
+        ColumnContext columnContext = new ColumnContext(type, columnName, desiredFieldName);
 
         // when
-        String getterBody = getterBuilderStrategy.buildGetterBody(type, columnName, objectName);
+        String getterBody = getterBuilderStrategy.buildGetterBody(columnContext, objectName);
 
         // then
         assertThat(getterBody).isEqualTo(expectedGetter);

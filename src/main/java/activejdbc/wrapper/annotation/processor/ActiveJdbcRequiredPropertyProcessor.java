@@ -72,7 +72,7 @@ public class ActiveJdbcRequiredPropertyProcessor extends AbstractProcessor {
                 .filter(annotationMirror -> annotationMirror.getAnnotationType().toString().equals(ActiveJdbcRequiredProperties.class.getName()))
                 .map(AnnotationMirror::getElementValues)
                 .map(elementValues -> AnnotationValueExtractor.extract(elementValues, "value"))
-                .map(annotationValue -> (List<AnnotationMirror>) annotationValue.getValue())
+                .map(annotationValue -> (List<AnnotationMirror>) annotationValue.get().getValue())
                 .findFirst()
                 .orElseGet(() -> annotationMirrors.stream()
                         .filter(annotationMirror -> annotationMirror.getAnnotationType().toString().equals(ActiveJdbcRequiredProperty.class.getName()))

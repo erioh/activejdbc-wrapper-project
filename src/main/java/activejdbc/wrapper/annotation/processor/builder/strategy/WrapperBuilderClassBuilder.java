@@ -13,9 +13,10 @@ limitations under the License.
 
 package activejdbc.wrapper.annotation.processor.builder.strategy;
 
+import activejdbc.wrapper.annotation.processor.ColumnContext;
 import activejdbc.wrapper.annotation.processor.util.StringUtils;
 
-import java.util.Map;
+import java.util.List;
 
 import static activejdbc.wrapper.annotation.processor.util.StringTemplates.BUILDER_SETTER_TEMPLATE;
 
@@ -38,23 +39,25 @@ public class WrapperBuilderClassBuilder {
             "}";
     private final String wrapperClassName;
     private final String builderClassName;
-    private final Map<String, String> columnNameWithType;
+    private final List<ColumnContext> columnContexts;
 
-    public WrapperBuilderClassBuilder(String wrapperClassName, String builderClassName, Map<String, String> columnNameWithType) {
+    public WrapperBuilderClassBuilder(String wrapperClassName, String builderClassName, List<ColumnContext> columnContexts) {
         this.wrapperClassName = wrapperClassName;
         this.builderClassName = builderClassName;
-        this.columnNameWithType = columnNameWithType;
+        this.columnContexts = columnContexts;
     }
 
     public String buildClassBody() {
         StringBuilder stringBuilder = new StringBuilder();
         String wrapperObjectName = StringUtils.lowerCaseFirstCharacter(wrapperClassName);
-        columnNameWithType.forEach((columnName, type) -> {
-            String withMethodName = StringUtils.buildMethodName(columnName, "with");
+        columnContexts.forEach(columnContext -> {
+            String propertyName = StringUtils.isBlank(columnContext.getDesiredFieldName())
+                    ? StringUtils.buildPropertyNameFromColumnName(columnContext.getColumnName())
+                    : columnContext.getDesiredFieldName();
+            String withMethodName = StringUtils.buildMethodName(propertyName, "with");
             // todo refactor this thing
-            String setMethodName = StringUtils.buildMethodName(columnName, "set");
-            String propertyName = StringUtils.buildPropertyNameFromColumnName(columnName);
-            stringBuilder.append(String.format(BUILDER_SETTER_TEMPLATE, builderClassName, withMethodName, type, propertyName, wrapperObjectName, setMethodName, propertyName));
+            String setMethodName = StringUtils.buildMethodName(propertyName, "set");
+            stringBuilder.append(String.format(BUILDER_SETTER_TEMPLATE, builderClassName, withMethodName, columnContext.getClazz(), propertyName, wrapperObjectName, setMethodName, propertyName));
 
         });
         return String.format(CLASS_TEMPLATE, builderClassName, wrapperClassName, wrapperObjectName, wrapperClassName, stringBuilder, wrapperClassName, wrapperObjectName);
