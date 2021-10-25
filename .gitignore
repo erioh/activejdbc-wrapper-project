@@ -2,5 +2,6 @@
 *.iml
 *.class
 *.log
-*/target/*
+target
 git
+*.versionsBackup

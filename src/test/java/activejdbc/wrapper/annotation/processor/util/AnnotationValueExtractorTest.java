@@ -27,9 +27,9 @@ import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Name;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.BDDMockito.given;
 
 @RunWith(DataProviderRunner.class)
@@ -63,22 +63,21 @@ public class AnnotationValueExtractorTest {
         given(executableElement.getSimpleName()).willReturn(name);
         given(name.toString()).willReturn(expectedPropertyName.toLowerCase());
         // when
-        AnnotationValue actualAnnotationValue = AnnotationValueExtractor.extract(map, expectedPropertyName);
+        Optional<AnnotationValue> actualAnnotationValue = AnnotationValueExtractor.extract(map, expectedPropertyName);
         // then
-        assertThat(actualAnnotationValue).isEqualTo(annotationValue);
+        assertThat(actualAnnotationValue).isEqualTo(Optional.of(annotationValue));
     }
 
     @Test
-    public void should_throw_IllegalArgumentException() {
+    public void should_return_empty_optional_if_property_is_not_set() {
         // given
         Map<ExecutableElement, AnnotationValue> map = new HashMap<>();
         map.put(executableElement, annotationValue);
         given(executableElement.getSimpleName()).willReturn(name);
         given(name.toString()).willReturn("actualPropertyName");
         // when | then
-        assertThatThrownBy(() -> AnnotationValueExtractor.extract(map, "expectedPropertyName"))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("Unknown property [expectedPropertyName]");
+        assertThat(AnnotationValueExtractor.extract(map, "expectedPropertyName"))
+                .isEmpty();
     }
 
 }

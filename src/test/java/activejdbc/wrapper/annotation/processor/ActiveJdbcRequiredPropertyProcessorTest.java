@@ -45,6 +45,37 @@ public class ActiveJdbcRequiredPropertyProcessorTest {
     }
 
     @Test
+    public void should_create_new_class_with_custom_column() {
+        // given
+        JavaFileObject javaFileObject = JavaFileObjects.forResource("FancyTableWithCustomColumn.java");
+        // when
+        Compilation compilation =
+                javac()
+                        .withProcessors(new ActiveJdbcRequiredPropertyProcessor())
+                        .compile(javaFileObject);
+        // then
+        assertThat(compilation).succeededWithoutWarnings();
+        assertThat(compilation).generatedSourceFile("FancyTableWithCustomColumnWrapper")
+                .hasSourceEquivalentTo(JavaFileObjects.forResource("FancyTableWithCustomColumnWrapper.java"));
+    }
+
+    @Test
+    public void should_create_new_class_with_custom_column_and_options() {
+        // given
+        JavaFileObject javaFileObject = JavaFileObjects.forResource("FancyTableWithCustomColumn.java");
+        // when
+        Compilation compilation =
+                javac()
+                        .withProcessors(new ActiveJdbcRequiredPropertyProcessor())
+                        .withOptions("-Aactivejdbc.wrapper.suffix=NewWrapperSuffix")
+                        .compile(javaFileObject);
+        // then
+        assertThat(compilation).succeededWithoutWarnings();
+        assertThat(compilation).generatedSourceFile("FancyTableWithCustomColumnNewWrapperSuffix")
+                .hasSourceEquivalentTo(JavaFileObjects.forResource("FancyTableWithCustomColumnNewWrapperSuffix.java"));
+    }
+
+    @Test
     public void should_throw_exception_on_illegal_options() {
         // given
         JavaFileObject javaFileObject = JavaFileObjects.forResource("FancyTable.java");

@@ -56,7 +56,7 @@ public class StringUtilsTest {
                 {"A", "getA"},
                 {"Aa", "getAa"},
                 {"a", "getA"},
-                {"aA", "getAa"},
+                {"aa", "getAa"},
         };
     }
 

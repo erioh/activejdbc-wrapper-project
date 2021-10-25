@@ -13,6 +13,7 @@ limitations under the License.
 
 package activejdbc.wrapper.annotation.processor.builder.strategy.getter;
 
+import activejdbc.wrapper.annotation.processor.ColumnContext;
 import activejdbc.wrapper.annotation.processor.util.StringUtils;
 
 import java.util.Collections;
@@ -31,9 +32,12 @@ public class DefaultGetterBuilderStrategy implements GetterBuilderStrategy {
             "}%n";
 
     @Override
-    public String buildGetterBody(String type, String columnName, String activejdbcObjectName) {
-        String methodName = StringUtils.buildMethodName(columnName, "get");
-        return String.format(getTemplate(), type, methodName, type, activejdbcObjectName, columnName);
+    public String buildGetterBody(ColumnContext columnContext, String activejdbcObjectName) {
+        String propertyName = StringUtils.isBlank(columnContext.getDesiredFieldName())
+                ? StringUtils.buildPropertyNameFromColumnName(columnContext.getColumnName())
+                : columnContext.getDesiredFieldName();
+        String methodName = StringUtils.buildMethodName(propertyName, "get");
+        return String.format(getTemplate(), columnContext.getClazz(), methodName, columnContext.getClazz(), activejdbcObjectName, columnContext.getColumnName());
     }
 
     @Override

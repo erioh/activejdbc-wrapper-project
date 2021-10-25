@@ -13,16 +13,19 @@ limitations under the License.
 
 package activejdbc.wrapper.annotation.processor.builder.strategy.setter;
 
+import activejdbc.wrapper.annotation.processor.ColumnContext;
 import activejdbc.wrapper.annotation.processor.util.StringUtils;
 
 import java.util.Set;
 
 public interface SetterBuilderStrategy {
 
-    default String buildSetterBody(String type, String columnName, String activejdbcObjectName) {
-        String propertyName = StringUtils.buildPropertyNameFromColumnName(columnName);
-        String methodName = StringUtils.buildMethodName(columnName, "set");
-        return String.format(getTemplate(), methodName, type, propertyName, activejdbcObjectName, columnName, propertyName);
+    default String buildSetterBody(ColumnContext columnContext, String activejdbcObjectName) {
+        String propertyName = StringUtils.isBlank(columnContext.getDesiredFieldName())
+                ? StringUtils.buildPropertyNameFromColumnName(columnContext.getColumnName())
+                : columnContext.getDesiredFieldName();
+        String methodName = StringUtils.buildMethodName(propertyName, "set");
+        return String.format(getTemplate(), methodName, columnContext.getClazz(), propertyName, activejdbcObjectName, columnContext.getColumnName(), propertyName);
     }
 
     String getTemplate();

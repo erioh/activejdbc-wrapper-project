@@ -13,6 +13,7 @@ limitations under the License.
 
 package activejdbc.wrapper.annotation.processor.builder;
 
+import activejdbc.wrapper.annotation.processor.ColumnContext;
 import activejdbc.wrapper.annotation.processor.builder.strategy.StrategyHolder;
 import activejdbc.wrapper.annotation.processor.builder.strategy.WrapperBuilderClassBuilder;
 import activejdbc.wrapper.annotation.processor.builder.strategy.getter.GetterBuilderStrategy;
@@ -117,18 +118,20 @@ public class WrapperClassBuilder {
         return this;
     }
 
-    public WrapperClassBuilder withGetter(String type, String columnName) {
-        String propertyName = StringUtils.buildPropertyNameFromColumnName(columnName);
-        String methodName = StringUtils.buildMethodName(columnName, "get");
-        GetterBuilderStrategy strategy = getterBuilderStrategyHolder.getStrategy(type);
-        gettersBody.add(strategy.buildGetterBody(type, columnName, activejdbcObjectName));
+    public WrapperClassBuilder withGetter(ColumnContext columnContext) {
+        String propertyName = StringUtils.isBlank(columnContext.getDesiredFieldName())
+                ? StringUtils.buildPropertyNameFromColumnName(columnContext.getColumnName())
+                : columnContext.getDesiredFieldName();
+        String methodName = StringUtils.buildMethodName(propertyName, "get");
+        GetterBuilderStrategy strategy = getterBuilderStrategyHolder.getStrategy(columnContext.getClazz());
+        gettersBody.add(strategy.buildGetterBody(columnContext, activejdbcObjectName));
         propertyNamesAndGetters.put(propertyName, methodName);
         return this;
     }
 
-    public WrapperClassBuilder withSetter(String type, String columnName) {
-        SetterBuilderStrategy strategy = setterBuilderStrategyHolder.getStrategy(type);
-        settersBody.add(strategy.buildSetterBody(type, columnName, activejdbcObjectName));
+    public WrapperClassBuilder withSetter(ColumnContext columnContext) {
+        SetterBuilderStrategy strategy = setterBuilderStrategyHolder.getStrategy(columnContext.getClazz());
+        settersBody.add(strategy.buildSetterBody(columnContext, activejdbcObjectName));
         return this;
     }
 
@@ -137,11 +140,11 @@ public class WrapperClassBuilder {
         return this;
     }
 
-    public WrapperClassBuilder withBuilder(Map<String, String> columnNameWithType) {
+    public WrapperClassBuilder withBuilder(List<ColumnContext> columnContexts) {
         StringBuilder stringBuilder = new StringBuilder();
         String builderClassName = wrapperClassName + "Builder";
         stringBuilder.append(String.format(BUILDER_METHOD_TEMPLATE, builderClassName, builderClassName));
-        stringBuilder.append(new WrapperBuilderClassBuilder(wrapperClassName, builderClassName, columnNameWithType).buildClassBody());
+        stringBuilder.append(new WrapperBuilderClassBuilder(wrapperClassName, builderClassName, columnContexts).buildClassBody());
         builderAndBuilderClass = stringBuilder.toString();
         return this;
     }

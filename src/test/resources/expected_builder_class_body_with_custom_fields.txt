@@ -1,0 +1,11 @@
+ public static class WrapperClassNameBuilder {
+private final WrapperClassName wrapperClassName = new WrapperClassName();
+ public WrapperClassNameBuilder withCustomFieldName(java.lang.ClassName customFieldName) {
+this.wrapperClassName.setCustomFieldName(customFieldName);
+return this;
+}
+
+public WrapperClassName build() {
+return wrapperClassName;
+}
+}
