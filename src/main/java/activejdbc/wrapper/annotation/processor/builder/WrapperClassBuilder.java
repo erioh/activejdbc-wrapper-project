@@ -111,7 +111,7 @@ public class WrapperClassBuilder {
                 .append('{');
         StringJoiner stringJoiner = new StringJoiner(" + \", ");
         propertyNamesAndGetters.forEach((propertyName, getter) ->
-                stringJoiner.add(String.format("%s = \" + \"'\" + this.%s() + \"'\"%n", propertyName, getter)));
+                stringJoiner.add(String.format("%s = \" + (this.%s() == null ? null : \"'\" + this.%s() + \"'\")%n", propertyName, getter, getter)));
         stringBuilder.append(stringJoiner);
         stringBuilder.append(" + \"}\"");
         toString = String.format(TO_STRING_METHOD_TEMPLATE, stringBuilder);

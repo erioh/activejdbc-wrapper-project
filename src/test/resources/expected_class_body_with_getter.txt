@@ -11,7 +11,7 @@ this.objectClassName = objectClassName;
 
 getter() {}
 public java.lang.String toString() {
-return "{stringColumn = " + "'" + this.getStringColumn() + "'"
+return "{stringColumn = " + (this.getStringColumn() == null ? null : "'" + this.getStringColumn() + "'")
  + "}";
 }
 public boolean equals(Object o) {

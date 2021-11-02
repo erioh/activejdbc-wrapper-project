@@ -11,7 +11,7 @@ this.objectClassName = objectClassName;
 
 getter() {}
 public java.lang.String toString() {
-return "{customName = " + "'" + this.getCustomName() + "'"
+return "{customName = " + (this.getCustomName() == null ? null : "'" + this.getCustomName() + "'")
  + "}";
 }
 public boolean equals(Object o) {

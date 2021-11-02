@@ -19,7 +19,7 @@ public class FancyTableWithCustomColumnWrapper extends activejdbc.wrapper.annota
         return fancyTableWithCustomColumn;
     }
     public java.lang.String toString() {
-        return "{customColumn = " + "'" + this.getCustomColumn() + "'"
+        return "{customColumn = " + (this.getCustomColumn() == null ? null : "'" + this.getCustomColumn() + "'")
                 + "}";
     }
     public boolean equals(Object o) {

@@ -19,7 +19,7 @@ public class FancyTableNewWrapperSuffix extends activejdbc.wrapper.annotation.pr
         return fancyTable;
     }
     public java.lang.String toString() {
-        return "{fancyTableId = " + "'" + this.getFancyTableId() + "'"
+        return "{fancyTableId = " + (this.getFancyTableId() == null ? null : "'" + this.getFancyTableId() + "'")
                 + "}";
     }
     public boolean equals(Object o) {

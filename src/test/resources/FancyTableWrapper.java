@@ -19,7 +19,7 @@ public class FancyTableWrapper extends activejdbc.wrapper.annotation.processor.b
         return fancyTable;
     }
     public java.lang.String toString() {
-        return "{fancyTableId = " + "'" + this.getFancyTableId() + "'"
+        return "{fancyTableId = " + (this.getFancyTableId() == null ? null : "'" + this.getFancyTableId() + "'")
                 + "}";
     }
     public boolean equals(Object o) {
