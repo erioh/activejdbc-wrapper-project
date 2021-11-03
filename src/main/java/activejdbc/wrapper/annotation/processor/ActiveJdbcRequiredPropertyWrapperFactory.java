@@ -21,7 +21,6 @@ import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.AnnotationValue;
 import java.util.List;
 import java.util.Objects;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 public class ActiveJdbcRequiredPropertyWrapperFactory {
@@ -35,22 +34,22 @@ public class ActiveJdbcRequiredPropertyWrapperFactory {
         List<ColumnContext> columnContexts = annotationMirrors.stream()
                 .map(this::getColumnContext)
                 .collect(Collectors.toList());
-        WrapperClassBuilder wrapperClassBuilder = new WrapperClassBuilder(packageName, className, annotationProcessorContext);
+        WrapperClassBuilder wrapperClassBuilder = new WrapperClassBuilder(packageName, className, columnContexts, annotationProcessorContext);
         // add setters
-        addMethod(columnContexts, wrapperClassBuilder::withSetter);
-        // add getters
-        addMethod(columnContexts, wrapperClassBuilder::withGetter);
-        // add get activejdbc object method
-        wrapperClassBuilder.withMethodGetActivejdbcObject();
-        // add toString (using getters)
-        wrapperClassBuilder.withToString();
-        // add equals
-        wrapperClassBuilder.withEquals();
-        // and hashcode (using getters)
-        wrapperClassBuilder.withHashCode();
-        // add builder method with builder class
-        wrapperClassBuilder.withBuilder(columnContexts);
-        return wrapperClassBuilder.buildClassBody();
+        return wrapperClassBuilder.withSetters()
+                // add getters
+                .withGetters()
+                // add get activejdbc object method
+                .withMethodGetActivejdbcObject()
+                // add toString (using getters)
+                .withToString()
+                // add equals
+                .withEquals()
+                // and hashcode (using getters)
+                .withHashCode()
+                // add builder method with builder class
+                .withBuilder()
+                .buildClassBody();
     }
 
     private ColumnContext getColumnContext(AnnotationMirror annotationMirror) {
@@ -65,8 +64,5 @@ public class ActiveJdbcRequiredPropertyWrapperFactory {
                 .map(AnnotationValue::getValue)
                 .map(Objects::toString)
                 .orElse("");
-    }
-    private void addMethod(List<ColumnContext> columnContexts, Consumer<ColumnContext> classBuilderConsumer) {
-        columnContexts.forEach(classBuilderConsumer);
     }
 }

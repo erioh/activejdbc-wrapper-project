@@ -32,11 +32,12 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @SupportedAnnotationTypes({"activejdbc.wrapper.annotation.ActiveJdbcRequiredProperty", "activejdbc.wrapper.annotation.ActiveJdbcRequiredProperties"})
-@SupportedOptions(ActiveJdbcRequiredPropertyProcessor.ACTIVEJDBC_WRAPPER_SUFFIX)
+@SupportedOptions({ActiveJdbcRequiredPropertyProcessor.ACTIVEJDBC_WRAPPER_SUFFIX,ActiveJdbcRequiredPropertyProcessor.ACTIVEJDBC_BUILDER_METHOD_PREFIX})
 public class ActiveJdbcRequiredPropertyProcessor extends AbstractProcessor {
 
     private static final String DEFAULT_WRAPPER_SUFFIX = "Wrapper";
     public static final String ACTIVEJDBC_WRAPPER_SUFFIX = "activejdbc.wrapper.suffix";
+    public static final String ACTIVEJDBC_BUILDER_METHOD_PREFIX = "activejdbc.wrapper.builder.method.prefix";
     private ActiveJdbcRequiredPropertyWrapperFactory wrapperFactory;
 
     @Override
@@ -82,7 +83,7 @@ public class ActiveJdbcRequiredPropertyProcessor extends AbstractProcessor {
     @Override
     public synchronized void init(ProcessingEnvironment processingEnv) {
         super.init(processingEnv);
-        AnnotationProcessorContext annotationProcessorContext = new AnnotationProcessorContext(getWrapperSuffix());
+        AnnotationProcessorContext annotationProcessorContext = new AnnotationProcessorContext(getWrapperSuffix(), getBuilderMethodPrefix());
         this.wrapperFactory = annotationProcessorContext.init();
     }
 
@@ -102,5 +103,18 @@ public class ActiveJdbcRequiredPropertyProcessor extends AbstractProcessor {
             throw new IllegalArgumentException("Custom suffix has illegal characters. Please use only characters in uppercase and lowercase, underscore, and numbers.");
         }
         return suffix;
+    }
+
+    private String getBuilderMethodPrefix() {
+        String prefix = this.processingEnv.getOptions().get(ACTIVEJDBC_BUILDER_METHOD_PREFIX);
+        if (StringUtils.isBlank(prefix)) {
+            processingEnv.getMessager().printMessage(Diagnostic.Kind.NOTE, "Custom builder method prefix is not set. \r\n");
+            return StringUtils.EMPTY_STRING;
+        }
+
+        if (!StringUtils.isValid(prefix)) {
+            throw new IllegalArgumentException("Custom prefix has illegal characters. Please use only characters in uppercase and lowercase, underscore, and numbers.");
+        }
+        return prefix;
     }
 }

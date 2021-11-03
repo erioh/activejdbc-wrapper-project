@@ -35,11 +35,13 @@ public class AnnotationProcessorContext {
     private final StrategyHolder<SetterBuilderStrategy> setterBuilderStrategyHolder;
     private final StrategyHolder<GetterBuilderStrategy> getterBuilderStrategyHolder;
     private final String wrapperSuffix;
+    private final String builderMethodPrefix;
 
-    public AnnotationProcessorContext(String wrapperSuffix) {
+    public AnnotationProcessorContext(String wrapperSuffix, String builderMethodPrefix) {
         this.wrapperSuffix = wrapperSuffix;
         this.getterBuilderStrategyHolder = initGetterBuilderStrategyHolder();
         this.setterBuilderStrategyHolder = initSetterBuilderStrategyHolder();
+        this.builderMethodPrefix = builderMethodPrefix;
     }
 
     private GetterBuilderStrategyHolder initGetterBuilderStrategyHolder() {
@@ -86,5 +88,9 @@ public class AnnotationProcessorContext {
 
     public String getWrapperSuffix() {
         return wrapperSuffix;
+    }
+
+    public String getBuilderMethodPrefix() {
+        return builderMethodPrefix;
     }
 }

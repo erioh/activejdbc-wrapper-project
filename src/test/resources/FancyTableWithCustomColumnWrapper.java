@@ -38,7 +38,7 @@ public class FancyTableWithCustomColumnWrapper extends activejdbc.wrapper.annota
     }
     public static class FancyTableWithCustomColumnWrapperBuilder {
         private final FancyTableWithCustomColumnWrapper fancyTableWithCustomColumnWrapper = new FancyTableWithCustomColumnWrapper();
-        public FancyTableWithCustomColumnWrapperBuilder withCustomColumn(java.lang.Long customColumn) {
+        public FancyTableWithCustomColumnWrapperBuilder customColumn(java.lang.Long customColumn) {
             this.fancyTableWithCustomColumnWrapper.setCustomColumn(customColumn);
             return this;
         }
