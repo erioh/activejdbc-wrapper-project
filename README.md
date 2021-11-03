@@ -60,7 +60,7 @@ public class FancyTable extends Model {
 <dependency>
     <groupId>io.github.erioh</groupId>
     <artifactId>activejdbc-wrapper</artifactId>
-    <version>1.0.4</version>
+    <version>1.0.5</version>
 </dependency>
 ```
 
