@@ -16,6 +16,7 @@ package activejdbc.wrapper.annotation.processor;
 import activejdbc.wrapper.annotation.processor.builder.WrapperClassBuilder;
 import activejdbc.wrapper.annotation.processor.context.AnnotationProcessorContext;
 import activejdbc.wrapper.annotation.processor.util.AnnotationValueExtractor;
+import activejdbc.wrapper.annotation.processor.util.StringUtils;
 
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.AnnotationValue;
@@ -63,6 +64,6 @@ public class ActiveJdbcRequiredPropertyWrapperFactory {
         return AnnotationValueExtractor.extract(annotationMirror.getElementValues(), property)
                 .map(AnnotationValue::getValue)
                 .map(Objects::toString)
-                .orElse("");
+                .orElse(StringUtils.EMPTY_STRING);
     }
 }

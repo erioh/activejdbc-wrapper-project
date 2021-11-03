@@ -58,11 +58,11 @@ public class WrapperClassBuilder {
     private final List<ColumnContext> columnContexts;
     private final Map<String, String> propertyNamesAndGetters = new HashMap<>();
     private final WrapperBuilderClassBuilder wrapperBuilderClassBuilder;
-    private String hashCode = "";
-    private String equals = "";
-    private String toString = "";
-    private String getObject = "";
-    private String builderAndBuilderClass = "";
+    private String hashCode = StringUtils.EMPTY_STRING;
+    private String equals = StringUtils.EMPTY_STRING;
+    private String toString = StringUtils.EMPTY_STRING;
+    private String getObject = StringUtils.EMPTY_STRING;
+    private String builderAndBuilderClass = StringUtils.EMPTY_STRING;
 
     public WrapperClassBuilder(String packageName, String activejdbcObjectClassName, List<ColumnContext> columnContexts, AnnotationProcessorContext annotationProcessorContext) {
         getterBuilderStrategyHolder = annotationProcessorContext.getGetterBuilderStrategyHolder();
