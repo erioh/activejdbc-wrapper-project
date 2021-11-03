@@ -30,6 +30,7 @@ import org.junit.runner.RunWith;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
@@ -47,7 +48,8 @@ public class WrapperClassBuilderTest {
         AnnotationProcessorContext annotationProcessorContext = mock(AnnotationProcessorContext.class);
         given(annotationProcessorContext.getWrapperSuffix()).willReturn("Wrapper");
         String expectedBody = ContentExtractor.fromFile("expected_empty_class_body.txt");
-        WrapperClassBuilder wrapperClassBuilder = new WrapperClassBuilder(packageName, activejdbcObjectClassName, annotationProcessorContext);
+        List<ColumnContext> columnContexts = new ArrayList<>();
+        WrapperClassBuilder wrapperClassBuilder = new WrapperClassBuilder(packageName, activejdbcObjectClassName, columnContexts, annotationProcessorContext);
 
         // when
         String classBody = wrapperClassBuilder.buildClassBody();
@@ -81,10 +83,12 @@ public class WrapperClassBuilderTest {
                 .willReturn(String.format("setter() {}%n"));
         given(setterStrategyHolder.getStrategy("String")).willReturn(stringStrategy);
         given(annotationProcessorContext.getSetterBuilderStrategyHolder()).willReturn(setterStrategyHolder);
+        List<ColumnContext> columnContexts = new ArrayList<>();
+        columnContexts.add(columnContext);
 
         // when
-        WrapperClassBuilder wrapperClassBuilder = new WrapperClassBuilder(packageName, activejdbcObjectClassName, annotationProcessorContext);
-        wrapperClassBuilder.withSetter(columnContext);
+        WrapperClassBuilder wrapperClassBuilder = new WrapperClassBuilder(packageName, activejdbcObjectClassName, columnContexts, annotationProcessorContext);
+        wrapperClassBuilder.withSetters();
         String classBody = wrapperClassBuilder.buildClassBody();
         // then
         assertThat(classBody).isEqualTo(expectedBody);
@@ -118,9 +122,11 @@ public class WrapperClassBuilderTest {
         ColumnContext columnContext = new ColumnContext("String", "STRING_COLUMN", desiredFieldName);
         given(getterStrategy.buildGetterBody(columnContext, activejdbcObjectName))
                 .willReturn(String.format("getter() {}%n"));
+        List<ColumnContext> columnContexts = new ArrayList<>();
         // when
-        WrapperClassBuilder wrapperClassBuilder = new WrapperClassBuilder(packageName, activejdbcObjectClassName, annotationProcessorContext);
-        wrapperClassBuilder.withGetter(columnContext);
+        columnContexts.add(columnContext);
+        WrapperClassBuilder wrapperClassBuilder = new WrapperClassBuilder(packageName, activejdbcObjectClassName, columnContexts, annotationProcessorContext);
+        wrapperClassBuilder.withGetters();
         wrapperClassBuilder.withEquals();
         wrapperClassBuilder.withHashCode();
         wrapperClassBuilder.withToString();
@@ -138,8 +144,9 @@ public class WrapperClassBuilderTest {
         AnnotationProcessorContext annotationProcessorContext = mock(AnnotationProcessorContext.class);
         given(annotationProcessorContext.getWrapperSuffix()).willReturn("Wrapper");
         String expectedBody = ContentExtractor.fromFile("expected_class_body_with_get_activejdbc_object_method.txt");
+        List<ColumnContext> columnContexts = new ArrayList<>();
         // when
-        WrapperClassBuilder wrapperClassBuilder = new WrapperClassBuilder(packageName, activejdbcObjectClassName, annotationProcessorContext);
+        WrapperClassBuilder wrapperClassBuilder = new WrapperClassBuilder(packageName, activejdbcObjectClassName, columnContexts, annotationProcessorContext);
         wrapperClassBuilder.withMethodGetActivejdbcObject();
         String classBody = wrapperClassBuilder.buildClassBody();
         // then
@@ -154,9 +161,10 @@ public class WrapperClassBuilderTest {
         AnnotationProcessorContext annotationProcessorContext = mock(AnnotationProcessorContext.class);
         given(annotationProcessorContext.getWrapperSuffix()).willReturn("Wrapper");
         String expectedBody = ContentExtractor.fromFile("expected_class_body_with_builder.txt");
+        List<ColumnContext> columnContexts = new ArrayList<>();
         // when
-        WrapperClassBuilder wrapperClassBuilder = new WrapperClassBuilder(packageName, activejdbcObjectClassName, annotationProcessorContext);
-        wrapperClassBuilder.withBuilder(new ArrayList<>());
+        WrapperClassBuilder wrapperClassBuilder = new WrapperClassBuilder(packageName, activejdbcObjectClassName, columnContexts, annotationProcessorContext);
+        wrapperClassBuilder.withBuilder();
         String classBody = wrapperClassBuilder.buildClassBody();
         // then
         assertThat(classBody).isEqualTo(expectedBody);

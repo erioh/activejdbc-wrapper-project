@@ -19,7 +19,7 @@ public class FancyTableWrapper extends activejdbc.wrapper.annotation.processor.b
         return fancyTable;
     }
     public java.lang.String toString() {
-        return "{fancyTableId = " + "'" + this.getFancyTableId() + "'"
+        return "{fancyTableId = " + (this.getFancyTableId() == null ? null : "'" + this.getFancyTableId() + "'")
                 + "}";
     }
     public boolean equals(Object o) {
@@ -38,7 +38,7 @@ public class FancyTableWrapper extends activejdbc.wrapper.annotation.processor.b
     }
     public static class FancyTableWrapperBuilder {
         private final FancyTableWrapper fancyTableWrapper = new FancyTableWrapper();
-        public FancyTableWrapperBuilder withFancyTableId(java.lang.Long fancyTableId) {
+        public FancyTableWrapperBuilder fancyTableId(java.lang.Long fancyTableId) {
             this.fancyTableWrapper.setFancyTableId(fancyTableId);
             return this;
         }

@@ -55,20 +55,24 @@ public class WrapperClassBuilder {
     private final String activejdbcObjectName;
     private final Set<String> settersBody = new HashSet<>();
     private final Set<String> gettersBody = new HashSet<>();
+    private final List<ColumnContext> columnContexts;
     private final Map<String, String> propertyNamesAndGetters = new HashMap<>();
+    private final WrapperBuilderClassBuilder wrapperBuilderClassBuilder;
     private String hashCode = "";
     private String equals = "";
     private String toString = "";
     private String getObject = "";
     private String builderAndBuilderClass = "";
 
-    public WrapperClassBuilder(String packageName, String activejdbcObjectClassName, AnnotationProcessorContext annotationProcessorContext) {
+    public WrapperClassBuilder(String packageName, String activejdbcObjectClassName, List<ColumnContext> columnContexts, AnnotationProcessorContext annotationProcessorContext) {
         getterBuilderStrategyHolder = annotationProcessorContext.getGetterBuilderStrategyHolder();
         setterBuilderStrategyHolder = annotationProcessorContext.getSetterBuilderStrategyHolder();
         this.packageName = packageName;
         this.activejdbcObjectClassName = activejdbcObjectClassName;
         this.wrapperClassName = activejdbcObjectClassName + annotationProcessorContext.getWrapperSuffix();
         this.activejdbcObjectName = StringUtils.lowerCaseFirstCharacter(activejdbcObjectClassName);
+        this.columnContexts = columnContexts;
+        this.wrapperBuilderClassBuilder = new WrapperBuilderClassBuilder(wrapperClassName, annotationProcessorContext, columnContexts);
     }
 
     public String buildClassBody() {
@@ -111,27 +115,31 @@ public class WrapperClassBuilder {
                 .append('{');
         StringJoiner stringJoiner = new StringJoiner(" + \", ");
         propertyNamesAndGetters.forEach((propertyName, getter) ->
-                stringJoiner.add(String.format("%s = \" + \"'\" + this.%s() + \"'\"%n", propertyName, getter)));
+                stringJoiner.add(String.format("%s = \" + (this.%s() == null ? null : \"'\" + this.%s() + \"'\")%n", propertyName, getter, getter)));
         stringBuilder.append(stringJoiner);
         stringBuilder.append(" + \"}\"");
         toString = String.format(TO_STRING_METHOD_TEMPLATE, stringBuilder);
         return this;
     }
 
-    public WrapperClassBuilder withGetter(ColumnContext columnContext) {
-        String propertyName = StringUtils.isBlank(columnContext.getDesiredFieldName())
-                ? StringUtils.buildPropertyNameFromColumnName(columnContext.getColumnName())
-                : columnContext.getDesiredFieldName();
-        String methodName = StringUtils.buildMethodName(propertyName, "get");
-        GetterBuilderStrategy strategy = getterBuilderStrategyHolder.getStrategy(columnContext.getClazz());
-        gettersBody.add(strategy.buildGetterBody(columnContext, activejdbcObjectName));
-        propertyNamesAndGetters.put(propertyName, methodName);
+    public WrapperClassBuilder withGetters() {
+        this.columnContexts.forEach(columnContext -> {
+            String propertyName = StringUtils.isBlank(columnContext.getDesiredFieldName())
+                    ? StringUtils.buildPropertyNameFromColumnName(columnContext.getColumnName())
+                    : columnContext.getDesiredFieldName();
+            String methodName = StringUtils.buildMethodName(propertyName, "get");
+            GetterBuilderStrategy strategy = getterBuilderStrategyHolder.getStrategy(columnContext.getClazz());
+            gettersBody.add(strategy.buildGetterBody(columnContext, activejdbcObjectName));
+            propertyNamesAndGetters.put(propertyName, methodName);
+        });
         return this;
     }
 
-    public WrapperClassBuilder withSetter(ColumnContext columnContext) {
-        SetterBuilderStrategy strategy = setterBuilderStrategyHolder.getStrategy(columnContext.getClazz());
-        settersBody.add(strategy.buildSetterBody(columnContext, activejdbcObjectName));
+    public WrapperClassBuilder withSetters() {
+        this.columnContexts.forEach(columnContext -> {
+            SetterBuilderStrategy strategy = setterBuilderStrategyHolder.getStrategy(columnContext.getClazz());
+            settersBody.add(strategy.buildSetterBody(columnContext, activejdbcObjectName));
+        });
         return this;
     }
 
@@ -140,11 +148,10 @@ public class WrapperClassBuilder {
         return this;
     }
 
-    public WrapperClassBuilder withBuilder(List<ColumnContext> columnContexts) {
+    public WrapperClassBuilder withBuilder() {
         StringBuilder stringBuilder = new StringBuilder();
-        String builderClassName = wrapperClassName + "Builder";
-        stringBuilder.append(String.format(BUILDER_METHOD_TEMPLATE, builderClassName, builderClassName));
-        stringBuilder.append(new WrapperBuilderClassBuilder(wrapperClassName, builderClassName, columnContexts).buildClassBody());
+        stringBuilder.append(wrapperBuilderClassBuilder.buildBuildMethodName());
+        stringBuilder.append(wrapperBuilderClassBuilder.buildClassBody());
         builderAndBuilderClass = stringBuilder.toString();
         return this;
     }

@@ -14,10 +14,12 @@ limitations under the License.
 package activejdbc.wrapper.annotation.processor.builder.strategy;
 
 import activejdbc.wrapper.annotation.processor.ColumnContext;
+import activejdbc.wrapper.annotation.processor.context.AnnotationProcessorContext;
 import activejdbc.wrapper.annotation.processor.util.StringUtils;
 
 import java.util.List;
 
+import static activejdbc.wrapper.annotation.processor.util.StringTemplates.BUILDER_METHOD_TEMPLATE;
 import static activejdbc.wrapper.annotation.processor.util.StringTemplates.BUILDER_SETTER_TEMPLATE;
 
 public class WrapperBuilderClassBuilder {
@@ -39,12 +41,18 @@ public class WrapperBuilderClassBuilder {
             "}";
     private final String wrapperClassName;
     private final String builderClassName;
+    private final String methodPrefix;
     private final List<ColumnContext> columnContexts;
 
-    public WrapperBuilderClassBuilder(String wrapperClassName, String builderClassName, List<ColumnContext> columnContexts) {
+    public WrapperBuilderClassBuilder(String wrapperClassName, AnnotationProcessorContext annotationProcessorContext, List<ColumnContext> columnContexts) {
         this.wrapperClassName = wrapperClassName;
-        this.builderClassName = builderClassName;
+        this.builderClassName = wrapperClassName + "Builder";
         this.columnContexts = columnContexts;
+        this.methodPrefix = annotationProcessorContext.getBuilderMethodPrefix();
+    }
+
+    public String buildBuildMethodName() {
+        return String.format(BUILDER_METHOD_TEMPLATE, builderClassName, builderClassName);
     }
 
     public String buildClassBody() {
@@ -54,7 +62,7 @@ public class WrapperBuilderClassBuilder {
             String propertyName = StringUtils.isBlank(columnContext.getDesiredFieldName())
                     ? StringUtils.buildPropertyNameFromColumnName(columnContext.getColumnName())
                     : columnContext.getDesiredFieldName();
-            String withMethodName = StringUtils.buildMethodName(propertyName, "with");
+            String withMethodName = StringUtils.buildMethodName(propertyName, methodPrefix);
             // todo refactor this thing
             String setMethodName = StringUtils.buildMethodName(propertyName, "set");
             stringBuilder.append(String.format(BUILDER_SETTER_TEMPLATE, builderClassName, withMethodName, columnContext.getClazz(), propertyName, wrapperObjectName, setMethodName, propertyName));

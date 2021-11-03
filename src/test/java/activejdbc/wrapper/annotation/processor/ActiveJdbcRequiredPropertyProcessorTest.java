@@ -2,8 +2,12 @@ package activejdbc.wrapper.annotation.processor;
 
 import com.google.testing.compile.Compilation;
 import com.google.testing.compile.JavaFileObjects;
+import com.tngtech.java.junit.dataprovider.DataProvider;
+import com.tngtech.java.junit.dataprovider.DataProviderRunner;
+import com.tngtech.java.junit.dataprovider.UseDataProvider;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import javax.tools.JavaFileObject;
 
@@ -11,6 +15,7 @@ import static com.google.testing.compile.CompilationSubject.assertThat;
 import static com.google.testing.compile.Compiler.javac;
 
 
+@RunWith(DataProviderRunner.class)
 public class ActiveJdbcRequiredPropertyProcessorTest {
 
     @Test
@@ -36,7 +41,7 @@ public class ActiveJdbcRequiredPropertyProcessorTest {
         Compilation compilation =
                 javac()
                         .withProcessors(new ActiveJdbcRequiredPropertyProcessor())
-                        .withOptions("-Aactivejdbc.wrapper.suffix=NewWrapperSuffix")
+                        .withOptions("-Aactivejdbc.wrapper.suffix=NewWrapperSuffix", "-Aactivejdbc.wrapper.builder.method.prefix=with")
                         .compile(javaFileObject);
         // then
         assertThat(compilation).succeededWithoutWarnings();
@@ -67,7 +72,7 @@ public class ActiveJdbcRequiredPropertyProcessorTest {
         Compilation compilation =
                 javac()
                         .withProcessors(new ActiveJdbcRequiredPropertyProcessor())
-                        .withOptions("-Aactivejdbc.wrapper.suffix=NewWrapperSuffix")
+                        .withOptions("-Aactivejdbc.wrapper.suffix=NewWrapperSuffix", "-Aactivejdbc.wrapper.builder.method.prefix=with")
                         .compile(javaFileObject);
         // then
         assertThat(compilation).succeededWithoutWarnings();
@@ -75,17 +80,30 @@ public class ActiveJdbcRequiredPropertyProcessorTest {
                 .hasSourceEquivalentTo(JavaFileObjects.forResource("FancyTableWithCustomColumnNewWrapperSuffix.java"));
     }
 
+    @DataProvider
+    public static Object[][] data_for_should_throw_exception_on_illegal_options() {
+        return new Object[][]{
+                {"-Aactivejdbc.wrapper.suffix=NewWrapper*Suffix",
+                        "java.lang.IllegalArgumentException: Custom suffix has illegal characters. " +
+                                "Please use only characters in uppercase and lowercase, underscore, and numbers."},
+                {"-Aactivejdbc.wrapper.builder.method.prefix=with*Something",
+                        "java.lang.IllegalArgumentException: Custom prefix has illegal characters. " +
+                                "Please use only characters in uppercase and lowercase, underscore, and numbers."},
+        };
+    }
+
     @Test
-    public void should_throw_exception_on_illegal_options() {
+    @UseDataProvider("data_for_should_throw_exception_on_illegal_options")
+    public void should_throw_exception_on_illegal_options(String options, String message) {
         // given
         JavaFileObject javaFileObject = JavaFileObjects.forResource("FancyTable.java");
         // when | then
 
         Assertions.assertThatThrownBy(() -> javac()
                 .withProcessors(new ActiveJdbcRequiredPropertyProcessor())
-                .withOptions("-Aactivejdbc.wrapper.suffix=NewWrapper*Suffix")
+                .withOptions(options)
                 .compile(javaFileObject))
                 .isInstanceOf(RuntimeException.class)
-                .hasMessage("java.lang.IllegalArgumentException: Custom suffix has illegal characters. Please use only characters in uppercase and lowercase, underscore, and numbers.");
+                .hasMessage(message);
     }
 }

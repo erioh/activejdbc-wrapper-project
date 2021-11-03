@@ -18,6 +18,8 @@ import java.util.stream.Collectors;
 
 public final class StringUtils {
 
+    public static final String EMPTY_STRING = "";
+
     public static boolean isBlank(String string) {
         return string == null || string.trim().length() == 0;
     }
@@ -46,7 +48,9 @@ public final class StringUtils {
     }
 
     public static String buildMethodName(String propertyName, String prefix) {
-        return prefix + changeCapitalizationOfTheFirstCharacter(propertyName, true);
+        return StringUtils.isBlank(prefix) ?
+                propertyName
+                : prefix + changeCapitalizationOfTheFirstCharacter(propertyName, true);
     }
 
     private StringUtils() {

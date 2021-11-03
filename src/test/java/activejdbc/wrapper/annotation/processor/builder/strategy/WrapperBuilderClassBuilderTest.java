@@ -1,6 +1,7 @@
 package activejdbc.wrapper.annotation.processor.builder.strategy;
 
 import activejdbc.wrapper.annotation.processor.ColumnContext;
+import activejdbc.wrapper.annotation.processor.context.AnnotationProcessorContext;
 import activejdbc.wrapper.annotation.processor.test.util.ContentExtractor;
 import com.tngtech.java.junit.dataprovider.DataProvider;
 import com.tngtech.java.junit.dataprovider.DataProviderRunner;
@@ -31,12 +32,12 @@ public class WrapperBuilderClassBuilderTest {
     public void should_create_builder_class_body(String desiredFieldName, String file) throws IOException, URISyntaxException {
         // given
         String wrapperClassName = "WrapperClassName";
-        String builderClassName = "WrapperClassNameBuilder";
         ColumnContext columnContext = new ColumnContext("java.lang.ClassName", "COLUMN_NAME", desiredFieldName);
         List<ColumnContext> columnContexts = new ArrayList<>();
         columnContexts.add(columnContext);
         // when
-        WrapperBuilderClassBuilder wrapperBuilderClassBuilder = new WrapperBuilderClassBuilder(wrapperClassName, builderClassName, columnContexts);
+        AnnotationProcessorContext annotationProcessorContext = new AnnotationProcessorContext("", "with");
+        WrapperBuilderClassBuilder wrapperBuilderClassBuilder = new WrapperBuilderClassBuilder(wrapperClassName, annotationProcessorContext, columnContexts);
         String result = wrapperBuilderClassBuilder.buildClassBody();
         // then
         String expectedBody = ContentExtractor.fromFile(file);
