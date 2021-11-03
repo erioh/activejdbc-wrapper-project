@@ -32,8 +32,8 @@ In case if you prefer to use builders, you can use them as well :)
 
 ```java
         SomeTableWrapper someTableWrapper=SomeTableWrapper.builder()
-        .withSomeId(1L)
-        .withAaa("some value")
+        .someId(1L)
+        .aaa("some value")
         .build();
 ```
 
@@ -126,7 +126,14 @@ public void get_real_activejdbc_object(){
 
 5. If you are not happy with the default suffix, you can easily override it by providing your own suffix
    using `activejdbc.wrapper.suffix` option
-
+   
+6. If you want to adjust builder methods names you can specify your own prefix using `activejdbc.wrapper.builder.method.prefix` option
+```java
+        SomeTableWrapper someTableWrapper=SomeTableWrapper.builder()
+        .withSomeId(1L)
+        .withAaa("some value")
+        .build();
+```
 ```xml
 
 <plugin>
@@ -145,6 +152,7 @@ public void get_real_activejdbc_object(){
         </annotationProcessors>
         <compilerArgs>
             <arg>-Aactivejdbc.wrapper.suffix=NewWrapperSuffix</arg>
+            <arg>-Aactivejdbc.wrapper.builder.method.prefix=with</arg>
         </compilerArgs>
     </configuration>
 </plugin>
