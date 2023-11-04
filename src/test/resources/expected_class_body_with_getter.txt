@@ -1,6 +1,6 @@
 package package.name;
 import package.name.ObjectClassName;
-public class ObjectClassNameWrapper extends activejdbc.wrapper.annotation.processor.builder.ActivejdbcWrapper<ObjectClassName>{
+public class ObjectClassNameWrapper extends activejdbc.wrapper.annotation.processor.wrapper.builder.ActivejdbcWrapper<ObjectClassName>{
 private ObjectClassName objectClassName;
  public ObjectClassNameWrapper() {
 this.objectClassName = new ObjectClassName();

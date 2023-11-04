@@ -21,7 +21,7 @@ public final class StringUtils {
     public static final String EMPTY_STRING = "";
 
     public static boolean isBlank(String string) {
-        return string == null || string.trim().length() == 0;
+        return string == null || string.trim().isEmpty();
     }
 
     public static boolean isValid(String string) {

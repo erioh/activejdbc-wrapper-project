@@ -13,9 +13,10 @@ limitations under the License.
 
 package activejdbc.wrapper.annotation.processor.builder.strategy;
 
-import activejdbc.wrapper.annotation.processor.builder.strategy.setter.DateSetterBuilderStrategy;
-import activejdbc.wrapper.annotation.processor.builder.strategy.setter.DefaultSetterBuilderStrategy;
-import activejdbc.wrapper.annotation.processor.builder.strategy.setter.SetterBuilderStrategy;
+import activejdbc.wrapper.annotation.processor.wrapper.builder.strategy.SetterBuilderStrategyHolder;
+import activejdbc.wrapper.annotation.processor.wrapper.builder.strategy.setter.DateSetterBuilderStrategy;
+import activejdbc.wrapper.annotation.processor.wrapper.builder.strategy.setter.DefaultSetterBuilderStrategy;
+import activejdbc.wrapper.annotation.processor.wrapper.builder.strategy.setter.SetterBuilderStrategy;
 import org.junit.Before;
 import org.junit.Test;
 

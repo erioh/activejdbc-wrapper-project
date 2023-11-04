@@ -13,6 +13,8 @@ limitations under the License.
 
 package activejdbc.wrapper.annotation.processor.builder;
 
+import activejdbc.wrapper.annotation.processor.wrapper.builder.ActivejdbcWrapper;
+import activejdbc.wrapper.annotation.processor.wrapper.builder.ActivejdbcWrapperManipulator;
 import org.javalite.activejdbc.Model;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -34,7 +36,7 @@ public class ActivejdbcWrapperManipulatorTest {
     }
 
     public static class WrappedClass extends ActivejdbcWrapper<Model> {
-        private Model model = Mockito.mock(Model.class);
+        private final Model model = Mockito.mock(Model.class);
 
         @Override
         protected Model getActivejdbcObject() {
