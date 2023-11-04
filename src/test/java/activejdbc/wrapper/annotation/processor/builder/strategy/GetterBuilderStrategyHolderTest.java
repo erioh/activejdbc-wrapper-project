@@ -13,10 +13,10 @@ limitations under the License.
 
 package activejdbc.wrapper.annotation.processor.builder.strategy;
 
-import activejdbc.wrapper.annotation.processor.wrapper.builder.strategy.GetterBuilderStrategyHolder;
-import activejdbc.wrapper.annotation.processor.wrapper.builder.strategy.getter.DefaultGetterBuilderStrategy;
-import activejdbc.wrapper.annotation.processor.wrapper.builder.strategy.getter.GetterBuilderStrategy;
-import activejdbc.wrapper.annotation.processor.wrapper.builder.strategy.getter.StringGetterBuilderStrategy;
+import activejdbc.wrapper.annotation.processor.adapter.builder.strategy.GetterBuilderStrategyHolder;
+import activejdbc.wrapper.annotation.processor.adapter.builder.strategy.getter.DefaultGetterBuilderStrategy;
+import activejdbc.wrapper.annotation.processor.adapter.builder.strategy.getter.GetterBuilderStrategy;
+import activejdbc.wrapper.annotation.processor.adapter.builder.strategy.getter.StringGetterBuilderStrategy;
 import org.junit.Before;
 import org.junit.Test;
 

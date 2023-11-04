@@ -14,11 +14,11 @@ limitations under the License.
 package activejdbc.wrapper.annotation.processor.context;
 
 import activejdbc.wrapper.annotation.processor.ActiveJdbcRequiredPropertyWrapperFactory;
-import activejdbc.wrapper.annotation.processor.wrapper.builder.strategy.GetterBuilderStrategyHolder;
-import activejdbc.wrapper.annotation.processor.wrapper.builder.strategy.SetterBuilderStrategyHolder;
-import activejdbc.wrapper.annotation.processor.wrapper.builder.strategy.StrategyHolder;
-import activejdbc.wrapper.annotation.processor.wrapper.builder.strategy.getter.*;
-import activejdbc.wrapper.annotation.processor.wrapper.builder.strategy.setter.*;
+import activejdbc.wrapper.annotation.processor.adapter.builder.strategy.GetterBuilderStrategyHolder;
+import activejdbc.wrapper.annotation.processor.adapter.builder.strategy.SetterBuilderStrategyHolder;
+import activejdbc.wrapper.annotation.processor.adapter.builder.strategy.StrategyHolder;
+import activejdbc.wrapper.annotation.processor.adapter.builder.strategy.getter.*;
+import activejdbc.wrapper.annotation.processor.adapter.builder.strategy.setter.*;
 
 import java.math.BigDecimal;
 import java.sql.Clob;

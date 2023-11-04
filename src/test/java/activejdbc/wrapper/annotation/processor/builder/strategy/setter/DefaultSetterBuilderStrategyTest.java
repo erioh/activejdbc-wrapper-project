@@ -13,9 +13,9 @@ limitations under the License.
 
 package activejdbc.wrapper.annotation.processor.builder.strategy.setter;
 
+import activejdbc.wrapper.annotation.processor.adapter.builder.strategy.setter.DefaultSetterBuilderStrategy;
+import activejdbc.wrapper.annotation.processor.adapter.builder.strategy.setter.SetterBuilderStrategy;
 import activejdbc.wrapper.annotation.processor.context.ColumnContext;
-import activejdbc.wrapper.annotation.processor.wrapper.builder.strategy.setter.DefaultSetterBuilderStrategy;
-import activejdbc.wrapper.annotation.processor.wrapper.builder.strategy.setter.SetterBuilderStrategy;
 import com.tngtech.java.junit.dataprovider.DataProvider;
 import com.tngtech.java.junit.dataprovider.DataProviderRunner;
 import com.tngtech.java.junit.dataprovider.UseDataProvider;

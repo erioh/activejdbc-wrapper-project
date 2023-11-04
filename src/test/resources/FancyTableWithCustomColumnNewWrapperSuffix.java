@@ -1,6 +1,6 @@
 package com.sdemenkov;
 import com.sdemenkov.FancyTableWithCustomColumn;
-public class FancyTableWithCustomColumnNewWrapperSuffix extends activejdbc.wrapper.annotation.processor.wrapper.builder.ActivejdbcWrapper<FancyTableWithCustomColumn> {
+public class FancyTableWithCustomColumnNewWrapperSuffix extends activejdbc.wrapper.ActivejdbcWrapper<FancyTableWithCustomColumn> {
     private FancyTableWithCustomColumn fancyTableWithCustomColumn;
     public FancyTableWithCustomColumnNewWrapperSuffix() {
         this.fancyTableWithCustomColumn = new FancyTableWithCustomColumn();

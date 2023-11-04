@@ -1,6 +1,6 @@
 package com.sdemenkov;
 import com.sdemenkov.FancyTable;
-public class FancyTableNewWrapperSuffix extends activejdbc.wrapper.annotation.processor.wrapper.builder.ActivejdbcWrapper<FancyTable> {
+public class FancyTableNewWrapperSuffix extends activejdbc.wrapper.ActivejdbcWrapper<FancyTable> {
     private FancyTable fancyTable;
     public FancyTableNewWrapperSuffix() {
         this.fancyTable = new FancyTable();

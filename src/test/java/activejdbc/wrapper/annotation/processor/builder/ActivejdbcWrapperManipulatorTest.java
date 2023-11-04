@@ -13,8 +13,8 @@ limitations under the License.
 
 package activejdbc.wrapper.annotation.processor.builder;
 
-import activejdbc.wrapper.annotation.processor.wrapper.builder.ActivejdbcWrapper;
-import activejdbc.wrapper.annotation.processor.wrapper.builder.ActivejdbcWrapperManipulator;
+import activejdbc.wrapper.ActivejdbcWrapper;
+import activejdbc.wrapper.ActivejdbcWrapperManipulator;
 import org.javalite.activejdbc.Model;
 import org.junit.Test;
 import org.mockito.Mockito;
