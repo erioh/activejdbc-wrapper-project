@@ -25,7 +25,10 @@ public class TimeGetterBuilderStrategy implements GetterBuilderStrategy {
      * 4. column name
      */
     private static final String GETTER_TEMPLATE = "public %s %s() {%n" +
-            "return new java.sql.Time(%s.getDate(\"%s\").getTime());%n" +
+            "return java.util.Optional.ofNullable(%s.getDate(\"%s\"))%n" +
+            ".map(java.sql.Date::getTime)%n" +
+            ".map(java.sql.Time::new)%n" +
+            ".orElse(null);%n" +
             "}%n";
 
     @Override

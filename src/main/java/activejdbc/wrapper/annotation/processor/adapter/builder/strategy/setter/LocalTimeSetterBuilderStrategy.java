@@ -27,7 +27,9 @@ public class LocalTimeSetterBuilderStrategy implements SetterBuilderStrategy {
      * 6. property name
      */
     public static final String SETTER_TEMPLATE = "public void %s(%s %s) {%n" +
-            "%s.setTime(\"%s\", java.sql.Time.valueOf(%s));%n" +
+            "%s.setTime(\"%s\", java.util.Optional.ofNullable(%s)%n" +
+            ".map(java.sql.Time::valueOf)" +
+            ".orElse(null));%n" +
             "}%n";
 
     @Override

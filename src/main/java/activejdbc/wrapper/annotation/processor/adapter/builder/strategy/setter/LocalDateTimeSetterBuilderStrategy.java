@@ -27,7 +27,9 @@ public class LocalDateTimeSetterBuilderStrategy implements SetterBuilderStrategy
      * 6. property name
      */
     public static final String SETTER_TEMPLATE = "public void %s(%s %s) {%n" +
-            "%s.setTimestamp(\"%s\", java.sql.Timestamp.valueOf(%s));%n" +
+            "%s.setTimestamp(\"%s\", java.util.Optional.ofNullable(%s)%n" +
+            ".map(java.sql.Timestamp::valueOf)%n" +
+            ".orElse(null));%n" +
             "}%n";
 
     @Override
