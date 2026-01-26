@@ -16,7 +16,7 @@
 
     <properties>
         <junit.version>4.13.1</junit.version>
-        <assertj-core.version>3.19.0</assertj-core.version>
+        <assertj-core.version>3.27.7</assertj-core.version>
         <activejdbc.version>2.2</activejdbc.version>
         <junit-dataprovider.version>1.13.1</junit-dataprovider.version>
         <mockito-core.version>3.9.0</mockito-core.version>
