@@ -20,7 +20,7 @@
         <activejdbc.version>2.2</activejdbc.version>
         <junit-dataprovider.version>1.13.1</junit-dataprovider.version>
         <mockito-core.version>3.9.0</mockito-core.version>
-        <compile-testing.version>0.19</compile-testing.version>
+        <compile-testing.version>0.24.0</compile-testing.version>
     </properties>
 
     <dependencies>
@@ -182,5 +182,37 @@
             </plugin>
         </plugins>
     </build>
+
+    <profiles>
+        <!-- compile-testing reaches into javac internals, which JDK 9+ encapsulates (JPMS) -->
+        <profile>
+            <id>jdk9plus-compile-testing</id>
+            <activation>
+                <jdk>[9,)</jdk>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <configuration>
+                            <argLine>
+                                --add-exports=jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED
+                                --add-exports=jdk.compiler/com.sun.tools.javac.file=ALL-UNNAMED
+                                --add-exports=jdk.compiler/com.sun.tools.javac.main=ALL-UNNAMED
+                                --add-exports=jdk.compiler/com.sun.tools.javac.model=ALL-UNNAMED
+                                --add-exports=jdk.compiler/com.sun.tools.javac.parser=ALL-UNNAMED
+                                --add-exports=jdk.compiler/com.sun.tools.javac.processing=ALL-UNNAMED
+                                --add-exports=jdk.compiler/com.sun.tools.javac.tree=ALL-UNNAMED
+                                --add-exports=jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED
+                                --add-exports=jdk.compiler/com.sun.tools.javac.code=ALL-UNNAMED
+                                --add-exports=jdk.compiler/com.sun.tools.javac.comp=ALL-UNNAMED
+                            </argLine>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 
 </project>
