@@ -71,13 +71,16 @@ public class WrapperClassBuilder {
     private String getObject = StringUtils.EMPTY_STRING;
     private String builderAndBuilderClass = StringUtils.EMPTY_STRING;
 
+    /**
+     * @param activejdbcObjectClassName class name relative to its package: {@code Outer.Inner} for a nested class
+     */
     public WrapperClassBuilder(String packageName, String activejdbcObjectClassName, List<ColumnContext> columnContexts, AnnotationProcessorContext annotationProcessorContext) {
         getterBuilderStrategyHolder = annotationProcessorContext.getGetterBuilderStrategyHolder();
         setterBuilderStrategyHolder = annotationProcessorContext.getSetterBuilderStrategyHolder();
         this.packageName = packageName;
         this.activejdbcObjectClassName = activejdbcObjectClassName;
-        this.wrapperClassName = activejdbcObjectClassName + annotationProcessorContext.getWrapperSuffix();
-        this.activejdbcObjectName = StringUtils.lowerCaseFirstCharacter(activejdbcObjectClassName);
+        this.wrapperClassName = wrapperClassName(activejdbcObjectClassName, annotationProcessorContext.getWrapperSuffix());
+        this.activejdbcObjectName = StringUtils.lowerCaseFirstCharacter(activejdbcObjectClassName.substring(activejdbcObjectClassName.lastIndexOf('.') + 1));
         this.columnContexts = columnContexts;
         this.wrapperBuilderClassBuilder = new WrapperBuilderClassBuilder(wrapperClassName, annotationProcessorContext, columnContexts);
         this.generatedAnnotation = annotationProcessorContext.getGeneratedAnnotation();
@@ -98,10 +101,24 @@ public class WrapperClassBuilder {
         // a class in the default package can be neither declared in a package nor imported
         String packageAndImport = packageName.isEmpty()
                 ? StringUtils.EMPTY_STRING
-                : String.format(PACKAGE_AND_IMPORT_TEMPLATE, packageName, packageName, activejdbcObjectClassName);
+                : String.format(PACKAGE_AND_IMPORT_TEMPLATE, packageName, packageName, outermostClassName());
         String generatedAnnotationLine = StringUtils.isBlank(generatedAnnotation) ? StringUtils.EMPTY_STRING : String.format("%s%n", generatedAnnotation);
         return String.format(CLASS_TEMPLATE, packageAndImport, generatedAnnotationLine,
                 wrapperClassName, activejdbcObjectClassName, activejdbcObjectClassName, activejdbcObjectName, constructors, methods, builderAndBuilderClass);
+    }
+
+    /**
+     * Wrapper of a nested class {@code Outer.Inner} is {@code Outer_InnerWrapper}, so that nested classes with
+     * the same name in different outer classes of one package don't get the same wrapper.
+     */
+    public static String wrapperClassName(String activejdbcObjectClassName, String wrapperSuffix) {
+        return activejdbcObjectClassName.replace('.', '_') + wrapperSuffix;
+    }
+
+    // a nested class is referenced as Outer.Inner, so the outermost class is what gets imported
+    private String outermostClassName() {
+        int firstDot = activejdbcObjectClassName.indexOf('.');
+        return firstDot < 0 ? activejdbcObjectClassName : activejdbcObjectClassName.substring(0, firstDot);
     }
 
     public WrapperClassBuilder withHashCode() {

@@ -299,6 +299,58 @@ public class ActiveJdbcRequiredPropertyProcessorTest {
     }
 
     @Test
+    public void should_create_wrappers_for_static_nested_classes() {
+        // given: two nested classes with the same simple name in one package
+        JavaFileObject first = source("n.First", "public class First { @ActiveJdbcRequiredProperty(columnName = \"NAME\", clazz = String.class) public static class Item extends Model {} }");
+        JavaFileObject second = source("n.Second", "public class Second { @ActiveJdbcRequiredProperty(columnName = \"NAME\", clazz = String.class) public static class Item extends Model {} }");
+        // when
+        Compilation compilation = compile(first, second);
+        // then
+        assertThat(compilation).succeededWithoutWarnings();
+        assertThat(compilation).generatedSourceFile("n.First_ItemWrapper");
+        assertThat(compilation).generatedSourceFile("n.Second_ItemWrapper");
+    }
+
+    @Test
+    public void should_create_wrapper_for_nested_class_in_default_package() {
+        // given
+        JavaFileObject javaFileObject = JavaFileObjects.forSourceString("Outer",
+                "import activejdbc.wrapper.annotation.ActiveJdbcRequiredProperty;\n" +
+                        "import org.javalite.activejdbc.Model;\n" +
+                        "public class Outer { @ActiveJdbcRequiredProperty(columnName = \"NAME\", clazz = String.class) public static class Inner extends Model {} }");
+        // when
+        Compilation compilation = compile(javaFileObject);
+        // then
+        assertThat(compilation).succeededWithoutWarnings();
+        assertThat(compilation).generatedSourceFile("Outer_InnerWrapper");
+    }
+
+    @DataProvider
+    public static Object[][] data_for_should_fail_when_class_is_not_reachable_from_wrapper() {
+        return new Object[][]{
+                {"public class Outer { @ActiveJdbcRequiredProperty(columnName = \"NAME\", clazz = String.class) public class Inner extends Model {} }",
+                        "Class [n.Outer.Inner] is an inner class, make it static to be annotated with ActiveJdbcRequiredProperty."},
+                {"public class Outer { @ActiveJdbcRequiredProperty(columnName = \"NAME\", clazz = String.class) private static class Inner extends Model {} }",
+                        "Class [n.Outer.Inner] is private, the generated wrapper can't access it."},
+                {"public class Outer { private static class Middle { @ActiveJdbcRequiredProperty(columnName = \"NAME\", clazz = String.class) static class Inner extends Model {} } }",
+                        "Class [n.Outer.Middle] is private, the generated wrapper can't access it."},
+        };
+    }
+
+    @Test
+    @UseDataProvider("data_for_should_fail_when_class_is_not_reachable_from_wrapper")
+    public void should_fail_when_class_is_not_reachable_from_wrapper(String declaration, String message) {
+        // given
+        JavaFileObject javaFileObject = source("n.Outer", declaration);
+        // when
+        Compilation compilation = compile(javaFileObject);
+        // then
+        assertThat(compilation).failed();
+        assertThat(compilation).hadErrorContaining(message);
+        assertThat(compilation).hadErrorCount(1);
+    }
+
+    @Test
     public void should_fail_when_interface_is_annotated() {
         // given
         JavaFileObject javaFileObject = JavaFileObjects.forSourceString("i.Api",
@@ -337,5 +389,14 @@ public class ActiveJdbcRequiredPropertyProcessorTest {
             source = source.replace("@javax.annotation.processing.Generated(", "@javax.annotation.Generated(");
         }
         return JavaFileObjects.forSourceString("com.sdemenkov." + className, source);
+    }
+
+    private static JavaFileObject source(String qualifiedName, String declaration) {
+        int lastDot = qualifiedName.lastIndexOf('.');
+        return JavaFileObjects.forSourceString(qualifiedName,
+                "package " + qualifiedName.substring(0, lastDot) + ";\n" +
+                        "import activejdbc.wrapper.annotation.ActiveJdbcRequiredProperty;\n" +
+                        "import org.javalite.activejdbc.Model;\n" +
+                        declaration);
     }
 }
