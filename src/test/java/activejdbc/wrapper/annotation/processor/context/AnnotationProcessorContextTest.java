@@ -64,7 +64,7 @@ public class AnnotationProcessorContextTest {
     @UseDataProvider("getter_strategies")
     public void should_provide_getter_strategy(Class<?> type, Class<?> expectedStrategy) {
         // given
-        AnnotationProcessorContext context = new AnnotationProcessorContext("Wrapper", "");
+        AnnotationProcessorContext context = new AnnotationProcessorContext("Wrapper", "", "");
         // when
         GetterBuilderStrategy strategy = context.getGetterBuilderStrategyHolder().getStrategy(type.getCanonicalName());
         // then
@@ -87,7 +87,7 @@ public class AnnotationProcessorContextTest {
     @UseDataProvider("setter_strategies")
     public void should_provide_setter_strategy(Class<?> type, Class<?> expectedStrategy) {
         // given
-        AnnotationProcessorContext context = new AnnotationProcessorContext("Wrapper", "");
+        AnnotationProcessorContext context = new AnnotationProcessorContext("Wrapper", "", "");
         // when
         SetterBuilderStrategy strategy = context.getSetterBuilderStrategyHolder().getStrategy(type.getCanonicalName());
         // then
@@ -102,7 +102,7 @@ public class AnnotationProcessorContextTest {
         try (URLClassLoader isolated = new URLClassLoader(new URL[0], null)) {
             thread.setContextClassLoader(isolated);
             // when
-            AnnotationProcessorContext context = new AnnotationProcessorContext("Wrapper", "");
+            AnnotationProcessorContext context = new AnnotationProcessorContext("Wrapper", "", "");
             // then
             assertThat(context.getGetterBuilderStrategyHolder().getStrategy(LocalDate.class.getCanonicalName()))
                     .isExactlyInstanceOf(LocalDateGetterBuilderStrategy.class);

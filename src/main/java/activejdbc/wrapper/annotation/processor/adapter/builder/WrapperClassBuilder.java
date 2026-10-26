@@ -30,16 +30,18 @@ public class WrapperClassBuilder {
      * 1. package name
      * 2. import activejbdc class package
      * 3. activejbdc object class for import
-     * 4. wrapper class name
-     * 5. activejdbc object class
-     * 6  activejdbc object class
-     * 7. activejdbc object name
-     * 8. constructors
-     * 9. methods
-     * 10. builder method and builder class
+     * 4. @Generated annotation line (may be empty)
+     * 5. wrapper class name
+     * 6. activejdbc object class
+     * 7  activejdbc object class
+     * 8. activejdbc object name
+     * 9. constructors
+     * 10. methods
+     * 11. builder method and builder class
      */
     public static final String CLASS_TEMPLATE = "package %s;%n" +
             "import %s.%s;%n" +
+            "%s" +
             "public class %s extends activejdbc.wrapper.ActivejdbcWrapper<%s>{%n" +
             "private %s %s;%n" +
             "%s%n" +
@@ -58,6 +60,7 @@ public class WrapperClassBuilder {
     private final List<ColumnContext> columnContexts;
     private final Map<String, String> propertyNamesAndGetters = new HashMap<>();
     private final WrapperBuilderClassBuilder wrapperBuilderClassBuilder;
+    private final String generatedAnnotation;
     private String hashCode = StringUtils.EMPTY_STRING;
     private String equals = StringUtils.EMPTY_STRING;
     private String toString = StringUtils.EMPTY_STRING;
@@ -73,6 +76,7 @@ public class WrapperClassBuilder {
         this.activejdbcObjectName = StringUtils.lowerCaseFirstCharacter(activejdbcObjectClassName);
         this.columnContexts = columnContexts;
         this.wrapperBuilderClassBuilder = new WrapperBuilderClassBuilder(wrapperClassName, annotationProcessorContext, columnContexts);
+        this.generatedAnnotation = annotationProcessorContext.getGeneratedAnnotation();
     }
 
     public String buildClassBody() {
@@ -87,7 +91,8 @@ public class WrapperClassBuilder {
         String constructorWithoutParameters = String.format(CONSTRUCTOR_WITHOUT_PARAMETERS_TEMPLATE, wrapperClassName, activejdbcObjectName, activejdbcObjectClassName);
         String constructorWithParameter = String.format(CONSTRUCTOR_WITH_PARAMETER_TEMPLATE, wrapperClassName, activejdbcObjectClassName, activejdbcObjectName, activejdbcObjectName, activejdbcObjectName);
         String constructors = constructorWithoutParameters + constructorWithParameter;
-        return String.format(CLASS_TEMPLATE, packageName, packageName, activejdbcObjectClassName,
+        String generatedAnnotationLine = StringUtils.isBlank(generatedAnnotation) ? StringUtils.EMPTY_STRING : String.format("%s%n", generatedAnnotation);
+        return String.format(CLASS_TEMPLATE, packageName, packageName, activejdbcObjectClassName, generatedAnnotationLine,
                 wrapperClassName, activejdbcObjectClassName, activejdbcObjectClassName, activejdbcObjectName, constructors, methods, builderAndBuilderClass);
     }
 
