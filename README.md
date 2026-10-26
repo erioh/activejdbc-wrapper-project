@@ -115,6 +115,29 @@ That's it. In the same package where your ActiveJDBC classes are placed (in the 
 target/generated-sources/annotations ) you'll find new classes with suffix "Wrapper" (in case of FancyTable.java you'll
 find FancyTableWrapper.java).
 
+> **JDK 23 and newer:** javac no longer runs annotation processors that are only found on the classpath, so with
+> nothing but the dependency from step 1 no wrapper is generated, and there is no error either. Enable the processor
+> explicitly, for example with `maven-compiler-plugin`:
+>
+> ```xml
+> <plugin>
+>     <groupId>org.apache.maven.plugins</groupId>
+>     <artifactId>maven-compiler-plugin</artifactId>
+>     <configuration>
+>         <annotationProcessorPaths>
+>             <path>
+>                 <groupId>io.github.erioh</groupId>
+>                 <artifactId>activejdbc-wrapper</artifactId>
+>                 <version>1.0.4</version>
+>             </path>
+>         </annotationProcessorPaths>
+>     </configuration>
+> </plugin>
+> ```
+>
+> Listing the processor in `<annotationProcessors>` (as in step 5) or passing `-proc:full` to javac works as well.
+> Gradle's `annotationProcessor` configuration needs nothing extra.
+
 4. In case if you want to get a real ActiveJDBC object from this wrapper, you'll have to use
    ActivejdbcWrapperManipulator (for calling insert method, for example).
 
