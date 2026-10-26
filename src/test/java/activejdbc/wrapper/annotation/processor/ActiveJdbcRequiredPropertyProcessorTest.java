@@ -170,6 +170,21 @@ public class ActiveJdbcRequiredPropertyProcessorTest {
     }
 
     @Test
+    public void should_create_wrapper_for_class_in_default_package() {
+        // given
+        JavaFileObject javaFileObject = JavaFileObjects.forSourceString("Plain",
+                "import activejdbc.wrapper.annotation.ActiveJdbcRequiredProperty;\n" +
+                        "import org.javalite.activejdbc.Model;\n" +
+                        "@ActiveJdbcRequiredProperty(columnName = \"NAME\", clazz = String.class)\n" +
+                        "public class Plain extends Model {}");
+        // when
+        Compilation compilation = compile(javaFileObject);
+        // then
+        assertThat(compilation).succeededWithoutWarnings();
+        assertThat(compilation).generatedSourceFile("PlainWrapper");
+    }
+
+    @Test
     public void should_create_wrapper_when_property_name_equals_activejdbc_object_name() {
         // given
         JavaFileObject javaFileObject = model("s.Status", "@ActiveJdbcRequiredProperty(columnName = \"STATUS\", clazz = String.class)");

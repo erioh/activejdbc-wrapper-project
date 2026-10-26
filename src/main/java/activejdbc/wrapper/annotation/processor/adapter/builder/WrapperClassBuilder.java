@@ -27,20 +27,17 @@ import static activejdbc.wrapper.annotation.processor.util.StringTemplates.*;
 
 public class WrapperClassBuilder {
     /**
-     * 1. package name
-     * 2. import activejbdc class package
-     * 3. activejbdc object class for import
-     * 4. @Generated annotation line (may be empty)
-     * 5. wrapper class name
-     * 6. activejdbc object class
-     * 7  activejdbc object class
-     * 8. activejdbc object name
-     * 9. constructors
-     * 10. methods
-     * 11. builder method and builder class
+     * 1. package declaration and import of the activejdbc class (empty for the default package)
+     * 2. @Generated annotation line (may be empty)
+     * 3. wrapper class name
+     * 4. activejdbc object class
+     * 5  activejdbc object class
+     * 6. activejdbc object name
+     * 7. constructors
+     * 8. methods
+     * 9. builder method and builder class
      */
-    public static final String CLASS_TEMPLATE = "package %s;%n" +
-            "import %s.%s;%n" +
+    public static final String CLASS_TEMPLATE = "%s" +
             "%s" +
             "public class %s extends activejdbc.wrapper.ActivejdbcWrapper<%s>{%n" +
             "private %s %s;%n" +
@@ -48,6 +45,13 @@ public class WrapperClassBuilder {
             "%s%n" +
             "%s%n" +
             "}";
+    /**
+     * 1. package name
+     * 2. import activejbdc class package
+     * 3. activejbdc object class for import
+     */
+    private static final String PACKAGE_AND_IMPORT_TEMPLATE = "package %s;%n" +
+            "import %s.%s;%n";
 
     private final StrategyHolder<GetterBuilderStrategy> getterBuilderStrategyHolder;
     private final StrategyHolder<SetterBuilderStrategy> setterBuilderStrategyHolder;
@@ -91,8 +95,12 @@ public class WrapperClassBuilder {
         String constructorWithoutParameters = String.format(CONSTRUCTOR_WITHOUT_PARAMETERS_TEMPLATE, wrapperClassName, activejdbcObjectName, activejdbcObjectClassName);
         String constructorWithParameter = String.format(CONSTRUCTOR_WITH_PARAMETER_TEMPLATE, wrapperClassName, activejdbcObjectClassName, activejdbcObjectName, activejdbcObjectName, activejdbcObjectName);
         String constructors = constructorWithoutParameters + constructorWithParameter;
+        // a class in the default package can be neither declared in a package nor imported
+        String packageAndImport = packageName.isEmpty()
+                ? StringUtils.EMPTY_STRING
+                : String.format(PACKAGE_AND_IMPORT_TEMPLATE, packageName, packageName, activejdbcObjectClassName);
         String generatedAnnotationLine = StringUtils.isBlank(generatedAnnotation) ? StringUtils.EMPTY_STRING : String.format("%s%n", generatedAnnotation);
-        return String.format(CLASS_TEMPLATE, packageName, packageName, activejdbcObjectClassName, generatedAnnotationLine,
+        return String.format(CLASS_TEMPLATE, packageAndImport, generatedAnnotationLine,
                 wrapperClassName, activejdbcObjectClassName, activejdbcObjectClassName, activejdbcObjectName, constructors, methods, builderAndBuilderClass);
     }
 
