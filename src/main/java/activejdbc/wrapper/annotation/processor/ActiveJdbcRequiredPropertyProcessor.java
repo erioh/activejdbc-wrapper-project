@@ -153,7 +153,7 @@ public class ActiveJdbcRequiredPropertyProcessor extends AbstractProcessor {
             return;
         }
         this.wrapperSuffix = suffix;
-        AnnotationProcessorContext annotationProcessorContext = new AnnotationProcessorContext(suffix, builderMethodPrefix);
+        AnnotationProcessorContext annotationProcessorContext = new AnnotationProcessorContext(suffix, builderMethodPrefix, getGeneratedAnnotation());
         this.wrapperFactory = annotationProcessorContext.init();
     }
 
@@ -194,6 +194,19 @@ public class ActiveJdbcRequiredPropertyProcessor extends AbstractProcessor {
             return null;
         }
         return prefix;
+    }
+
+    /**
+     * javax.annotation.processing.Generated exists since Java 9, javax.annotation.Generated only up to Java 10
+     * (and not with --release 9+), so pick whichever the code being compiled can see.
+     */
+    private String getGeneratedAnnotation() {
+        for (String annotation : new String[]{"javax.annotation.processing.Generated", "javax.annotation.Generated"}) {
+            if (processingEnv.getElementUtils().getTypeElement(annotation) != null) {
+                return String.format("@%s(\"%s\")", annotation, ActiveJdbcRequiredPropertyProcessor.class.getName());
+            }
+        }
+        return StringUtils.EMPTY_STRING;
     }
 
     private void error(String message, Element element) {

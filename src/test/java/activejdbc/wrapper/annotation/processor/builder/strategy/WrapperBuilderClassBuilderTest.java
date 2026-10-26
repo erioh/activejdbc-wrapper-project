@@ -37,7 +37,7 @@ public class WrapperBuilderClassBuilderTest {
         List<ColumnContext> columnContexts = new ArrayList<>();
         columnContexts.add(columnContext);
         // when
-        AnnotationProcessorContext annotationProcessorContext = new AnnotationProcessorContext("", "with");
+        AnnotationProcessorContext annotationProcessorContext = new AnnotationProcessorContext("", "with", "");
         WrapperBuilderClassBuilder wrapperBuilderClassBuilder = new WrapperBuilderClassBuilder(wrapperClassName, annotationProcessorContext, columnContexts);
         String result = wrapperBuilderClassBuilder.buildClassBody();
         // then

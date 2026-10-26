@@ -31,12 +31,14 @@ public class AnnotationProcessorContext {
     private final StrategyHolder<GetterBuilderStrategy> getterBuilderStrategyHolder;
     private final String wrapperSuffix;
     private final String builderMethodPrefix;
+    private final String generatedAnnotation;
 
-    public AnnotationProcessorContext(String wrapperSuffix, String builderMethodPrefix) {
+    public AnnotationProcessorContext(String wrapperSuffix, String builderMethodPrefix, String generatedAnnotation) {
         this.wrapperSuffix = wrapperSuffix;
         this.getterBuilderStrategyHolder = initGetterBuilderStrategyHolder();
         this.setterBuilderStrategyHolder = initSetterBuilderStrategyHolder();
         this.builderMethodPrefix = builderMethodPrefix;
+        this.generatedAnnotation = generatedAnnotation;
     }
 
     private GetterBuilderStrategyHolder initGetterBuilderStrategyHolder() {
@@ -86,5 +88,13 @@ public class AnnotationProcessorContext {
 
     public String getBuilderMethodPrefix() {
         return builderMethodPrefix;
+    }
+
+    /**
+     * @return annotation to put on generated classes, e.g. {@code @javax.annotation.processing.Generated("...")},
+     * or an empty string if no {@code @Generated} annotation is available to the code being compiled
+     */
+    public String getGeneratedAnnotation() {
+        return generatedAnnotation;
     }
 }

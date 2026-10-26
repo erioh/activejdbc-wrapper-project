@@ -20,7 +20,7 @@ import static com.google.testing.compile.Compiler.javac;
 public class ActiveJdbcRequiredPropertyProcessorTest {
 
     @Test
-    public void should_create_new_class() {
+    public void should_create_new_class() throws IOException {
         // given
         JavaFileObject javaFileObject = JavaFileObjects.forResource("FancyTable.java");
         // when
@@ -31,11 +31,11 @@ public class ActiveJdbcRequiredPropertyProcessorTest {
         // then
         assertThat(compilation).succeededWithoutWarnings();
         assertThat(compilation).generatedSourceFile("com.sdemenkov.FancyTableWrapper")
-                .hasSourceEquivalentTo(JavaFileObjects.forResource("FancyTableWrapper.java"));
+                .hasSourceEquivalentTo(expectedWrapper("FancyTableWrapper"));
     }
 
     @Test
-    public void should_create_new_class_with_options() {
+    public void should_create_new_class_with_options() throws IOException {
         // given
         JavaFileObject javaFileObject = JavaFileObjects.forResource("FancyTable.java");
         // when
@@ -47,11 +47,11 @@ public class ActiveJdbcRequiredPropertyProcessorTest {
         // then
         assertThat(compilation).succeededWithoutWarnings();
         assertThat(compilation).generatedSourceFile("com.sdemenkov.FancyTableNewWrapperSuffix")
-                .hasSourceEquivalentTo(JavaFileObjects.forResource("FancyTableNewWrapperSuffix.java"));
+                .hasSourceEquivalentTo(expectedWrapper("FancyTableNewWrapperSuffix"));
     }
 
     @Test
-    public void should_create_new_class_with_custom_column() {
+    public void should_create_new_class_with_custom_column() throws IOException {
         // given
         JavaFileObject javaFileObject = JavaFileObjects.forResource("FancyTableWithCustomColumn.java");
         // when
@@ -62,11 +62,11 @@ public class ActiveJdbcRequiredPropertyProcessorTest {
         // then
         assertThat(compilation).succeededWithoutWarnings();
         assertThat(compilation).generatedSourceFile("com.sdemenkov.FancyTableWithCustomColumnWrapper")
-                .hasSourceEquivalentTo(JavaFileObjects.forResource("FancyTableWithCustomColumnWrapper.java"));
+                .hasSourceEquivalentTo(expectedWrapper("FancyTableWithCustomColumnWrapper"));
     }
 
     @Test
-    public void should_create_new_class_with_custom_column_and_options() {
+    public void should_create_new_class_with_custom_column_and_options() throws IOException {
         // given
         JavaFileObject javaFileObject = JavaFileObjects.forResource("FancyTableWithCustomColumn.java");
         // when
@@ -78,7 +78,7 @@ public class ActiveJdbcRequiredPropertyProcessorTest {
         // then
         assertThat(compilation).succeededWithoutWarnings();
         assertThat(compilation).generatedSourceFile("com.sdemenkov.FancyTableWithCustomColumnNewWrapperSuffix")
-                .hasSourceEquivalentTo(JavaFileObjects.forResource("FancyTableWithCustomColumnNewWrapperSuffix.java"));
+                .hasSourceEquivalentTo(expectedWrapper("FancyTableWithCustomColumnNewWrapperSuffix"));
     }
 
     @DataProvider
@@ -310,5 +310,17 @@ public class ActiveJdbcRequiredPropertyProcessorTest {
                         "import org.javalite.activejdbc.Model;\n" +
                         annotation + "\n" +
                         "public class " + qualifiedName.substring(lastDot + 1) + " extends Model {}");
+    }
+
+    /**
+     * Expected wrappers are written with javax.annotation.processing.Generated, which only exists since Java 9;
+     * on Java 8 the processor falls back to javax.annotation.Generated.
+     */
+    private static JavaFileObject expectedWrapper(String className) throws IOException {
+        String source = JavaFileObjects.forResource(className + ".java").getCharContent(true).toString();
+        if (System.getProperty("java.specification.version").startsWith("1.")) {
+            source = source.replace("@javax.annotation.processing.Generated(", "@javax.annotation.Generated(");
+        }
+        return JavaFileObjects.forSourceString("com.sdemenkov." + className, source);
     }
 }
