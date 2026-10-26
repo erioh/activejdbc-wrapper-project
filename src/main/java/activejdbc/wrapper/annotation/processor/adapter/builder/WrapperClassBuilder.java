@@ -127,12 +127,33 @@ public class WrapperClassBuilder {
         stringBuilder.append('"')
                 .append('{');
         StringJoiner stringJoiner = new StringJoiner(" + \", ");
-        propertyNamesAndGetters.forEach((propertyName, getter) ->
-                stringJoiner.add(String.format("%s = \" + (this.%s() == null ? null : \"'\" + this.%s() + \"'\")%n", propertyName, getter, getter)));
+        columnContexts.forEach(columnContext -> {
+            String propertyName = columnContext.getPropertyName();
+            String getter = propertyNamesAndGetters.get(propertyName);
+            stringJoiner.add(String.format("%s = \" + (this.%s() == null ? null : \"'\" + %s + \"'\")%n",
+                    propertyName, getter, toStringValue(getter, columnContext.getClazz())));
+        });
         stringBuilder.append(stringJoiner);
         stringBuilder.append(" + \"}\"");
         toString = String.format(TO_STRING_METHOD_TEMPLATE, stringBuilder);
         return this;
+    }
+
+    /**
+     * Arrays don't override toString, so "[B@1b6d3586" would be printed. byte[] usually holds BLOB content, which can
+     * be large, so only its length is printed.
+     */
+    private static String toStringValue(String getter, String type) {
+        if ("byte[]".equals(type)) {
+            return String.format("\"<\" + this.%s().length + \" bytes>\"", getter);
+        }
+        if (type.endsWith("[][]")) {
+            return String.format("java.util.Arrays.deepToString(this.%s())", getter);
+        }
+        if (type.endsWith("[]")) {
+            return String.format("java.util.Arrays.toString(this.%s())", getter);
+        }
+        return String.format("this.%s()", getter);
     }
 
     public WrapperClassBuilder withGetters() {

@@ -185,6 +185,25 @@ public class ActiveJdbcRequiredPropertyProcessorTest {
     }
 
     @Test
+    public void should_print_arrays_readably_in_to_string() throws Exception {
+        // given
+        JavaFileObject model = model("a.Blob", "@ActiveJdbcRequiredProperty(columnName = \"CONTENT\", clazz = byte[].class)\n" +
+                "@ActiveJdbcRequiredProperty(columnName = \"TAGS\", clazz = String[].class)\n" +
+                "@ActiveJdbcRequiredProperty(columnName = \"MATRIX\", clazz = int[][].class)\n" +
+                "@ActiveJdbcRequiredProperty(columnName = \"EMPTY\", clazz = byte[].class)");
+        // when
+        Compilation compilation = compile(model);
+        // then
+        assertThat(compilation).succeededWithoutWarnings();
+        String source = compilation.generatedSourceFile("a.BlobWrapper").get().getCharContent(true).toString();
+        Assertions.assertThat(source)
+                .contains("\"<\" + this.getContent().length + \" bytes>\"")
+                .contains("java.util.Arrays.toString(this.getTags())")
+                .contains("java.util.Arrays.deepToString(this.getMatrix())")
+                .contains("this.getEmpty() == null ? null");
+    }
+
+    @Test
     public void should_create_wrapper_when_property_name_equals_activejdbc_object_name() {
         // given
         JavaFileObject javaFileObject = model("s.Status", "@ActiveJdbcRequiredProperty(columnName = \"STATUS\", clazz = String.class)");
