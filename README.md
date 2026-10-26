@@ -166,17 +166,28 @@ This runs `FIRST_NAME = ? AND (AMOUNT > ? OR ACTIVATED IS NULL)`. The value type
   `notLike` for `String` columns. `eq(null)` means `IS NULL`.
 * Conditions are joined with AND unless `or()` is called in between; as in SQL, AND binds tighter than OR.
   `and(q -> ...)`, `or(q -> ...)` and `group(q -> ...)` put conditions in parentheses.
-* `fetch()` returns wrappers, `fetchModels()` returns ActiveJDBC models (a `LazyList`, so `orderBy`, `limit` and
-  `offset` are available), `fetchCount()` returns the number of rows. `getSql()` and `getParams()` show what will run.
+* Sorting and paging: `amount().desc()`, `firstName().asc()` (applied in the order they are added), `limit(n)`,
+  `offset(n)`.
+* `fetch()` returns wrappers, `fetchModels()` returns ActiveJDBC models (a `LazyList`), `fetchCount()` returns the
+  number of matching rows (sorting and paging don't apply to it). `getSql()`, `getOrderBy()` and `getParams()` show
+  what will run.
 * Queries work with and without ActiveJDBC instrumentation.
 * A column whose property name clashes with a method of the query class (for example `TO_STRING` → `toString`)
   is left out of the query builder with a compiler warning; set `desiredFieldName` to use it.
 
-Each wrapper also has a constant per column, for raw SQL and sorting:
+```java
+        List<FancyTableWrapper> page = FancyTableWrapper.query()
+                .activated().eq(true)
+                .amount().desc().firstName().asc()
+                .limit(20).offset(40)
+                .fetch();
+```
+
+Each wrapper also has a constant per column, for raw SQL:
 
 ```java
-        LazyList<FancyTable> rows = FancyTableWrapper.query().activated().eq(true)
-                .fetchModels().orderBy(FancyTableWrapper.FIRST_NAME);
+        List<Map> rows = Base.findAll("SELECT " + FancyTableWrapper.FIRST_NAME + ", COUNT(*) FROM FANCY_TABLE GROUP BY "
+                + FancyTableWrapper.FIRST_NAME);
 ```
 
 The constant name is the column name in upper case, with characters that can't be part of a Java identifier

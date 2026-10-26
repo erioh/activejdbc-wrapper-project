@@ -486,6 +486,8 @@ public class ActiveJdbcRequiredPropertyProcessorTest {
                         "                .firstName().like(\"Jo%\")\n" +
                         "                .and(q -> q.amount().gt(BigDecimal.TEN).or().birthDate().isNull())\n" +
                         "                .count().between(1, 5)\n" +
+                        "                .amount().desc().firstName().asc()\n" +
+                        "                .limit(10).offset(20)\n" +
                         "                .fetch();\n" +
                         "    }\n" +
                         "    LazyList<Person> models() { return PersonWrapper.query().firstName().in(\"a\", \"b\").fetchModels(); }\n" +

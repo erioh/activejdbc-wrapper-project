@@ -27,6 +27,8 @@ import java.util.stream.Collectors;
 /**
  * Base of the query classes generated inside wrappers, e.g. {@code FancyTableWrapper.query()}. Conditions are joined
  * with AND unless {@link #or()} is called in between; {@link #group(Function)} puts conditions into parentheses.
+ * Sorting is set per column with {@link Condition#asc()} / {@link Condition#desc()}, paging with {@link #limit(long)}
+ * and {@link #offset(long)}.
  * <p>
  * Queries run through {@link ModelDelegate} with the model class passed explicitly, so they work with and without
  * ActiveJDBC instrumentation.
@@ -41,6 +43,9 @@ public abstract class AbstractQuery<Q extends AbstractQuery<Q, M, W>, M extends 
     private final StringBuilder sql = new StringBuilder();
     private final List<Object> params = new ArrayList<>();
     private String pendingConnector;
+    private final List<String> orderBy = new ArrayList<>();
+    private Long limit;
+    private Long offset;
 
     protected AbstractQuery(Class<M> modelClass, Function<M, W> wrapperFactory) {
         this.modelClass = modelClass;
@@ -82,10 +87,30 @@ public abstract class AbstractQuery<Q extends AbstractQuery<Q, M, W>, M extends 
         // typed as AbstractQuery: private members can't be reached through the type variable Q
         AbstractQuery<?, ?, ?> nested = Objects.requireNonNull(group.apply(newQuery()), "group must return the query it was given");
         nested.checkComplete();
+        if (!nested.orderBy.isEmpty() || nested.limit != null || nested.offset != null) {
+            throw new IllegalStateException("group() can only contain conditions, not asc()/desc()/limit()/offset()");
+        }
         if (nested.sql.length() == 0) {
             throw new IllegalStateException("group() needs at least one condition");
         }
         return append("(" + nested.sql + ")", nested.params);
+    }
+
+    /**
+     * Returns at most {@code limit} rows. Without sorting the database decides which ones, so it's usually combined
+     * with {@link Condition#asc()} / {@link Condition#desc()}.
+     */
+    public Q limit(long limit) {
+        this.limit = requireNotNegative(limit, "limit");
+        return self();
+    }
+
+    /**
+     * Skips the first {@code offset} rows; meant for paging together with {@link #limit(long)} and sorting.
+     */
+    public Q offset(long offset) {
+        this.offset = requireNotNegative(offset, "offset");
+        return self();
     }
 
     /**
@@ -98,18 +123,27 @@ public abstract class AbstractQuery<Q extends AbstractQuery<Q, M, W>, M extends 
     }
 
     /**
-     * @return all matching models; ActiveJDBC's {@link LazyList#orderBy(String)}, {@code limit} and {@code offset}
-     * can be applied before the list is read
+     * @return matching models, sorted and limited as requested
      */
     public LazyList<M> fetchModels() {
         checkComplete();
-        return sql.length() == 0
+        LazyList<M> models = sql.length() == 0
                 ? ModelDelegate.findAll(modelClass)
                 : ModelDelegate.where(modelClass, sql.toString(), params.toArray());
+        if (!orderBy.isEmpty()) {
+            models = models.orderBy(getOrderBy());
+        }
+        if (limit != null) {
+            models = models.limit(limit);
+        }
+        if (offset != null) {
+            models = models.offset(offset);
+        }
+        return models;
     }
 
     /**
-     * @return number of matching rows
+     * @return number of all matching rows; sorting, {@link #limit(long)} and {@link #offset(long)} don't apply
      */
     public Long fetchCount() {
         checkComplete();
@@ -123,6 +157,13 @@ public abstract class AbstractQuery<Q extends AbstractQuery<Q, M, W>, M extends 
      */
     public String getSql() {
         return sql.toString();
+    }
+
+    /**
+     * @return the ORDER BY clause built so far, e.g. {@code AMOUNT DESC, FIRST_NAME ASC}; empty without sorting
+     */
+    public String getOrderBy() {
+        return String.join(", ", orderBy);
     }
 
     /**
@@ -153,6 +194,21 @@ public abstract class AbstractQuery<Q extends AbstractQuery<Q, M, W>, M extends 
         params.addAll(values);
         pendingConnector = null;
         return self();
+    }
+
+    Q addOrder(String column, String direction) {
+        if (pendingConnector != null) {
+            throw new IllegalStateException(direction.toLowerCase() + "() follows " + pendingConnector.toLowerCase() + "(), add a condition between them");
+        }
+        orderBy.add(column + " " + direction);
+        return self();
+    }
+
+    private static long requireNotNegative(long value, String method) {
+        if (value < 0) {
+            throw new IllegalArgumentException(method + "() needs a value >= 0, got " + value);
+        }
+        return value;
     }
 
     private Q connector(String connector) {

@@ -89,6 +89,26 @@ public class AbstractQueryTest {
                 "(AGE = ? OR (NAME = ? AND NAME = ?))", 1, "a", "b");
     }
 
+    @Test
+    public void should_collect_sort_columns_in_order() {
+        // when
+        TestQuery query = query().age().gt(1).age().desc().name().asc().limit(10).offset(20);
+        // then: sorting doesn't touch the WHERE clause
+        assertSql(query, "AGE > ?", 1);
+        assertThat(query.getOrderBy()).isEqualTo("AGE DESC, NAME ASC");
+        assertThat(query().getOrderBy()).isEmpty();
+    }
+
+    @Test
+    public void should_reject_negative_limit_and_offset() {
+        assertThatThrownBy(() -> query().limit(-1))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("limit() needs a value >= 0, got -1");
+        assertThatThrownBy(() -> query().offset(-5))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("offset() needs a value >= 0, got -5");
+    }
+
     @DataProvider
     public static Object[][] jdbc_conversions() {
         return new Object[][]{
@@ -131,6 +151,9 @@ public class AbstractQueryTest {
                 {(Function<TestQuery, Object>) q -> q.age().eq(1).and().fetchCount(), "the query ends with and(), add a condition after it"},
                 {(Function<TestQuery, Object>) q -> q.group(inner -> inner), "group() needs at least one condition"},
                 {(Function<TestQuery, Object>) q -> q.group(inner -> inner.age().eq(1).or()), "the query ends with or(), add a condition after it"},
+                {(Function<TestQuery, Object>) q -> q.age().eq(1).and().age().desc(), "desc() follows and(), add a condition between them"},
+                {(Function<TestQuery, Object>) q -> q.group(inner -> inner.age().eq(1).name().asc()), "group() can only contain conditions, not asc()/desc()/limit()/offset()"},
+                {(Function<TestQuery, Object>) q -> q.group(inner -> inner.age().eq(1).limit(5)), "group() can only contain conditions, not asc()/desc()/limit()/offset()"},
         };
     }
 

@@ -190,6 +190,29 @@ public class GeneratedWrapperIntegrationTest {
     }
 
     @Test
+    public void should_sort_and_page_results() {
+        // given
+        save(AllTypesWrapper.builder().stringValue("alpha").integerValue(1).longValue(20L).build());
+        save(AllTypesWrapper.builder().stringValue("beta").integerValue(2).longValue(10L).build());
+        save(AllTypesWrapper.builder().stringValue("gamma").integerValue(3).longValue(10L).build());
+        save(AllTypesWrapper.builder().stringValue("delta").integerValue(4).longValue(10L).build());
+
+        // when | then
+        assertThat(AllTypesWrapper.query().integerValue().desc().limit(2).fetch())
+                .extracting(AllTypesWrapper::getStringValue).containsExactly("delta", "gamma");
+        assertThat(AllTypesWrapper.query().integerValue().asc().limit(2).offset(1).fetch())
+                .extracting(AllTypesWrapper::getStringValue).containsExactly("beta", "gamma");
+        // several sort columns apply in the order they were added
+        assertThat(AllTypesWrapper.query().longValue().asc().stringValue().desc().fetch())
+                .extracting(AllTypesWrapper::getStringValue).containsExactly("gamma", "delta", "beta", "alpha");
+        // conditions and sorting together; fetchCount ignores limit
+        AllTypesWrapper.AllTypesWrapperQuery query = AllTypesWrapper.query().stringValue().like("%a").integerValue().desc().limit(1);
+        assertThat(query.fetch()).extracting(AllTypesWrapper::getStringValue).containsExactly("delta");
+        assertThat(query.fetchModels()).hasSize(1);
+        assertThat(query.fetchCount()).isEqualTo(4L);
+    }
+
+    @Test
     public void should_find_row_by_every_type() {
         // given: the fully populated row and one with different values
         save(fullyPopulated());

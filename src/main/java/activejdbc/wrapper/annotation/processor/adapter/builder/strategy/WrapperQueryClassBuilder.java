@@ -32,7 +32,7 @@ public class WrapperQueryClassBuilder {
      * AbstractQuery or Object. Such columns are left out of the query class.
      */
     public static final Set<String> RESERVED_METHOD_NAMES = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(
-            "and", "or", "group", "fetch", "fetchModels", "fetchCount", "getSql", "getParams",
+            "and", "or", "group", "limit", "offset", "fetch", "fetchModels", "fetchCount", "getSql", "getOrderBy", "getParams",
             "newCondition", "newStringCondition", "newQuery",
             "getClass", "hashCode", "toString", "clone", "finalize", "wait", "notify", "notifyAll")));
     /**

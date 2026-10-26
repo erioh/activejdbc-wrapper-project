@@ -32,6 +32,7 @@ import java.util.StringJoiner;
 
 /**
  * Condition on one column of a generated query; every operator adds the condition and returns the query.
+ * {@link #asc()} / {@link #desc()} sort by the column instead.
  *
  * @param <Q> the generated query class
  * @param <T> type of the column
@@ -113,6 +114,20 @@ public class Condition<Q extends AbstractQuery<Q, ?, ?>, T> {
 
     public Q isNotNull() {
         return query.append(column + " IS NOT NULL", Collections.emptyList());
+    }
+
+    /**
+     * Sorts by this column, ascending; sort columns apply in the order they are added.
+     */
+    public Q asc() {
+        return query.addOrder(column, "ASC");
+    }
+
+    /**
+     * Sorts by this column, descending; sort columns apply in the order they are added.
+     */
+    public Q desc() {
+        return query.addOrder(column, "DESC");
     }
 
     protected Q compare(String operator, Object value) {
