@@ -13,7 +13,8 @@ Toolchain is installed via SDKMAN (`source ~/.sdkman/bin/sdkman-init.sh`). Code 
 ```
 mvn test                                   # all tests
 mvn test -Dtest=StringUtilsTest            # single test class
-mvn test -Dtest=StringUtilsTest#methodName # single test method
+mvn test -Dtest=StringUtilsTest#methodName # single test method; NOT for @RunWith(DataProviderRunner) classes —
+                                           # the filter silently matches 0 tests there, run the whole class instead
 mvn package                                # jar + sources + javadoc jars
 mvn install -Dgpg.skip                     # verify/install sign with GPG; skip locally (no key on this machine)
 ```
@@ -44,5 +45,5 @@ Add a getter (and, if needed, setter) strategy class with `typesToApply()`, list
 
 - `ActiveJdbcRequiredPropertyProcessorTest` is end-to-end: it compiles `src/test/resources/FancyTable*.java` with google compile-testing and compares the output against the expected `*Wrapper.java` / `*NewWrapperSuffix.java` sources via `hasSourceEquivalentTo` (AST comparison).
 - `WrapperClassBuilderTest` / `WrapperBuilderClassBuilderTest` compare generated text **exactly** with `src/test/resources/expected_*.txt` (loaded through `test/util/ContentExtractor`, joined with the platform line separator).
-- Generated members come from `HashSet`/`HashMap` iteration in `WrapperClassBuilder`, so changing those collections or property names can reorder output and break the fixtures. If you change generated code, update the expected resources.
+- Generated members follow annotation order (`LinkedHashSet`/`LinkedHashMap` in `WrapperClassBuilder`; guarded by `should_generate_members_in_annotation_order`). If you change generated code, update the expected resources.
 - Test stack: JUnit 4, junit-dataprovider, AssertJ, Mockito 3.
