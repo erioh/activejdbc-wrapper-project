@@ -22,7 +22,7 @@
         <mockito-core.version>3.9.0</mockito-core.version>
         <compile-testing.version>0.24.0</compile-testing.version>
         <!-- 2.2.x is the last H2 line that runs on Java 8 -->
-        <h2.version>2.2.224</h2.version>
+        <h2.version>2.5.252</h2.version>
     </properties>
 
     <dependencies>
