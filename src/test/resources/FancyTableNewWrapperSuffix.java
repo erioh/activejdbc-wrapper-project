@@ -13,7 +13,7 @@ public class FancyTableNewWrapperSuffix extends activejdbc.wrapper.ActivejdbcWra
         return fancyTable.getLong("FANCY_TABLE_ID");
     }
     public void setFancyTableId(java.lang.Long fancyTableId) {
-        fancyTable.set("FANCY_TABLE_ID", fancyTableId);
+        this.fancyTable.set("FANCY_TABLE_ID", fancyTableId);
     }
     protected FancyTable getActivejdbcObject() {
         return fancyTable;

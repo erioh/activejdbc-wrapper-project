@@ -23,6 +23,8 @@ public class StringUtilsTest {
                 {"ADDRESS", "address"},
                 {"ADDRESS_", "address"},
                 {"_ADDRESS", "address"},
+                {"_", ""},
+                {"__", ""},
         };
     }
 

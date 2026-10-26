@@ -51,7 +51,7 @@ public class DateSetterBuilderStrategyTest {
         String columnName = "COLUMN_NAME";
         String objectName = "object";
         String expectedGetter = String.format("public void %s(%s %s) {%n" +
-                "object.setDate(\"COLUMN_NAME\", %s);%n" +
+                "this.object.setDate(\"COLUMN_NAME\", %s);%n" +
                 "}%n", expectedMethodName, type, expectedColumnName, expectedColumnName);
         ColumnContext columnContext = new ColumnContext(type, columnName, desiredFieldName);
 

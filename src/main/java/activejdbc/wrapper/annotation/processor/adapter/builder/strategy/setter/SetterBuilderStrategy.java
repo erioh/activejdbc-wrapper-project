@@ -21,9 +21,7 @@ import java.util.Set;
 public interface SetterBuilderStrategy {
 
     default String buildSetterBody(ColumnContext columnContext, String activejdbcObjectName) {
-        String propertyName = StringUtils.isBlank(columnContext.getDesiredFieldName())
-                ? StringUtils.buildPropertyNameFromColumnName(columnContext.getColumnName())
-                : columnContext.getDesiredFieldName();
+        String propertyName = columnContext.getPropertyName();
         String methodName = StringUtils.buildMethodName(propertyName, "set");
         return String.format(getTemplate(), methodName, columnContext.getClazz(), propertyName, activejdbcObjectName, columnContext.getColumnName(), propertyName);
     }

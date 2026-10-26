@@ -124,9 +124,7 @@ public class WrapperClassBuilder {
 
     public WrapperClassBuilder withGetters() {
         this.columnContexts.forEach(columnContext -> {
-            String propertyName = StringUtils.isBlank(columnContext.getDesiredFieldName())
-                    ? StringUtils.buildPropertyNameFromColumnName(columnContext.getColumnName())
-                    : columnContext.getDesiredFieldName();
+            String propertyName = columnContext.getPropertyName();
             String methodName = StringUtils.buildMethodName(propertyName, "get");
             GetterBuilderStrategy strategy = getterBuilderStrategyHolder.getStrategy(columnContext.getClazz());
             gettersBody.add(strategy.buildGetterBody(columnContext, activejdbcObjectName));

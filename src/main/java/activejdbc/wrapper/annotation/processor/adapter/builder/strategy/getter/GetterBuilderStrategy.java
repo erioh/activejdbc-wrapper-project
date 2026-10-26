@@ -21,9 +21,7 @@ import java.util.Set;
 public interface GetterBuilderStrategy {
 
     default String buildGetterBody(ColumnContext columnContext, String activejdbcObjectName) {
-        String propertyName = StringUtils.isBlank(columnContext.getDesiredFieldName())
-                ? StringUtils.buildPropertyNameFromColumnName(columnContext.getColumnName())
-                : columnContext.getDesiredFieldName();
+        String propertyName = columnContext.getPropertyName();
         String methodName = StringUtils.buildMethodName(propertyName, "get");
         return String.format(getTemplate(), columnContext.getClazz(), methodName, activejdbcObjectName, columnContext.getColumnName());
     }

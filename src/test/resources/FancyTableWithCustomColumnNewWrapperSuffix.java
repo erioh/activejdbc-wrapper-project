@@ -13,7 +13,7 @@ public class FancyTableWithCustomColumnNewWrapperSuffix extends activejdbc.wrapp
         return fancyTableWithCustomColumn.getLong("FANCY_TABLE_ID");
     }
     public void setCustomColumn(java.lang.Long customColumn) {
-        fancyTableWithCustomColumn.set("FANCY_TABLE_ID", customColumn);
+        this.fancyTableWithCustomColumn.set("FANCY_TABLE_ID", customColumn);
     }
     protected FancyTableWithCustomColumn getActivejdbcObject() {
         return fancyTableWithCustomColumn;

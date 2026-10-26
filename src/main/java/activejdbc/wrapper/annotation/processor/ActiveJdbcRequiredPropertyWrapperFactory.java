@@ -32,10 +32,13 @@ public class ActiveJdbcRequiredPropertyWrapperFactory {
         this.annotationProcessorContext = annotationProcessorContext;
     }
 
-    public String build(String packageName, String className, List<? extends AnnotationMirror> annotationMirrors) {
-        List<ColumnContext> columnContexts = annotationMirrors.stream()
+    public List<ColumnContext> getColumnContexts(List<? extends AnnotationMirror> annotationMirrors) {
+        return annotationMirrors.stream()
                 .map(this::getColumnContext)
                 .collect(Collectors.toList());
+    }
+
+    public String build(String packageName, String className, List<ColumnContext> columnContexts) {
         WrapperClassBuilder wrapperClassBuilder = new WrapperClassBuilder(packageName, className, columnContexts, annotationProcessorContext);
         // add setters
         return wrapperClassBuilder.withSetters()

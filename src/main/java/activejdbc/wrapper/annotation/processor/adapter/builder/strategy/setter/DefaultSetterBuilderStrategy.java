@@ -26,7 +26,7 @@ public class DefaultSetterBuilderStrategy implements SetterBuilderStrategy {
      * 6. property name
      */
     public static final String SETTER_TEMPLATE = "public void %s(%s %s) {%n" +
-            "%s.set(\"%s\", %s);%n" +
+            "this.%s.set(\"%s\", %s);%n" +
             "}%n";
 
     @Override

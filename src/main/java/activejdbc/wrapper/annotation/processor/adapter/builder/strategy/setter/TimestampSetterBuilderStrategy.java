@@ -27,7 +27,7 @@ public class TimestampSetterBuilderStrategy implements SetterBuilderStrategy {
      * 6. property name
      */
     public static final String SETTER_TEMPLATE = "public void %s(%s %s) {%n" +
-            "%s.setTimestamp(\"%s\", %s);%n" +
+            "this.%s.setTimestamp(\"%s\", %s);%n" +
             "}%n";
 
     @Override

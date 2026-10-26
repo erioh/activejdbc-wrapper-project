@@ -46,7 +46,7 @@ public class DefaultSetterBuilderStrategyTest {
         String objectName = "object";
         String type = "SomeType";
         String expectedGetter = String.format("public void %s(%s %s) {%n" +
-                "object.set(\"COLUMN_NAME\", %s);%n" +
+                "this.object.set(\"COLUMN_NAME\", %s);%n" +
                 "}%n", methodName, type, expectedColumnName, expectedColumnName);
         ColumnContext columnContext = new ColumnContext(type, columnName, desiredFieldName);
 

@@ -47,7 +47,7 @@ public class TimestampSetterBuilderStrategyTest {
         String objectName = "object";
         String type = "Timestamp";
         String expectedGetter = String.format("public void %s(Timestamp %s) {%n" +
-                "object.setTimestamp(\"COLUMN_NAME\", %s);%n" +
+                "this.object.setTimestamp(\"COLUMN_NAME\", %s);%n" +
                 "}%n", methodName, expectedColumnName, expectedColumnName);
         ColumnContext columnContext = new ColumnContext(type, columnName, desiredFieldName);
 

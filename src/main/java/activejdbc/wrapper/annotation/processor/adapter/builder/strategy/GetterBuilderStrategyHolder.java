@@ -15,28 +15,24 @@ package activejdbc.wrapper.annotation.processor.adapter.builder.strategy;
 
 import activejdbc.wrapper.annotation.processor.adapter.builder.strategy.getter.GetterBuilderStrategy;
 
+import java.util.HashMap;
 import java.util.Map;
 
-public class GetterBuilderStrategyHolder implements StrategyHolder<GetterBuilderStrategy>{
+public class GetterBuilderStrategyHolder implements StrategyHolder<GetterBuilderStrategy> {
     private final GetterBuilderStrategy defaultStrategy;
-    private final Map<Class<?>, GetterBuilderStrategy> getterBuilderStrategies;
+    /**
+     * Keyed by canonical type name: the type comes from the code being compiled, so it may be primitive, an array
+     * or a class that is not on the processor classpath, and must not be loaded with Class.forName.
+     */
+    private final Map<String, GetterBuilderStrategy> getterBuilderStrategies = new HashMap<>();
 
     public GetterBuilderStrategyHolder(GetterBuilderStrategy defaultStrategy, Map<Class<?>, GetterBuilderStrategy> getterBuilderStrategies) {
         this.defaultStrategy = defaultStrategy;
-
-        this.getterBuilderStrategies = getterBuilderStrategies;
+        getterBuilderStrategies.forEach((type, strategy) -> this.getterBuilderStrategies.put(type.getCanonicalName(), strategy));
     }
 
     @Override
     public GetterBuilderStrategy getStrategy(String type) {
-        return getterBuilderStrategies.getOrDefault(getClass(type), defaultStrategy);
-    }
-
-    private Class<?> getClass(String type) {
-        try {
-            return Class.forName(type);
-        } catch (ClassNotFoundException e) {
-            throw new IllegalArgumentException("Unknown type " + type, e);
-        }
+        return getterBuilderStrategies.getOrDefault(type, defaultStrategy);
     }
 }
