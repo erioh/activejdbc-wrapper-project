@@ -69,6 +69,7 @@ public class WrapperClassBuilder {
     private String equals = StringUtils.EMPTY_STRING;
     private String toString = StringUtils.EMPTY_STRING;
     private String getObject = StringUtils.EMPTY_STRING;
+    private String wrap = StringUtils.EMPTY_STRING;
     private String builderAndBuilderClass = StringUtils.EMPTY_STRING;
 
     public WrapperClassBuilder(String packageName, String activejdbcObjectClassName, List<ColumnContext> columnContexts, AnnotationProcessorContext annotationProcessorContext) {
@@ -88,6 +89,7 @@ public class WrapperClassBuilder {
         gettersBody.forEach(methods::append);
         settersBody.forEach(methods::append);
         methods.append(getObject)
+                .append(wrap)
                 .append(toString)
                 .append(equals)
                 .append(hashCode);
@@ -151,6 +153,11 @@ public class WrapperClassBuilder {
             SetterBuilderStrategy strategy = setterBuilderStrategyHolder.getStrategy(columnContext.getClazz());
             settersBody.add(strategy.buildSetterBody(columnContext, activejdbcObjectName));
         });
+        return this;
+    }
+
+    public WrapperClassBuilder withWrapMethod() {
+        wrap = String.format(WRAP_METHOD_TEMPLATE, wrapperClassName, activejdbcObjectClassName, wrapperClassName, activejdbcObjectClassName, wrapperClassName);
         return this;
     }
 

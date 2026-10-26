@@ -250,6 +250,24 @@ public class ActiveJdbcRequiredPropertyProcessorTest {
     }
 
     @Test
+    public void should_wrap_collections_of_models_including_lazy_lists() {
+        // given
+        JavaFileObject model = model("w.Person", "@ActiveJdbcRequiredProperty(columnName = \"NAME\", clazz = String.class)");
+        JavaFileObject user = JavaFileObjects.forSourceString("w.Usage",
+                "package w;\n" +
+                        "import java.util.List;\n" +
+                        "import org.javalite.activejdbc.LazyList;\n" +
+                        "public class Usage {\n" +
+                        "    List<PersonWrapper> fromList(List<Person> people) { return PersonWrapper.wrap(people); }\n" +
+                        "    List<PersonWrapper> fromQuery(LazyList<Person> people) { return PersonWrapper.wrap(people); }\n" +
+                        "}");
+        // when
+        Compilation compilation = compile(model, user);
+        // then
+        assertThat(compilation).succeededWithoutWarnings();
+    }
+
+    @Test
     public void should_create_wrapper_when_desired_field_name_resolves_collision() {
         // given
         JavaFileObject javaFileObject = model("c.Customer", "@ActiveJdbcRequiredProperty(columnName = \"ADDRESS\", clazz = String.class)\n" +

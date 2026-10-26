@@ -19,6 +19,13 @@ public class FancyTableNewWrapperSuffix extends activejdbc.wrapper.ActivejdbcWra
     protected FancyTable getActivejdbcObject() {
         return fancyTable;
     }
+    public static java.util.List<FancyTableNewWrapperSuffix> wrap(java.util.Collection<? extends FancyTable> models) {
+        java.util.List<FancyTableNewWrapperSuffix> wrappers = new java.util.ArrayList<>(models.size());
+        for (FancyTable model : models) {
+            wrappers.add(new FancyTableNewWrapperSuffix(model));
+        }
+        return wrappers;
+    }
     public java.lang.String toString() {
         return "{fancyTableId = " + (this.getFancyTableId() == null ? null : "'" + this.getFancyTableId() + "'")
                 + "}";
