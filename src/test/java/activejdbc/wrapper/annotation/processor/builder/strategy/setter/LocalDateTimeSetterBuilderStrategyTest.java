@@ -47,7 +47,7 @@ public class LocalDateTimeSetterBuilderStrategyTest {
         String objectName = "object";
         String type = "SomeType";
         String expectedGetter = String.format("public void %s(%s %s) {%n" +
-                "object.setTimestamp(\"COLUMN_NAME\", java.util.Optional.ofNullable(%s)%n" +
+                "this.object.setTimestamp(\"COLUMN_NAME\", java.util.Optional.ofNullable(%s)%n" +
                 ".map(java.sql.Timestamp::valueOf)%n" +
                 ".orElse(null));%n" +
                 "}%n", methodName, type, expectedColumnName, expectedColumnName);

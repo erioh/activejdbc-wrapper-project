@@ -35,10 +35,11 @@ public final class StringUtils {
     public static String buildPropertyNameFromColumnName(String columnName) {
         String value = columnName.toLowerCase();
         String[] strings = value.split("_");
-        return changeCapitalizationOfTheFirstCharacter(Arrays.stream(strings)
+        String joined = Arrays.stream(strings)
                 .filter(string -> !isBlank(string))
                 .map(string -> changeCapitalizationOfTheFirstCharacter(string, true))
-                .collect(Collectors.joining()), false);
+                .collect(Collectors.joining());
+        return joined.isEmpty() ? EMPTY_STRING : changeCapitalizationOfTheFirstCharacter(joined, false);
     }
 
     private static String changeCapitalizationOfTheFirstCharacter(String string, boolean toUppercase) {

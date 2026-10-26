@@ -47,7 +47,7 @@ public class LocalTimeSetterBuilderStrategyTest {
         String objectName = "object";
         String type = "LocalTime";
         String expectedGetter = String.format("public void %s(LocalTime %s) {%n" +
-                "object.setTime(\"COLUMN_NAME\", java.util.Optional.ofNullable(%s)%n" +
+                "this.object.setTime(\"COLUMN_NAME\", java.util.Optional.ofNullable(%s)%n" +
                 ".map(java.sql.Time::valueOf).orElse(null));%n" +
                 "}%n", methodName, expectedColumnName, expectedColumnName);
         ColumnContext columnContext = new ColumnContext(type, columnName, desiredFieldName);

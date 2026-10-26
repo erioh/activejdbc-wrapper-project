@@ -59,9 +59,7 @@ public class WrapperBuilderClassBuilder {
         StringBuilder stringBuilder = new StringBuilder();
         String wrapperObjectName = StringUtils.lowerCaseFirstCharacter(wrapperClassName);
         columnContexts.forEach(columnContext -> {
-            String propertyName = StringUtils.isBlank(columnContext.getDesiredFieldName())
-                    ? StringUtils.buildPropertyNameFromColumnName(columnContext.getColumnName())
-                    : columnContext.getDesiredFieldName();
+            String propertyName = columnContext.getPropertyName();
             String withMethodName = StringUtils.buildMethodName(propertyName, methodPrefix);
             // todo refactor this thing
             String setMethodName = StringUtils.buildMethodName(propertyName, "set");

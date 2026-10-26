@@ -1,5 +1,7 @@
 package activejdbc.wrapper.annotation.processor.context;
 
+import activejdbc.wrapper.annotation.processor.util.StringUtils;
+
 import java.util.Objects;
 
 public final class ColumnContext {
@@ -23,6 +25,12 @@ public final class ColumnContext {
 
     public String getDesiredFieldName() {
         return desiredFieldName;
+    }
+
+    public String getPropertyName() {
+        return StringUtils.isBlank(desiredFieldName)
+                ? StringUtils.buildPropertyNameFromColumnName(columnName)
+                : desiredFieldName;
     }
 
     @Override

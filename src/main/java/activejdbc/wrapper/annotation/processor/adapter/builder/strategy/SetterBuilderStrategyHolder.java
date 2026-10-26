@@ -15,28 +15,24 @@ package activejdbc.wrapper.annotation.processor.adapter.builder.strategy;
 
 import activejdbc.wrapper.annotation.processor.adapter.builder.strategy.setter.SetterBuilderStrategy;
 
+import java.util.HashMap;
 import java.util.Map;
 
 public class SetterBuilderStrategyHolder implements StrategyHolder<SetterBuilderStrategy> {
     private final SetterBuilderStrategy defaultStrategy;
-    private final Map<Class<?>, SetterBuilderStrategy> setterBuilderStrategies;
+    /**
+     * Keyed by canonical type name: the type comes from the code being compiled, so it may be primitive, an array
+     * or a class that is not on the processor classpath, and must not be loaded with Class.forName.
+     */
+    private final Map<String, SetterBuilderStrategy> setterBuilderStrategies = new HashMap<>();
 
     public SetterBuilderStrategyHolder(SetterBuilderStrategy defaultStrategy, Map<Class<?>, SetterBuilderStrategy> setterBuilderStrategies) {
-
         this.defaultStrategy = defaultStrategy;
-        this.setterBuilderStrategies = setterBuilderStrategies;
+        setterBuilderStrategies.forEach((type, strategy) -> this.setterBuilderStrategies.put(type.getCanonicalName(), strategy));
     }
 
     @Override
     public SetterBuilderStrategy getStrategy(String type) {
-        return setterBuilderStrategies.getOrDefault(getClass(type), defaultStrategy);
-    }
-
-    private Class<?> getClass(String type) {
-        try {
-            return Class.forName(type);
-        } catch (ClassNotFoundException e) {
-            throw new IllegalArgumentException("Unknown type " + type, e);
-        }
+        return setterBuilderStrategies.getOrDefault(type, defaultStrategy);
     }
 }

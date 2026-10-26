@@ -29,7 +29,7 @@ public class DateSetterBuilderStrategy implements SetterBuilderStrategy {
      * 6. property name
      */
     public static final String SETTER_TEMPLATE = "public void %s(%s %s) {%n" +
-            "%s.setDate(\"%s\", %s);%n" +
+            "this.%s.setDate(\"%s\", %s);%n" +
             "}%n";
 
     @Override
