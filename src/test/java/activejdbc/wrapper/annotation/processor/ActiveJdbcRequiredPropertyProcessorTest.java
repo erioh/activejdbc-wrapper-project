@@ -287,6 +287,37 @@ public class ActiveJdbcRequiredPropertyProcessorTest {
     }
 
     @Test
+    public void should_generate_column_name_constants_usable_in_user_code() {
+        // given
+        JavaFileObject model = model("q.Person", "@ActiveJdbcRequiredProperty(columnName = \"FIRST_NAME\", clazz = String.class)\n" +
+                "@ActiveJdbcRequiredProperty(columnName = \"last-name\", clazz = String.class, desiredFieldName = \"lastName\")");
+        JavaFileObject user = JavaFileObjects.forSourceString("q.Query",
+                "package q;\n" +
+                        "public class Query {\n" +
+                        "    static final String CONDITION = PersonWrapper.FIRST_NAME + \" = ? AND \" + PersonWrapper.LAST_NAME + \" = ?\";\n" +
+                        "}");
+        // when
+        Compilation compilation = compile(model, user);
+        // then
+        assertThat(compilation).succeededWithoutWarnings();
+        assertThat(compilation).generatedSourceFile("q.PersonWrapper").contentsAsUtf8String()
+                .contains("public static final java.lang.String LAST_NAME = \"last-name\";");
+    }
+
+    @Test
+    public void should_fail_on_constant_name_collision() {
+        // given
+        JavaFileObject javaFileObject = model("c.Customer", "@ActiveJdbcRequiredProperty(columnName = \"MY_COL\", clazz = String.class)\n" +
+                "@ActiveJdbcRequiredProperty(columnName = \"my-col\", clazz = String.class, desiredFieldName = \"other\")");
+        // when
+        Compilation compilation = compile(javaFileObject);
+        // then
+        assertThat(compilation).failed();
+        assertThat(compilation).hadErrorContaining("Columns [MY_COL] and [my-col] both produce constant name [MY_COL] in the wrapper.");
+        assertThat(compilation).hadErrorCount(1);
+    }
+
+    @Test
     public void should_create_wrapper_when_desired_field_name_resolves_collision() {
         // given
         JavaFileObject javaFileObject = model("c.Customer", "@ActiveJdbcRequiredProperty(columnName = \"ADDRESS\", clazz = String.class)\n" +

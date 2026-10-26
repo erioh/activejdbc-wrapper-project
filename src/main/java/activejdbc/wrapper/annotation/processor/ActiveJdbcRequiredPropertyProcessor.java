@@ -158,6 +158,21 @@ public class ActiveJdbcRequiredPropertyProcessor extends AbstractProcessor {
                         previousColumnName, columnContext.getColumnName(), propertyName), element);
             }
         }
+        return valid && hasUniqueConstantNames(columnContexts, element);
+    }
+
+    private boolean hasUniqueConstantNames(List<ColumnContext> columnContexts, Element element) {
+        boolean valid = true;
+        Map<String, String> columnNamesByConstantName = new HashMap<>();
+        for (ColumnContext columnContext : columnContexts) {
+            String constantName = StringUtils.buildConstantName(columnContext.getColumnName());
+            String previousColumnName = columnNamesByConstantName.putIfAbsent(constantName, columnContext.getColumnName());
+            if (previousColumnName != null) {
+                valid = false;
+                error(String.format("Columns [%s] and [%s] both produce constant name [%s] in the wrapper.",
+                        previousColumnName, columnContext.getColumnName(), constantName), element);
+            }
+        }
         return valid;
     }
 
