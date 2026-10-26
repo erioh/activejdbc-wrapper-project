@@ -18,6 +18,7 @@ import activejdbc.wrapper.annotation.ActiveJdbcRequiredProperty;
 import activejdbc.wrapper.annotation.processor.context.AnnotationProcessorContext;
 import activejdbc.wrapper.annotation.processor.context.ColumnContext;
 import activejdbc.wrapper.annotation.processor.util.AnnotationValueExtractor;
+import activejdbc.wrapper.annotation.processor.util.SourceFormatter;
 import activejdbc.wrapper.annotation.processor.util.StringUtils;
 
 import javax.annotation.processing.*;
@@ -76,7 +77,7 @@ public class ActiveJdbcRequiredPropertyProcessor extends AbstractProcessor {
                 try {
                     JavaFileObject sourceFile = processingEnv.getFiler().createSourceFile(qualifiedWrapperClassName, element);
                     try (PrintWriter out = new PrintWriter(sourceFile.openWriter())) {
-                        out.print(wrapperClassBody);
+                        out.print(SourceFormatter.format(wrapperClassBody));
                     }
                 } catch (IOException e) {
                     error(String.format("Unable to create %s: %s", qualifiedWrapperClassName, e.getMessage()), element);
