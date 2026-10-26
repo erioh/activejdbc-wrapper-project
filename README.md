@@ -1,25 +1,25 @@
 # activejdbc-wrapper-project
 
-The main goal of this project is to simplify usage of ActiveJDBC by generation new wrapper classes.
+The main goal of this project is to simplify the usage of ActiveJDBC by generating wrapper classes.
 
-Maybe you have noticed that sometimes activejdbc code looks a bit ugly. At the same time, you need to remember the names
-of all fields, types of these fields, etc.
+You may have noticed that ActiveJDBC code sometimes looks a bit ugly. On top of that, you have to remember the names
+and types of all the fields.
 
-If you are using ActiveJDBC in your e2e/integration tests, you'll not be able to do simple assertions. You'll be forced
-to call a ton of getters in order to fetch needed data. Also, sometimes you really missing equals and toString methods.
-And you don't want to create these methods on your own.
+If you use ActiveJDBC in your e2e/integration tests, you can't write simple assertions. You're forced to call a ton of
+getters to fetch the data you need. You may also really miss the equals and toString methods, and you don't want to
+write them yourself.
 
-So. Using this project you'll be able insteasd of this
+With this project, instead of this:
 
 ```java
         FancyTable activejdbcObject=new FancyTable();
         activejdbcObject.setString("FIRST_NAME","Some value");
         activejdbcObject.setBigDecimal("AMOUNT",BigDecimal.TEN);
-        // 100500 billions of another setters
+        // 100500 billion other setters
         activejdbcObject.setBoolean("ACTIVATED",false);
 ```
 
-do something like that.
+you can write this:
 
 ```java
         FancyTableWrapper fancyTableWrapper=new FancyTableWrapper();
@@ -28,7 +28,7 @@ do something like that.
         fancyTableWrapper.setActivated(false);
 ```
 
-In case if you prefer to use builders, you can use them as well :)
+If you prefer builders, you can use them as well :)
 
 ```java
         SomeTableWrapper someTableWrapper=SomeTableWrapper.builder()
@@ -37,13 +37,13 @@ In case if you prefer to use builders, you can use them as well :)
         .build();
 ```
 
-All setters and getters should be generated automatically. Methods equals/hashCode/toString would be overridden
-automatically as well, so they are ready to use.
+All setters and getters are generated automatically. The equals/hashCode/toString methods are overridden automatically
+as well, so they are ready to use.
 
-# So, what do we need to start?
+# So, what do you need to get started?
 
-0. Let's assume that you already have some ActiveJDBC classes, everything works and you want only to simplify usage of
-   these classes.
+0. Let's assume that you already have some ActiveJDBC classes, everything works, and you only want to simplify their
+   usage.
 
 ```java
 
@@ -53,7 +53,7 @@ public class FancyTable extends Model {
 }
 ```
 
-1. You need to add new dependency into your pom.xml file.
+1. Add the dependency to your pom.xml file.
 
 ```xml
 
@@ -64,7 +64,7 @@ public class FancyTable extends Model {
 </dependency>
 ```
 
-2. Put ActiveJdbcRequiredProperty annotation with provided column name and expected type
+2. Add the ActiveJdbcRequiredProperty annotation with the column name and the expected type.
 
 ```java
 package com.sdemenkov;
@@ -106,14 +106,14 @@ public class FancyTable extends Model {
 
 Types with dedicated accessors: `String`, `Boolean`, `Short`, `Integer`, `Long`, `Float`, `Double`, `BigDecimal`,
 `BigInteger`, `byte[]`, `java.sql.Clob`, `java.sql.Date`, `java.sql.Time`, `java.sql.Timestamp`, `java.util.Date`,
-`LocalDate`, `LocalTime`, `LocalDateTime` and `Instant`. Any other (non-primitive) type works through a plain cast of
-`get(...)`/`set(...)`.
+`LocalDate`, `LocalTime`, `LocalDateTime` and `Instant`. Any other non-primitive type is read with a plain cast of
+`get(...)` and written with `set(...)`.
 
 3. Compile your project for the first time.
 
-That's it. In the same package where your ActiveJDBC classes are placed (in the same package, but folder would be
-target/generated-sources/annotations ) you'll find new classes with suffix "Wrapper" (in case of FancyTable.java you'll
-find FancyTableWrapper.java). For a static nested model `Outer.Inner` the wrapper is called `Outer_InnerWrapper`.
+That's it. You'll find new classes with the suffix "Wrapper" in the same package as your ActiveJDBC classes, but in the
+target/generated-sources/annotations folder (for FancyTable.java, it's FancyTableWrapper.java). For a static nested
+model `Outer.Inner`, the wrapper is called `Outer_InnerWrapper`.
 
 > **JDK 23 and newer:** javac no longer runs annotation processors that are only found on the classpath, so with
 > nothing but the dependency from step 1 no wrapper is generated, and there is no error either. Enable the processor
@@ -135,7 +135,8 @@ find FancyTableWrapper.java). For a static nested model `Outer.Inner` the wrappe
 > </plugin>
 > ```
 >
-> Listing the processor in `<annotationProcessors>` (as in step 5) or passing `-proc:full` to javac works as well.
+> Listing the processor in `<annotationProcessors>` (as in the example in step 6) or passing `-proc:full` to javac works
+> as well.
 > Gradle's `annotationProcessor` configuration needs nothing extra.
 
 Query results can be wrapped in one go, which is handy for assertions on whole lists:
@@ -154,8 +155,8 @@ Each wrapper also has a constant per column, handy for queries without string li
 The constant name is the column name in upper case, with characters that can't be part of a Java identifier
 replaced by `_`.
 
-4. In case if you want to get a real ActiveJDBC object from this wrapper, you'll have to use
-   ActivejdbcWrapperManipulator (for calling insert method, for example).
+4. If you need the real ActiveJDBC object behind a wrapper (to call the insert method, for example), use
+   ActivejdbcWrapperManipulator.
 
 ```java
     private final ActivejdbcWrapperManipulator manipulator=new ActivejdbcWrapperManipulator();
@@ -168,10 +169,11 @@ public void get_real_activejdbc_object(){
         }
 ```
 
-5. If you are not happy with the default suffix, you can easily override it by providing your own suffix
-   using `activejdbc.wrapper.suffix` option
-   
-6. If you want to adjust builder methods names you can specify your own prefix using `activejdbc.wrapper.builder.method.prefix` option
+5. If you are not happy with the default suffix, you can easily override it with your own suffix using the
+   `activejdbc.wrapper.suffix` option.
+
+6. If you want to change the names of the builder methods, you can specify your own prefix using the
+   `activejdbc.wrapper.builder.method.prefix` option. Both options are passed to the compiler as shown below.
 ```java
         SomeTableWrapper someTableWrapper=SomeTableWrapper.builder()
         .withSomeId(1L)
@@ -202,8 +204,8 @@ public void get_real_activejdbc_object(){
 </plugin>
 ```
 
-6. Sometimes we can meet with collisions in case if two column names will be changed to the same
-   property `ADDRESS and _ADDRESS` for example. In this case it would be a good idea to set desired field name
+7. Sometimes two column names map to the same property, for example `ADDRESS` and `_ADDRESS`. The processor reports
+   such a collision as a compilation error; set `desiredFieldName` for one of the columns to resolve it.
 
 ```java
 
@@ -213,7 +215,7 @@ public class FancyTableWithCustomColumn extends Model {
 }
 ```
 
-That's pretty it :)
+That's pretty much it :)
 Enjoy!
 
 # License
