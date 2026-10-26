@@ -110,22 +110,11 @@
                 </configuration>
                 <executions>
                     <execution>
+                        <!-- the processor is registered in META-INF/services and must not run on its own sources -->
                         <id>default-compile</id>
                         <configuration>
                             <compilerArgument>-proc:none</compilerArgument>
-                            <includes>
-                                <include>
-                                    activejdbc\wrapper\annotation\processor\ActiveJdbcRequiredPropertyProcessor.java
-                                </include>
-                            </includes>
                         </configuration>
-                    </execution>
-                    <execution>
-                        <id>compile-project</id>
-                        <phase>compile</phase>
-                        <goals>
-                            <goal>compile</goal>
-                        </goals>
                     </execution>
                 </executions>
             </plugin>
