@@ -16,6 +16,13 @@ updates:
     ignore:
       # provided dependency: the processor must keep working with the ActiveJDBC version users already have
       - dependency-name: org.javalite:activejdbc
+      # the build and tests must keep running on Java 8; these lines need a newer Java
+      - dependency-name: com.h2database:h2
+        versions: [">= 2.3"]        # 2.3+ needs Java 11, 2.2.x is the last line for Java 8
+      - dependency-name: org.mockito:mockito-core
+        versions: [">= 5"]          # Mockito 5 needs Java 11, 4.x is the last line for Java 8
+      - dependency-name: org.assertj:assertj-core
+        versions: [">= 4"]          # AssertJ 4 needs Java 17
   - package-ecosystem: github-actions
     directory: /
     schedule:
