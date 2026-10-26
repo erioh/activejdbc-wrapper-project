@@ -28,8 +28,10 @@ import javax.tools.JavaFileObject;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -104,6 +106,27 @@ public class ActiveJdbcRequiredPropertyProcessor extends AbstractProcessor {
             } else {
                 error(String.format("desiredFieldName [%s] of column [%s] is not a valid Java identifier.",
                         propertyName, columnContext.getColumnName()), element);
+            }
+        }
+        return valid && hasUniquePropertyNames(columnContexts, element);
+    }
+
+    private boolean hasUniquePropertyNames(List<ColumnContext> columnContexts, Element element) {
+        boolean valid = true;
+        // keyed by getter name: "address" and "Address" are different fields but the same getAddress()
+        Map<String, String> columnNamesByGetterName = new HashMap<>();
+        for (ColumnContext columnContext : columnContexts) {
+            String propertyName = columnContext.getPropertyName();
+            String previousColumnName = columnNamesByGetterName.putIfAbsent(StringUtils.buildMethodName(propertyName, "get"), columnContext.getColumnName());
+            if (previousColumnName == null) {
+                continue;
+            }
+            valid = false;
+            if (previousColumnName.equals(columnContext.getColumnName())) {
+                error(String.format("Column [%s] is declared more than once.", previousColumnName), element);
+            } else {
+                error(String.format("Columns [%s] and [%s] both produce property name [%s]. Please set a different desiredFieldName for one of them.",
+                        previousColumnName, columnContext.getColumnName(), propertyName), element);
             }
         }
         return valid;

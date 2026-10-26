@@ -178,6 +178,45 @@ public class ActiveJdbcRequiredPropertyProcessorTest {
         assertThat(compilation).hadErrorCount(1);
     }
 
+    @DataProvider
+    public static Object[][] data_for_should_fail_on_property_name_collision() {
+        return new Object[][]{
+                {"@ActiveJdbcRequiredProperty(columnName = \"ADDRESS\", clazz = String.class)\n" +
+                        "@ActiveJdbcRequiredProperty(columnName = \"_ADDRESS\", clazz = String.class)",
+                        "Columns [ADDRESS] and [_ADDRESS] both produce property name [address]. Please set a different desiredFieldName for one of them."},
+                {"@ActiveJdbcRequiredProperty(columnName = \"ADDRESS\", clazz = String.class)\n" +
+                        "@ActiveJdbcRequiredProperty(columnName = \"STREET\", clazz = String.class, desiredFieldName = \"Address\")",
+                        "Columns [ADDRESS] and [STREET] both produce property name [Address]. Please set a different desiredFieldName for one of them."},
+                {"@ActiveJdbcRequiredProperty(columnName = \"ADDRESS\", clazz = String.class)\n" +
+                        "@ActiveJdbcRequiredProperty(columnName = \"ADDRESS\", clazz = String.class)",
+                        "Column [ADDRESS] is declared more than once."},
+        };
+    }
+
+    @Test
+    @UseDataProvider("data_for_should_fail_on_property_name_collision")
+    public void should_fail_on_property_name_collision(String annotations, String message) {
+        // given
+        JavaFileObject javaFileObject = model("c.Customer", annotations);
+        // when
+        Compilation compilation = compile(javaFileObject);
+        // then
+        assertThat(compilation).failed();
+        assertThat(compilation).hadErrorContaining(message);
+        assertThat(compilation).hadErrorCount(1);
+    }
+
+    @Test
+    public void should_create_wrapper_when_desired_field_name_resolves_collision() {
+        // given
+        JavaFileObject javaFileObject = model("c.Customer", "@ActiveJdbcRequiredProperty(columnName = \"ADDRESS\", clazz = String.class)\n" +
+                "@ActiveJdbcRequiredProperty(columnName = \"_ADDRESS\", clazz = String.class, desiredFieldName = \"anotherAddress\")");
+        // when
+        Compilation compilation = compile(javaFileObject);
+        // then
+        assertThat(compilation).succeededWithoutWarnings();
+    }
+
     @Test
     public void should_create_wrapper_when_desired_field_name_resolves_keyword_column() {
         // given
