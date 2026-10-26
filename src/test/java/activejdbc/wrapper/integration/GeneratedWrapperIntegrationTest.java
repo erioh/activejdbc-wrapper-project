@@ -84,27 +84,7 @@ public class GeneratedWrapperIntegrationTest {
     @Test
     public void should_read_back_every_type_written_through_the_wrapper() {
         // given
-        AllTypesWrapper written = AllTypesWrapper.builder()
-                .stringValue("text")
-                .booleanValue(true)
-                .shortValue((short) 7)
-                .integerValue(42)
-                .longValue(1234567890123L)
-                .floatValue(1.5f)
-                .doubleValue(2.25)
-                .bigDecimalValue(new BigDecimal("12345.67"))
-                .bigIntegerValue(new BigInteger("123456789012345678901234567890"))
-                .bytesValue(new byte[]{1, 2, 3})
-                .sqlDateValue(Date.valueOf("2026-10-27"))
-                .timeValue(Time.valueOf("13:45:30"))
-                .timestampValue(Timestamp.valueOf("2026-10-27 13:45:30.123"))
-                .utilDateValue(new java.util.Date(1793000000123L))
-                .localDateValue(LocalDate.of(2026, 10, 27))
-                .localTimeValue(LocalTime.of(13, 45, 30))
-                .localDateTimeValue(LocalDateTime.of(2026, 10, 27, 13, 45, 30, 123_000_000))
-                .instantValue(Instant.parse("2026-10-27T10:15:30.123Z"))
-                .uuidValue(UUID.fromString("123e4567-e89b-12d3-a456-426614174000"))
-                .build();
+        AllTypesWrapper written = fullyPopulated();
 
         // when
         AllTypesWrapper read = saveAndReload(written);
@@ -171,6 +151,104 @@ public class GeneratedWrapperIntegrationTest {
         // then: the driver's own Clob, readable as long as the connection is open
         Clob clob = read.getClobValue();
         assertThat(clob.getSubString(1, (int) clob.length())).isEqualTo("hello clob");
+    }
+
+    @Test
+    public void should_find_rows_with_query_builder() {
+        // given
+        save(AllTypesWrapper.builder().stringValue("alpha").integerValue(1).build());
+        save(AllTypesWrapper.builder().stringValue("beta").integerValue(2).build());
+        save(AllTypesWrapper.builder().stringValue("gamma").integerValue(3).build());
+        save(AllTypesWrapper.builder().stringValue("delta").integerValue(4).build());
+
+        // when
+        AllTypesWrapper.AllTypesWrapperQuery query = AllTypesWrapper.query()
+                .integerValue().gt(1)
+                .and(q -> q.stringValue().eq("beta").or().stringValue().like("g%"));
+
+        // then
+        assertThat(query.getSql()).isEqualTo("INTEGER_VALUE > ? AND (STRING_VALUE = ? OR STRING_VALUE LIKE ?)");
+        assertThat(query.fetch()).extracting(AllTypesWrapper::getStringValue).containsExactlyInAnyOrder("beta", "gamma");
+        assertThat(query.fetchModels()).hasSize(2);
+        assertThat(query.fetchCount()).isEqualTo(2L);
+    }
+
+    @Test
+    public void should_combine_or_and_null_checks() {
+        // given
+        save(AllTypesWrapper.builder().stringValue("alpha").integerValue(1).build());
+        save(AllTypesWrapper.builder().stringValue("beta").build());
+        save(AllTypesWrapper.builder().stringValue("gamma").integerValue(3).build());
+
+        // when | then
+        assertThat(AllTypesWrapper.query().integerValue().isNull().or().integerValue().in(3, 4).fetch())
+                .extracting(AllTypesWrapper::getStringValue).containsExactlyInAnyOrder("beta", "gamma");
+        assertThat(AllTypesWrapper.query().integerValue().eq(null).fetchCount()).isEqualTo(1L);
+        assertThat(AllTypesWrapper.query().integerValue().in(java.util.Collections.emptyList()).fetchCount()).isZero();
+        assertThat(AllTypesWrapper.query().fetchCount()).isEqualTo(3L);
+        assertThat(AllTypesWrapper.query().fetch()).hasSize(3);
+    }
+
+    @Test
+    public void should_find_row_by_every_type() {
+        // given: the fully populated row and one with different values
+        save(fullyPopulated());
+        save(AllTypesWrapper.builder().stringValue("other").booleanValue(false).build());
+        AllTypesWrapper expected = fullyPopulated();
+
+        // when | then: each query must match exactly the populated row, which also checks the JDBC conversions
+        assertMatchesOnlyPopulatedRow(AllTypesWrapper.query().stringValue().eq(expected.getStringValue()));
+        assertMatchesOnlyPopulatedRow(AllTypesWrapper.query().booleanValue().eq(expected.getBooleanValue()));
+        assertMatchesOnlyPopulatedRow(AllTypesWrapper.query().shortValue().eq(expected.getShortValue()));
+        assertMatchesOnlyPopulatedRow(AllTypesWrapper.query().integerValue().eq(expected.getIntegerValue()));
+        assertMatchesOnlyPopulatedRow(AllTypesWrapper.query().longValue().eq(expected.getLongValue()));
+        assertMatchesOnlyPopulatedRow(AllTypesWrapper.query().floatValue().eq(expected.getFloatValue()));
+        assertMatchesOnlyPopulatedRow(AllTypesWrapper.query().doubleValue().eq(expected.getDoubleValue()));
+        assertMatchesOnlyPopulatedRow(AllTypesWrapper.query().bigDecimalValue().eq(expected.getBigDecimalValue()));
+        assertMatchesOnlyPopulatedRow(AllTypesWrapper.query().bigIntegerValue().eq(expected.getBigIntegerValue()));
+        assertMatchesOnlyPopulatedRow(AllTypesWrapper.query().bytesValue().eq(expected.getBytesValue()));
+        assertMatchesOnlyPopulatedRow(AllTypesWrapper.query().sqlDateValue().eq(expected.getSqlDateValue()));
+        assertMatchesOnlyPopulatedRow(AllTypesWrapper.query().timeValue().eq(expected.getTimeValue()));
+        assertMatchesOnlyPopulatedRow(AllTypesWrapper.query().timestampValue().eq(expected.getTimestampValue()));
+        assertMatchesOnlyPopulatedRow(AllTypesWrapper.query().utilDateValue().eq(expected.getUtilDateValue()));
+        assertMatchesOnlyPopulatedRow(AllTypesWrapper.query().localDateValue().eq(expected.getLocalDateValue()));
+        assertMatchesOnlyPopulatedRow(AllTypesWrapper.query().localTimeValue().eq(expected.getLocalTimeValue()));
+        assertMatchesOnlyPopulatedRow(AllTypesWrapper.query().localDateTimeValue().eq(expected.getLocalDateTimeValue()));
+        assertMatchesOnlyPopulatedRow(AllTypesWrapper.query().instantValue().eq(expected.getInstantValue()));
+        assertMatchesOnlyPopulatedRow(AllTypesWrapper.query().uuidValue().eq(expected.getUuidValue()));
+        assertMatchesOnlyPopulatedRow(AllTypesWrapper.query().localDateValue().between(LocalDate.of(2026, 1, 1), LocalDate.of(2026, 12, 31)));
+    }
+
+    private static void assertMatchesOnlyPopulatedRow(AllTypesWrapper.AllTypesWrapperQuery query) {
+        assertThat(query.fetch()).as(query.getSql()).extracting(AllTypesWrapper::getStringValue).containsExactly("text");
+    }
+
+    private static AllTypesWrapper fullyPopulated() {
+        return AllTypesWrapper.builder()
+                .stringValue("text")
+                .booleanValue(true)
+                .shortValue((short) 7)
+                .integerValue(42)
+                .longValue(1234567890123L)
+                .floatValue(1.5f)
+                .doubleValue(2.25)
+                .bigDecimalValue(new BigDecimal("12345.67"))
+                .bigIntegerValue(new BigInteger("123456789012345678901234567890"))
+                .bytesValue(new byte[]{1, 2, 3})
+                .sqlDateValue(Date.valueOf("2026-10-27"))
+                .timeValue(Time.valueOf("13:45:30"))
+                .timestampValue(Timestamp.valueOf("2026-10-27 13:45:30.123"))
+                .utilDateValue(new java.util.Date(1793000000123L))
+                .localDateValue(LocalDate.of(2026, 10, 27))
+                .localTimeValue(LocalTime.of(13, 45, 30))
+                .localDateTimeValue(LocalDateTime.of(2026, 10, 27, 13, 45, 30, 123_000_000))
+                .instantValue(Instant.parse("2026-10-27T10:15:30.123Z"))
+                .uuidValue(UUID.fromString("123e4567-e89b-12d3-a456-426614174000"))
+                .build();
+    }
+
+    private void save(AllTypesWrapper wrapper) {
+        assertThat(manipulator.getActivejdbcObject(wrapper).saveIt()).isTrue();
     }
 
     private AllTypesWrapper saveAndReload(AllTypesWrapper wrapper) {

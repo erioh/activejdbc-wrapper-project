@@ -467,6 +467,56 @@ public class ActiveJdbcRequiredPropertyProcessorTest {
     }
 
     @Test
+    public void should_generate_query_builder_usable_in_user_code() {
+        // given
+        JavaFileObject model = model("u.Person", "@ActiveJdbcRequiredProperty(columnName = \"FIRST_NAME\", clazz = String.class)\n" +
+                "@ActiveJdbcRequiredProperty(columnName = \"AMOUNT\", clazz = java.math.BigDecimal.class)\n" +
+                "@ActiveJdbcRequiredProperty(columnName = \"BIRTH_DATE\", clazz = java.time.LocalDate.class)\n" +
+                "@ActiveJdbcRequiredProperty(columnName = \"COUNT\", clazz = Integer.class)");
+        JavaFileObject nested = source("u.Outer", "public class Outer { @ActiveJdbcRequiredProperty(columnName = \"NAME\", clazz = String.class) " +
+                "public static class Inner extends Model {} }");
+        JavaFileObject user = JavaFileObjects.forSourceString("u.Usage",
+                "package u;\n" +
+                        "import java.math.BigDecimal;\n" +
+                        "import java.util.List;\n" +
+                        "import org.javalite.activejdbc.LazyList;\n" +
+                        "public class Usage {\n" +
+                        "    List<PersonWrapper> wrappers() {\n" +
+                        "        return PersonWrapper.query()\n" +
+                        "                .firstName().like(\"Jo%\")\n" +
+                        "                .and(q -> q.amount().gt(BigDecimal.TEN).or().birthDate().isNull())\n" +
+                        "                .count().between(1, 5)\n" +
+                        "                .fetch();\n" +
+                        "    }\n" +
+                        "    LazyList<Person> models() { return PersonWrapper.query().firstName().in(\"a\", \"b\").fetchModels(); }\n" +
+                        "    Long count() { return PersonWrapper.query().fetchCount(); }\n" +
+                        "    List<Outer_InnerWrapper> nested() { return Outer_InnerWrapper.query().name().eq(\"x\").fetch(); }\n" +
+                        "}");
+        // when
+        Compilation compilation = compile(model, nested, user);
+        // then
+        assertThat(compilation).succeededWithoutWarnings();
+    }
+
+    @Test
+    public void should_leave_out_columns_clashing_with_query_methods() throws IOException {
+        // given
+        JavaFileObject model = model("u.Report", "@ActiveJdbcRequiredProperty(columnName = \"TO_STRING\", clazz = String.class)\n" +
+                "@ActiveJdbcRequiredProperty(columnName = \"TITLE\", clazz = String.class)");
+        // when
+        Compilation compilation = compile(model);
+        // then
+        assertThat(compilation).succeeded();
+        assertThat(compilation).hadWarningContaining("Column [TO_STRING] is not available in the query builder: property name [toString] " +
+                "clashes with a method of the query class. Set desiredFieldName to use it in queries.");
+        String source = compilation.generatedSourceFile("u.ReportWrapper").get().getCharContent(true).toString();
+        String queryClass = source.substring(source.indexOf("class ReportWrapperQuery"));
+        Assertions.assertThat(queryClass).contains("title()").doesNotContain("\"TO_STRING\"");
+        // the rest of the wrapper still has the column
+        Assertions.assertThat(source).contains("public java.lang.String getToString()");
+    }
+
+    @Test
     public void should_fail_when_interface_is_annotated() {
         // given
         JavaFileObject javaFileObject = JavaFileObjects.forSourceString("i.Api",

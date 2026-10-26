@@ -16,6 +16,7 @@ package activejdbc.wrapper.annotation.processor;
 import activejdbc.wrapper.annotation.ActiveJdbcRequiredProperties;
 import activejdbc.wrapper.annotation.ActiveJdbcRequiredProperty;
 import activejdbc.wrapper.annotation.processor.adapter.builder.WrapperClassBuilder;
+import activejdbc.wrapper.annotation.processor.adapter.builder.strategy.WrapperQueryClassBuilder;
 import activejdbc.wrapper.annotation.processor.context.AnnotationProcessorContext;
 import activejdbc.wrapper.annotation.processor.context.ColumnContext;
 import activejdbc.wrapper.annotation.processor.util.AnnotationValueExtractor;
@@ -74,6 +75,11 @@ public class ActiveJdbcRequiredPropertyProcessor extends AbstractProcessor {
                 List<ColumnContext> columnContexts = wrapperFactory.getColumnContexts(annotationMirrors);
                 if (!hasValidColumns(columnContexts, element)) {
                     continue;
+                }
+                for (ColumnContext leftOut : WrapperQueryClassBuilder.columnsLeftOut(columnContexts)) {
+                    processingEnv.getMessager().printMessage(Diagnostic.Kind.WARNING, String.format(
+                            "Column [%s] is not available in the query builder: property name [%s] clashes with a method of the query class. Set desiredFieldName to use it in queries.",
+                            leftOut.getColumnName(), leftOut.getPropertyName()), element);
                 }
                 String packageName = processingEnv.getElementUtils().getPackageOf(element).getQualifiedName().toString();
                 String qualifiedName = ((TypeElement) element).getQualifiedName().toString();
