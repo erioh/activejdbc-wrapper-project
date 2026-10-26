@@ -5,10 +5,12 @@ import com.google.testing.compile.JavaFileObjects;
 import com.tngtech.java.junit.dataprovider.DataProvider;
 import com.tngtech.java.junit.dataprovider.DataProviderRunner;
 import com.tngtech.java.junit.dataprovider.UseDataProvider;
+import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import javax.tools.JavaFileObject;
+import java.io.IOException;
 
 import static com.google.testing.compile.CompilationSubject.assertThat;
 import static com.google.testing.compile.Compiler.javac;
@@ -176,6 +178,34 @@ public class ActiveJdbcRequiredPropertyProcessorTest {
         assertThat(compilation).failed();
         assertThat(compilation).hadErrorContaining(message);
         assertThat(compilation).hadErrorCount(1);
+    }
+
+    @Test
+    public void should_generate_members_in_annotation_order() throws IOException {
+        // given
+        String[] columns = {"ZULU", "ALPHA", "MIKE", "BRAVO", "YANKEE", "CHARLIE"};
+        StringBuilder annotations = new StringBuilder();
+        for (String column : columns) {
+            annotations.append(String.format("@ActiveJdbcRequiredProperty(columnName = \"%s\", clazz = String.class)%n", column));
+        }
+        JavaFileObject javaFileObject = model("o.Ordered", annotations.toString());
+        // when
+        Compilation compilation = compile(javaFileObject);
+        // then
+        assertThat(compilation).succeededWithoutWarnings();
+        String source = compilation.generatedSourceFile("o.OrderedWrapper").get().getCharContent(true).toString();
+        for (String member : new String[]{"public java.lang.String get%s()", "public void set%s(", "%s = \"", "this.get%s(), that.get%s()", "public OrderedWrapperBuilder %s("}) {
+            int previous = -1;
+            for (String column : columns) {
+                String propertyName = column.toLowerCase();
+                String name = member.startsWith("public OrderedWrapperBuilder") || member.startsWith("%s =")
+                        ? propertyName
+                        : Character.toUpperCase(propertyName.charAt(0)) + propertyName.substring(1);
+                int index = source.indexOf(member.replace("%s", name));
+                Assertions.assertThat(index).as("%s for column %s", member, column).isGreaterThan(previous);
+                previous = index;
+            }
+        }
     }
 
     @Test

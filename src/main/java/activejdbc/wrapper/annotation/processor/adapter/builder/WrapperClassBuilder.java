@@ -53,10 +53,10 @@ public class WrapperClassBuilder {
     private final String activejdbcObjectClassName;
     private final String wrapperClassName;
     private final String activejdbcObjectName;
-    private final Set<String> settersBody = new HashSet<>();
-    private final Set<String> gettersBody = new HashSet<>();
+    private final Set<String> settersBody = new LinkedHashSet<>();
+    private final Set<String> gettersBody = new LinkedHashSet<>();
     private final List<ColumnContext> columnContexts;
-    private final Map<String, String> propertyNamesAndGetters = new HashMap<>();
+    private final Map<String, String> propertyNamesAndGetters = new LinkedHashMap<>();
     private final WrapperBuilderClassBuilder wrapperBuilderClassBuilder;
     private String hashCode = StringUtils.EMPTY_STRING;
     private String equals = StringUtils.EMPTY_STRING;
