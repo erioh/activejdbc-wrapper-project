@@ -14,6 +14,7 @@ limitations under the License.
 package activejdbc.wrapper.annotation.processor.util;
 
 import java.util.Arrays;
+import java.util.Locale;
 import java.util.stream.Collectors;
 
 public final class StringUtils {
@@ -46,6 +47,20 @@ public final class StringUtils {
         String firstCharacter = string.substring(0, 1);
         String allOtherCharacters = string.substring(1);
         return toUppercase ? firstCharacter.toUpperCase() + allOtherCharacters : firstCharacter.toLowerCase() + allOtherCharacters;
+    }
+
+    /**
+     * Column name as a Java constant: upper case, characters that can't be part of an identifier replaced with '_'.
+     */
+    public static String buildConstantName(String columnName) {
+        StringBuilder constantName = new StringBuilder();
+        for (char character : columnName.toUpperCase(Locale.ROOT).toCharArray()) {
+            constantName.append(Character.isJavaIdentifierPart(character) ? character : '_');
+        }
+        if (constantName.length() == 0 || !Character.isJavaIdentifierStart(constantName.charAt(0))) {
+            constantName.insert(0, '_');
+        }
+        return constantName.toString();
     }
 
     public static String buildMethodName(String propertyName, String prefix) {

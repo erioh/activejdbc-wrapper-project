@@ -33,6 +33,11 @@ public final class StringTemplates {
             "return wrappers;%n" +
             "}%n";
     /**
+     * 1. constant name
+     * 2. column name
+     */
+    public static final String COLUMN_NAME_CONSTANT_TEMPLATE = "public static final java.lang.String %s = \"%s\";%n";
+    /**
      * 1. toString implementation
      */
     public static final String TO_STRING_METHOD_TEMPLATE = "public java.lang.String toString() {%n" +

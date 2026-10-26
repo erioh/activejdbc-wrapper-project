@@ -2,6 +2,7 @@ package com.sdemenkov;
 import com.sdemenkov.FancyTableWithCustomColumn;
 @javax.annotation.processing.Generated("activejdbc.wrapper.annotation.processor.ActiveJdbcRequiredPropertyProcessor")
 public class FancyTableWithCustomColumnNewWrapperSuffix extends activejdbc.wrapper.ActivejdbcWrapper<FancyTableWithCustomColumn> {
+    public static final java.lang.String FANCY_TABLE_ID = "FANCY_TABLE_ID";
     private FancyTableWithCustomColumn fancyTableWithCustomColumn;
     public FancyTableWithCustomColumnNewWrapperSuffix() {
         this.fancyTableWithCustomColumn = new FancyTableWithCustomColumn();

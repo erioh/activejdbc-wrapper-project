@@ -1,6 +1,7 @@
 package package.name;
 import package.name.ObjectClassName;
 public class ObjectClassNameWrapper extends activejdbc.wrapper.ActivejdbcWrapper<ObjectClassName>{
+public static final java.lang.String STRING_COLUMN = "STRING_COLUMN";
 private ObjectClassName objectClassName;
  public ObjectClassNameWrapper() {
 this.objectClassName = new ObjectClassName();

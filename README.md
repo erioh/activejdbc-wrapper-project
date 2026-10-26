@@ -145,6 +145,15 @@ Query results can be wrapped in one go, which is handy for assertions on whole l
         assertThat(rows).containsExactly(expectedFirst, expectedSecond);
 ```
 
+Each wrapper also has a constant per column, handy for queries without string literals:
+
+```java
+        List<FancyTable> rows = FancyTable.where(FancyTableWrapper.FIRST_NAME + " = ?", "Some value");
+```
+
+The constant name is the column name in upper case, with characters that can't be part of a Java identifier
+replaced by `_`.
+
 4. In case if you want to get a real ActiveJDBC object from this wrapper, you'll have to use
    ActivejdbcWrapperManipulator (for calling insert method, for example).
 
