@@ -23,7 +23,9 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.sql.Timestamp;
-import java.util.Collections;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashSet;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -62,6 +64,6 @@ public class TimestampSetterBuilderStrategyTest {
     public void should_return_valid_classes() {
         // when | then
         assertThat(setterBuilderStrategy.typesToApply())
-                .isEqualTo(Collections.singleton(Timestamp.class));
+                .isEqualTo(new HashSet<>(Arrays.asList(Timestamp.class, Date.class)));
     }
 }

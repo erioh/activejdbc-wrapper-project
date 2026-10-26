@@ -5,10 +5,12 @@ import com.google.testing.compile.JavaFileObjects;
 import com.tngtech.java.junit.dataprovider.DataProvider;
 import com.tngtech.java.junit.dataprovider.DataProviderRunner;
 import com.tngtech.java.junit.dataprovider.UseDataProvider;
+import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import javax.tools.JavaFileObject;
+import java.io.IOException;
 
 import static com.google.testing.compile.CompilationSubject.assertThat;
 import static com.google.testing.compile.Compiler.javac;
@@ -139,6 +141,32 @@ public class ActiveJdbcRequiredPropertyProcessorTest {
         // then
         assertThat(compilation).succeeded();
         assertThat(compilation).generatedSourceFile("e.CarWrapper");
+    }
+
+    @Test
+    public void should_use_dedicated_accessors_for_supported_types() throws IOException {
+        // given
+        JavaFileObject javaFileObject = model("t.Typed",
+                "@ActiveJdbcRequiredProperty(columnName = \"CONTENT\", clazz = byte[].class)\n" +
+                        "@ActiveJdbcRequiredProperty(columnName = \"CREATED\", clazz = java.util.Date.class)\n" +
+                        "@ActiveJdbcRequiredProperty(columnName = \"UPDATED\", clazz = java.time.Instant.class)\n" +
+                        "@ActiveJdbcRequiredProperty(columnName = \"COUNTER\", clazz = java.math.BigInteger.class)");
+        // when
+        Compilation compilation = compile(javaFileObject);
+        // then
+        assertThat(compilation).succeededWithoutWarnings();
+        String source = compilation.generatedSourceFile("t.TypedWrapper").get().getCharContent(true).toString();
+        Assertions.assertThat(source)
+                .contains("typed.getBytes(\"CONTENT\")")
+                .contains("typed.getTimestamp(\"CREATED\")")
+                .contains("this.typed.setTimestamp(\"CREATED\", created)")
+                .contains("typed.getTimestamp(\"UPDATED\"))")
+                .contains("this.typed.setTimestamp(\"UPDATED\", java.util.Optional.ofNullable(updated).map(java.sql.Timestamp::from)")
+                .contains("typed.getBigDecimal(\"COUNTER\"))")
+                .contains("this.typed.setBigDecimal(\"COUNTER\", java.util.Optional.ofNullable(counter).map(java.math.BigDecimal::new)")
+                // arrays are compared by content
+                .contains("java.util.Objects.deepEquals(this.getContent(), that.getContent())")
+                .contains("java.util.Arrays.deepHashCode(new java.lang.Object[]{");
     }
 
     @Test

@@ -27,10 +27,10 @@ public class FancyTableWithCustomColumnNewWrapperSuffix extends activejdbc.wrapp
         if (o == null || getClass() != o.getClass()) return false;
         FancyTableWithCustomColumnNewWrapperSuffix that = (FancyTableWithCustomColumnNewWrapperSuffix) o;
         return
-                java.util.Objects.equals(this.getCustomColumn(), that.getCustomColumn());
+                java.util.Objects.deepEquals(this.getCustomColumn(), that.getCustomColumn());
     }
     public int hashCode() {
-        return java.util.Objects.hash(this.getCustomColumn());
+        return java.util.Arrays.deepHashCode(new java.lang.Object[]{this.getCustomColumn()});
     }
 
     public static FancyTableWithCustomColumnNewWrapperSuffixBuilder builder() {

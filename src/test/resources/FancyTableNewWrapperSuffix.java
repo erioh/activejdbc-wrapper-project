@@ -27,10 +27,10 @@ public class FancyTableNewWrapperSuffix extends activejdbc.wrapper.ActivejdbcWra
         if (o == null || getClass() != o.getClass()) return false;
         FancyTableNewWrapperSuffix that = (FancyTableNewWrapperSuffix) o;
         return
-                java.util.Objects.equals(this.getFancyTableId(), that.getFancyTableId());
+                java.util.Objects.deepEquals(this.getFancyTableId(), that.getFancyTableId());
     }
     public int hashCode() {
-        return java.util.Objects.hash(this.getFancyTableId());
+        return java.util.Arrays.deepHashCode(new java.lang.Object[]{this.getFancyTableId()});
     }
 
     public static FancyTableNewWrapperSuffixBuilder builder() {

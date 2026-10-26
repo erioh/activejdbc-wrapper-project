@@ -14,7 +14,9 @@ limitations under the License.
 package activejdbc.wrapper.annotation.processor.adapter.builder.strategy.setter;
 
 import java.sql.Timestamp;
-import java.util.Collections;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashSet;
 import java.util.Set;
 
 public class TimestampSetterBuilderStrategy implements SetterBuilderStrategy {
@@ -37,6 +39,6 @@ public class TimestampSetterBuilderStrategy implements SetterBuilderStrategy {
 
     @Override
     public Set<Class<?>> typesToApply() {
-        return Collections.singleton(Timestamp.class);
+        return new HashSet<>(Arrays.asList(Timestamp.class, Date.class));
     }
 }
