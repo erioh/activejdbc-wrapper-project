@@ -46,6 +46,8 @@ public class ActiveJdbcRequiredPropertyWrapperFactory {
                 .withGetters()
                 // add get activejdbc object method
                 .withMethodGetActivejdbcObject()
+                // add static wrap(Collection) for query results
+                .withWrapMethod()
                 // add toString (using getters)
                 .withToString()
                 // add equals

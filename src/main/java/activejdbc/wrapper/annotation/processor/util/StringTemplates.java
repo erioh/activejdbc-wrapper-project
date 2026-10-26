@@ -19,6 +19,20 @@ public final class StringTemplates {
             "return %s;%n" +
             "}%n";
     /**
+     * 1. wrapper class name
+     * 2. activejdbc object class
+     * 3. wrapper class name
+     * 4. activejdbc object class
+     * 5. wrapper class name
+     */
+    public static final String WRAP_METHOD_TEMPLATE = "public static java.util.List<%s> wrap(java.util.Collection<? extends %s> models) {%n" +
+            "java.util.List<%s> wrappers = new java.util.ArrayList<>(models.size());%n" +
+            "for (%s model : models) {%n" +
+            "wrappers.add(new %s(model));%n" +
+            "}%n" +
+            "return wrappers;%n" +
+            "}%n";
+    /**
      * 1. toString implementation
      */
     public static final String TO_STRING_METHOD_TEMPLATE = "public java.lang.String toString() {%n" +

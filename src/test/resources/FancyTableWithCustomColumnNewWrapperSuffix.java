@@ -19,6 +19,13 @@ public class FancyTableWithCustomColumnNewWrapperSuffix extends activejdbc.wrapp
     protected FancyTableWithCustomColumn getActivejdbcObject() {
         return fancyTableWithCustomColumn;
     }
+    public static java.util.List<FancyTableWithCustomColumnNewWrapperSuffix> wrap(java.util.Collection<? extends FancyTableWithCustomColumn> models) {
+        java.util.List<FancyTableWithCustomColumnNewWrapperSuffix> wrappers = new java.util.ArrayList<>(models.size());
+        for (FancyTableWithCustomColumn model : models) {
+            wrappers.add(new FancyTableWithCustomColumnNewWrapperSuffix(model));
+        }
+        return wrappers;
+    }
     public java.lang.String toString() {
         return "{customColumn = " + (this.getCustomColumn() == null ? null : "'" + this.getCustomColumn() + "'")
                 + "}";

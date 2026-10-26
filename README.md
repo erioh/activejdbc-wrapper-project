@@ -138,6 +138,13 @@ find FancyTableWrapper.java).
 > Listing the processor in `<annotationProcessors>` (as in step 5) or passing `-proc:full` to javac works as well.
 > Gradle's `annotationProcessor` configuration needs nothing extra.
 
+Query results can be wrapped in one go, which is handy for assertions on whole lists:
+
+```java
+        List<FancyTableWrapper> rows = FancyTableWrapper.wrap(FancyTable.findAll());
+        assertThat(rows).containsExactly(expectedFirst, expectedSecond);
+```
+
 4. In case if you want to get a real ActiveJDBC object from this wrapper, you'll have to use
    ActivejdbcWrapperManipulator (for calling insert method, for example).
 
