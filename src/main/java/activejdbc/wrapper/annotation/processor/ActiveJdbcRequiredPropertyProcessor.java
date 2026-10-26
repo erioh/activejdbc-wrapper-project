@@ -15,6 +15,7 @@ package activejdbc.wrapper.annotation.processor;
 
 import activejdbc.wrapper.annotation.ActiveJdbcRequiredProperties;
 import activejdbc.wrapper.annotation.ActiveJdbcRequiredProperty;
+import activejdbc.wrapper.annotation.processor.adapter.builder.WrapperClassBuilder;
 import activejdbc.wrapper.annotation.processor.context.AnnotationProcessorContext;
 import activejdbc.wrapper.annotation.processor.context.ColumnContext;
 import activejdbc.wrapper.annotation.processor.util.AnnotationValueExtractor;
@@ -63,14 +64,19 @@ public class ActiveJdbcRequiredPropertyProcessor extends AbstractProcessor {
                     continue;
                 }
                 processingEnv.getMessager().printMessage(Diagnostic.Kind.NOTE, "found @ActiveJdbcRequiredProperty at " + element);
+                if (!isReachableFromWrapper((TypeElement) element)) {
+                    continue;
+                }
                 List<? extends AnnotationMirror> annotationMirrors = filterNeededAnnotationMirrors(element.getAnnotationMirrors());
                 List<ColumnContext> columnContexts = wrapperFactory.getColumnContexts(annotationMirrors);
                 if (!hasValidColumns(columnContexts, element)) {
                     continue;
                 }
                 String packageName = processingEnv.getElementUtils().getPackageOf(element).getQualifiedName().toString();
-                String className = element.getSimpleName().toString();
-                String wrapperClassName = className + wrapperSuffix;
+                String qualifiedName = ((TypeElement) element).getQualifiedName().toString();
+                // Outer.Inner for nested classes
+                String className = packageName.isEmpty() ? qualifiedName : qualifiedName.substring(packageName.length() + 1);
+                String wrapperClassName = WrapperClassBuilder.wrapperClassName(className, wrapperSuffix);
                 String qualifiedWrapperClassName = packageName.isEmpty() ? wrapperClassName : packageName + "." + wrapperClassName;
 
                 String wrapperClassBody = wrapperFactory.build(packageName, className, columnContexts);
@@ -86,6 +92,28 @@ public class ActiveJdbcRequiredPropertyProcessor extends AbstractProcessor {
 
         }
         return false;
+    }
+
+    /**
+     * The wrapper is a top-level class in the same package, so it can only use top-level and static nested classes
+     * that aren't private. Local classes never get here: javac doesn't pass their annotations to processors.
+     */
+    private boolean isReachableFromWrapper(TypeElement element) {
+        for (Element current = element; current.getKind() != ElementKind.PACKAGE; current = current.getEnclosingElement()) {
+            Element enclosing = current.getEnclosingElement();
+            if (enclosing.getKind() == ElementKind.PACKAGE) {
+                return true;
+            }
+            if (!current.getModifiers().contains(Modifier.STATIC)) {
+                error(String.format("Class [%s] is an inner class, make it static to be annotated with ActiveJdbcRequiredProperty.", ((TypeElement) current).getQualifiedName()), element);
+                return false;
+            }
+            if (current.getModifiers().contains(Modifier.PRIVATE)) {
+                error(String.format("Class [%s] is private, the generated wrapper can't access it.", ((TypeElement) current).getQualifiedName()), element);
+                return false;
+            }
+        }
+        return true;
     }
 
     private boolean hasValidColumns(List<ColumnContext> columnContexts, Element element) {

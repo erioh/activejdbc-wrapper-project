@@ -113,7 +113,7 @@ Types with dedicated accessors: `String`, `Boolean`, `Short`, `Integer`, `Long`,
 
 That's it. In the same package where your ActiveJDBC classes are placed (in the same package, but folder would be
 target/generated-sources/annotations ) you'll find new classes with suffix "Wrapper" (in case of FancyTable.java you'll
-find FancyTableWrapper.java).
+find FancyTableWrapper.java). For a static nested model `Outer.Inner` the wrapper is called `Outer_InnerWrapper`.
 
 > **JDK 23 and newer:** javac no longer runs annotation processors that are only found on the classpath, so with
 > nothing but the dependency from step 1 no wrapper is generated, and there is no error either. Enable the processor
