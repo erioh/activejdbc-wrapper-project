@@ -1,0 +1,22 @@
+version: 2
+updates:
+  - package-ecosystem: maven
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      # one PR per week for test libraries instead of one per library
+      test-dependencies:
+        patterns:
+          - junit:*
+          - org.assertj:*
+          - org.mockito:*
+          - com.tngtech.java:*
+          - com.google.testing.compile:*
+    ignore:
+      # provided dependency: the processor must keep working with the ActiveJDBC version users already have
+      - dependency-name: org.javalite:activejdbc
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
