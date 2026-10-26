@@ -2,6 +2,7 @@ package com.sdemenkov;
 import com.sdemenkov.FancyTable;
 @javax.annotation.processing.Generated("activejdbc.wrapper.annotation.processor.ActiveJdbcRequiredPropertyProcessor")
 public class FancyTableWrapper extends activejdbc.wrapper.ActivejdbcWrapper<FancyTable> {
+    public static final java.lang.String FANCY_TABLE_ID = "FANCY_TABLE_ID";
     private FancyTable fancyTable;
     public FancyTableWrapper() {
         this.fancyTable = new FancyTable();

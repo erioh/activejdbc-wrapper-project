@@ -31,15 +31,17 @@ public class WrapperClassBuilder {
      * 2. @Generated annotation line (may be empty)
      * 3. wrapper class name
      * 4. activejdbc object class
-     * 5  activejdbc object class
-     * 6. activejdbc object name
-     * 7. constructors
-     * 8. methods
-     * 9. builder method and builder class
+     * 5. column name constants
+     * 6  activejdbc object class
+     * 7. activejdbc object name
+     * 8. constructors
+     * 9. methods
+     * 10. builder method and builder class
      */
     public static final String CLASS_TEMPLATE = "%s" +
             "%s" +
             "public class %s extends activejdbc.wrapper.ActivejdbcWrapper<%s>{%n" +
+            "%s" +
             "private %s %s;%n" +
             "%s%n" +
             "%s%n" +
@@ -106,7 +108,14 @@ public class WrapperClassBuilder {
                 : String.format(PACKAGE_AND_IMPORT_TEMPLATE, packageName, packageName, outermostClassName());
         String generatedAnnotationLine = StringUtils.isBlank(generatedAnnotation) ? StringUtils.EMPTY_STRING : String.format("%s%n", generatedAnnotation);
         return String.format(CLASS_TEMPLATE, packageAndImport, generatedAnnotationLine,
-                wrapperClassName, activejdbcObjectClassName, activejdbcObjectClassName, activejdbcObjectName, constructors, methods, builderAndBuilderClass);
+                wrapperClassName, activejdbcObjectClassName, buildColumnNameConstants(), activejdbcObjectClassName, activejdbcObjectName, constructors, methods, builderAndBuilderClass);
+    }
+
+    private String buildColumnNameConstants() {
+        StringBuilder constants = new StringBuilder();
+        columnContexts.forEach(columnContext -> constants.append(String.format(COLUMN_NAME_CONSTANT_TEMPLATE,
+                StringUtils.buildConstantName(columnContext.getColumnName()), columnContext.getColumnName())));
+        return constants.toString();
     }
 
     /**

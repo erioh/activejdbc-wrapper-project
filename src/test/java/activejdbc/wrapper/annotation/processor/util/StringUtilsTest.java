@@ -104,4 +104,23 @@ public class StringUtilsTest {
     public void should_test_is_valid_method(String string, boolean result) {
         assertThat(StringUtils.isValid(string)).isEqualTo(result);
     }
+
+    @DataProvider
+    public static Object[][] build_constant_name() {
+        return new Object[][]{
+                {"FIRST_NAME", "FIRST_NAME"},
+                {"first_name", "FIRST_NAME"},
+                {"_ADDRESS", "_ADDRESS"},
+                {"my-col", "MY_COL"},
+                {"order id", "ORDER_ID"},
+                {"1ST_PLACE", "_1ST_PLACE"},
+                {"default", "DEFAULT"},
+        };
+    }
+
+    @Test
+    @UseDataProvider("build_constant_name")
+    public void should_build_constant_name(String columnName, String expectedValue) {
+        assertThat(StringUtils.buildConstantName(columnName)).isEqualTo(expectedValue);
+    }
 }

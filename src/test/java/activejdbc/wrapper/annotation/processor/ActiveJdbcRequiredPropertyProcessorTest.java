@@ -287,6 +287,37 @@ public class ActiveJdbcRequiredPropertyProcessorTest {
     }
 
     @Test
+    public void should_generate_column_name_constants_usable_in_user_code() {
+        // given
+        JavaFileObject model = model("q.Person", "@ActiveJdbcRequiredProperty(columnName = \"FIRST_NAME\", clazz = String.class)\n" +
+                "@ActiveJdbcRequiredProperty(columnName = \"last-name\", clazz = String.class, desiredFieldName = \"lastName\")");
+        JavaFileObject user = JavaFileObjects.forSourceString("q.Query",
+                "package q;\n" +
+                        "public class Query {\n" +
+                        "    static final String CONDITION = PersonWrapper.FIRST_NAME + \" = ? AND \" + PersonWrapper.LAST_NAME + \" = ?\";\n" +
+                        "}");
+        // when
+        Compilation compilation = compile(model, user);
+        // then
+        assertThat(compilation).succeededWithoutWarnings();
+        assertThat(compilation).generatedSourceFile("q.PersonWrapper").contentsAsUtf8String()
+                .contains("public static final java.lang.String LAST_NAME = \"last-name\";");
+    }
+
+    @Test
+    public void should_fail_on_constant_name_collision() {
+        // given
+        JavaFileObject javaFileObject = model("c.Customer", "@ActiveJdbcRequiredProperty(columnName = \"MY_COL\", clazz = String.class)\n" +
+                "@ActiveJdbcRequiredProperty(columnName = \"my-col\", clazz = String.class, desiredFieldName = \"other\")");
+        // when
+        Compilation compilation = compile(javaFileObject);
+        // then
+        assertThat(compilation).failed();
+        assertThat(compilation).hadErrorContaining("Columns [MY_COL] and [my-col] both produce constant name [MY_COL] in the wrapper.");
+        assertThat(compilation).hadErrorCount(1);
+    }
+
+    @Test
     public void should_create_wrapper_when_desired_field_name_resolves_collision() {
         // given
         JavaFileObject javaFileObject = model("c.Customer", "@ActiveJdbcRequiredProperty(columnName = \"ADDRESS\", clazz = String.class)\n" +
@@ -331,6 +362,54 @@ public class ActiveJdbcRequiredPropertyProcessorTest {
         JavaFileObject javaFileObject = model("k.Flag", "@ActiveJdbcRequiredProperty(columnName = \"DEFAULT\", clazz = Boolean.class, desiredFieldName = \"defaultValue\")");
         // when
         Compilation compilation = compile(javaFileObject);
+        // then
+        assertThat(compilation).succeededWithoutWarnings();
+    }
+
+    @DataProvider
+    public static Object[][] data_for_should_fail_when_class_is_not_an_instantiable_model() {
+        return new Object[][]{
+                {"public class Pojo {}",
+                        "Class [x.Pojo] must extend org.javalite.activejdbc.Model to be annotated with ActiveJdbcRequiredProperty."},
+                {"public abstract class Abstract extends Model {}",
+                        "Class [x.Abstract] is abstract, but the wrapper needs to create its instances."},
+                {"public class PrivateConstructor extends Model { private PrivateConstructor() {} }",
+                        "Class [x.PrivateConstructor] needs a non-private constructor without parameters, the wrapper uses it to create instances."},
+                {"public class OnlyArgsConstructor extends Model { public OnlyArgsConstructor(String name) {} }",
+                        "Class [x.OnlyArgsConstructor] needs a non-private constructor without parameters, the wrapper uses it to create instances."},
+        };
+    }
+
+    @Test
+    @UseDataProvider("data_for_should_fail_when_class_is_not_an_instantiable_model")
+    public void should_fail_when_class_is_not_an_instantiable_model(String declaration, String message) {
+        // given
+        String className = declaration.replaceAll(".*class (\\w+).*", "$1");
+        JavaFileObject javaFileObject = JavaFileObjects.forSourceString("x." + className,
+                "package x;\n" +
+                        "import activejdbc.wrapper.annotation.ActiveJdbcRequiredProperty;\n" +
+                        "import org.javalite.activejdbc.Model;\n" +
+                        "@ActiveJdbcRequiredProperty(columnName = \"NAME\", clazz = String.class)\n" +
+                        declaration);
+        // when
+        Compilation compilation = compile(javaFileObject);
+        // then
+        assertThat(compilation).failed();
+        assertThat(compilation).hadErrorContaining(message);
+        assertThat(compilation).hadErrorCount(1);
+    }
+
+    @Test
+    public void should_create_wrapper_for_model_with_package_private_constructor() {
+        // given
+        JavaFileObject withConstructor = JavaFileObjects.forSourceString("x.Hidden",
+                "package x;\n" +
+                        "import activejdbc.wrapper.annotation.ActiveJdbcRequiredProperty;\n" +
+                        "import org.javalite.activejdbc.Model;\n" +
+                        "@ActiveJdbcRequiredProperty(columnName = \"NAME\", clazz = String.class)\n" +
+                        "public class Hidden extends Model { Hidden() {} }");
+        // when
+        Compilation compilation = compile(withConstructor);
         // then
         assertThat(compilation).succeededWithoutWarnings();
     }
