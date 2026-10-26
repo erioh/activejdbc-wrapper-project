@@ -13,13 +13,14 @@ limitations under the License.
 
 package activejdbc.wrapper.annotation.processor.builder;
 
-import activejdbc.wrapper.annotation.processor.ColumnContext;
-import activejdbc.wrapper.annotation.processor.builder.strategy.GetterBuilderStrategyHolder;
-import activejdbc.wrapper.annotation.processor.builder.strategy.SetterBuilderStrategyHolder;
-import activejdbc.wrapper.annotation.processor.builder.strategy.StrategyHolder;
-import activejdbc.wrapper.annotation.processor.builder.strategy.getter.GetterBuilderStrategy;
-import activejdbc.wrapper.annotation.processor.builder.strategy.setter.SetterBuilderStrategy;
+import activejdbc.wrapper.annotation.processor.adapter.builder.WrapperClassBuilder;
+import activejdbc.wrapper.annotation.processor.adapter.builder.strategy.GetterBuilderStrategyHolder;
+import activejdbc.wrapper.annotation.processor.adapter.builder.strategy.SetterBuilderStrategyHolder;
+import activejdbc.wrapper.annotation.processor.adapter.builder.strategy.StrategyHolder;
+import activejdbc.wrapper.annotation.processor.adapter.builder.strategy.getter.GetterBuilderStrategy;
+import activejdbc.wrapper.annotation.processor.adapter.builder.strategy.setter.SetterBuilderStrategy;
 import activejdbc.wrapper.annotation.processor.context.AnnotationProcessorContext;
+import activejdbc.wrapper.annotation.processor.context.ColumnContext;
 import activejdbc.wrapper.annotation.processor.test.util.ContentExtractor;
 import com.tngtech.java.junit.dataprovider.DataProvider;
 import com.tngtech.java.junit.dataprovider.DataProviderRunner;

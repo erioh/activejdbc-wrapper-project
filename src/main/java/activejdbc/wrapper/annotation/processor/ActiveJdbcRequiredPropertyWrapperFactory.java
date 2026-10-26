@@ -13,8 +13,9 @@ limitations under the License.
 
 package activejdbc.wrapper.annotation.processor;
 
-import activejdbc.wrapper.annotation.processor.builder.WrapperClassBuilder;
+import activejdbc.wrapper.annotation.processor.adapter.builder.WrapperClassBuilder;
 import activejdbc.wrapper.annotation.processor.context.AnnotationProcessorContext;
+import activejdbc.wrapper.annotation.processor.context.ColumnContext;
 import activejdbc.wrapper.annotation.processor.util.AnnotationValueExtractor;
 import activejdbc.wrapper.annotation.processor.util.StringUtils;
 

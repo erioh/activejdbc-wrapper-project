@@ -1,7 +1,8 @@
 package activejdbc.wrapper.annotation.processor.builder.strategy;
 
-import activejdbc.wrapper.annotation.processor.ColumnContext;
+import activejdbc.wrapper.annotation.processor.adapter.builder.strategy.WrapperBuilderClassBuilder;
 import activejdbc.wrapper.annotation.processor.context.AnnotationProcessorContext;
+import activejdbc.wrapper.annotation.processor.context.ColumnContext;
 import activejdbc.wrapper.annotation.processor.test.util.ContentExtractor;
 import com.tngtech.java.junit.dataprovider.DataProvider;
 import com.tngtech.java.junit.dataprovider.DataProviderRunner;

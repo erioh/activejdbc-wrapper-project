@@ -13,7 +13,9 @@ limitations under the License.
 
 package activejdbc.wrapper.annotation.processor.builder.strategy.getter;
 
-import activejdbc.wrapper.annotation.processor.ColumnContext;
+import activejdbc.wrapper.annotation.processor.adapter.builder.strategy.getter.GetterBuilderStrategy;
+import activejdbc.wrapper.annotation.processor.adapter.builder.strategy.getter.TimeGetterBuilderStrategy;
+import activejdbc.wrapper.annotation.processor.context.ColumnContext;
 import com.tngtech.java.junit.dataprovider.DataProvider;
 import com.tngtech.java.junit.dataprovider.DataProviderRunner;
 import com.tngtech.java.junit.dataprovider.UseDataProvider;
@@ -45,7 +47,10 @@ public class TimeGetterBuilderStrategyTest {
         String type = "Time";
         String objectName = "object";
         String expectedGetter = String.format("public Time %s() {%n" +
-                "return new java.sql.Time(object.getDate(\"COLUMN_NAME\").getTime());%n" +
+                "return java.util.Optional.ofNullable(object.getDate(\"COLUMN_NAME\"))%n" +
+                ".map(java.sql.Date::getTime)%n" +
+                ".map(java.sql.Time::new)%n" +
+                ".orElse(null);%n" +
                 "}%n", expectedMethod);
         ColumnContext columnContext = new ColumnContext(type, columnName, desiredFieldName);
 

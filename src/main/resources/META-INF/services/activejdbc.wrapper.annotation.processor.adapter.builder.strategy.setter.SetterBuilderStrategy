@@ -1,0 +1,5 @@
+activejdbc.wrapper.annotation.processor.adapter.builder.strategy.setter.DateSetterBuilderStrategy
+activejdbc.wrapper.annotation.processor.adapter.builder.strategy.setter.DefaultSetterBuilderStrategy
+activejdbc.wrapper.annotation.processor.adapter.builder.strategy.setter.LocalDateTimeSetterBuilderStrategy
+activejdbc.wrapper.annotation.processor.adapter.builder.strategy.setter.LocalTimeSetterBuilderStrategy
+activejdbc.wrapper.annotation.processor.adapter.builder.strategy.setter.TimestampSetterBuilderStrategy

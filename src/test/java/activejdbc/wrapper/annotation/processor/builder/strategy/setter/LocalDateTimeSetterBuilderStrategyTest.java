@@ -13,7 +13,9 @@ limitations under the License.
 
 package activejdbc.wrapper.annotation.processor.builder.strategy.setter;
 
-import activejdbc.wrapper.annotation.processor.ColumnContext;
+import activejdbc.wrapper.annotation.processor.adapter.builder.strategy.setter.LocalDateTimeSetterBuilderStrategy;
+import activejdbc.wrapper.annotation.processor.adapter.builder.strategy.setter.SetterBuilderStrategy;
+import activejdbc.wrapper.annotation.processor.context.ColumnContext;
 import com.tngtech.java.junit.dataprovider.DataProvider;
 import com.tngtech.java.junit.dataprovider.DataProviderRunner;
 import com.tngtech.java.junit.dataprovider.UseDataProvider;
@@ -45,7 +47,9 @@ public class LocalDateTimeSetterBuilderStrategyTest {
         String objectName = "object";
         String type = "SomeType";
         String expectedGetter = String.format("public void %s(%s %s) {%n" +
-                "object.setTimestamp(\"COLUMN_NAME\", java.sql.Timestamp.valueOf(%s));%n" +
+                "object.setTimestamp(\"COLUMN_NAME\", java.util.Optional.ofNullable(%s)%n" +
+                ".map(java.sql.Timestamp::valueOf)%n" +
+                ".orElse(null));%n" +
                 "}%n", methodName, type, expectedColumnName, expectedColumnName);
         ColumnContext columnContext = new ColumnContext(type, columnName, desiredFieldName);
 
