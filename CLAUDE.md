@@ -21,7 +21,7 @@ mvn install -Dgpg.skip                     # verify/install sign with GPG; skip 
 When changing anything that affects compilation or tests, run `mvn test` on both JDK 8 and the latest JDK.
 
 ### pom.xml quirks
-- **Two-pass compile**: `default-compile` compiles *only* `ActiveJdbcRequiredPropertyProcessor.java` with `-proc:none`, then `compile-project` compiles everything else. This is needed because `META-INF/services/javax.annotation.processing.Processor` registers the processor, and javac would otherwise try to load it while compiling this very project.
+- **`-proc:none` for main sources**: `META-INF/services/javax.annotation.processing.Processor` registers the processor, so without it javac would run the processor on this very project. Its `init()` loads strategies via `ServiceLoader` and fails with `ServiceConfigurationError` when the strategy classes aren't compiled yet.
 - Profile `jdk9plus-compile-testing` (auto-activated on JDK 9+) adds `--add-exports jdk.compiler/...` to surefire, because compile-testing reaches into javac internals. Not needed and not active on JDK 8.
 - No linter or formatter is configured.
 
@@ -30,7 +30,7 @@ When changing anything that affects compilation or tests, run `mvn test` on both
 Pipeline (all under `src/main/java/activejdbc/wrapper/annotation/processor/`):
 
 1. `ActiveJdbcRequiredPropertyProcessor` — the `AbstractProcessor`. Reads options `activejdbc.wrapper.suffix` (default `Wrapper`) and `activejdbc.wrapper.builder.method.prefix` (default empty), validated by `StringUtils.isValid`. Collects the annotation mirrors (handling both a single annotation and the `@ActiveJdbcRequiredProperties` container) and writes the generated source through `Filer`.
-2. `context/AnnotationProcessorContext` — hand-wired "DI container": builds the type→strategy maps for getters and setters and holds the suffix/prefix. `ColumnContext` = one annotated column (clazz as FQN string, columnName, desiredFieldName).
+2. `context/AnnotationProcessorContext` — builds the type→strategy maps for getters and setters from `ServiceLoader` (keyed by each strategy's `typesToApply()`, two strategies claiming one type is an error) and holds the suffix/prefix. `ServiceLoader` must get the processor's own class loader: javac/Maven load processors in a separate class loader, and with the default context class loader nothing is found and every column silently falls back to the default strategy (the 1.0.4 "critical bug"). `ColumnContext` = one annotated column (clazz as FQN string, columnName, desiredFieldName).
 3. `ActiveJdbcRequiredPropertyWrapperFactory` — turns mirrors into `ColumnContext`s and drives `WrapperClassBuilder` in a fixed chain (`withSetters → withGetters → withMethodGetActivejdbcObject → withToString → withEquals → withHashCode → withBuilder → buildClassBody`). `withGetters` must run before toString/equals/hashCode, since they read the property→getter map it fills.
 4. `adapter/builder/WrapperClassBuilder` + `strategy/WrapperBuilderClassBuilder` — generate source by `String.format` on templates (`CLASS_TEMPLATE`, `util/StringTemplates`). There is no JavaPoet; output is raw strings with `%n`.
 5. `strategy/getter/*` and `strategy/setter/*` — one strategy per Java type, each supplying a format template that calls the matching ActiveJDBC accessor (`getDate`, `getBigDecimal`, …). `GetterBuilderStrategyHolder`/`SetterBuilderStrategyHolder` look the strategy up by canonical type name and fall back to the `Default*` strategy (plain cast `get`/`set`). Never use `Class.forName` on the column type: it comes from the code being compiled (user enums, arrays, nested classes) and is not on the processor classpath.
@@ -38,7 +38,7 @@ Pipeline (all under `src/main/java/activejdbc/wrapper/annotation/processor/`):
 Property names: `ColumnContext.getPropertyName()` is the single source of truth — `desiredFieldName` if set, otherwise `StringUtils.buildPropertyNameFromColumnName` (`FIRST_NAME` → `firstName`). The processor validates columns before generating (property name must be a Java identifier and not a keyword; primitive types are rejected) and reports problems via `Messager` errors on the annotated element — don't throw exceptions from the processor. Generated setters reference the ActiveJDBC object as `this.<field>` because a property can have the same name as that field.
 
 ### Adding support for a new column type
-Add a getter (and, if needed, setter) strategy class, then register it **in `AnnotationProcessorContext`**, which is what is actually used at runtime. The `META-INF/services/...GetterBuilderStrategy` / `...SetterBuilderStrategy` files list the strategies too, but nothing loads them via `ServiceLoader`; keep them in sync anyway. Add a matching `*StrategyTest`.
+Add a getter (and, if needed, setter) strategy class with `typesToApply()`, list it in `META-INF/services/...GetterBuilderStrategy` / `...SetterBuilderStrategy`, add a matching `*StrategyTest` and a row in `AnnotationProcessorContextTest`.
 
 ## Tests
 

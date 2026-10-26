@@ -20,16 +20,11 @@ import activejdbc.wrapper.annotation.processor.adapter.builder.strategy.Strategy
 import activejdbc.wrapper.annotation.processor.adapter.builder.strategy.getter.*;
 import activejdbc.wrapper.annotation.processor.adapter.builder.strategy.setter.*;
 
-import java.math.BigDecimal;
-import java.sql.Clob;
-import java.sql.Date;
-import java.sql.Time;
-import java.sql.Timestamp;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.ServiceLoader;
+import java.util.Set;
+import java.util.function.Function;
 
 public class AnnotationProcessorContext {
     private final StrategyHolder<SetterBuilderStrategy> setterBuilderStrategyHolder;
@@ -45,33 +40,32 @@ public class AnnotationProcessorContext {
     }
 
     private GetterBuilderStrategyHolder initGetterBuilderStrategyHolder() {
-        Map<Class<?>, GetterBuilderStrategy> getterBuilderStrategies = new HashMap<>();
-        getterBuilderStrategies.put(BigDecimal.class, new BigDecimalGetterBuilderStrategy());
-        getterBuilderStrategies.put(Boolean.class, new BooleanGetterBuilderStrategy());
-        getterBuilderStrategies.put(Clob.class, new ClobGetterBuilderStrategy());
-        getterBuilderStrategies.put(Date.class, new DateGetterBuilderStrategy());
-        getterBuilderStrategies.put(Double.class, new DoubleGetterBuilderStrategy());
-        getterBuilderStrategies.put(Float.class, new FloatGetterBuilderStrategy());
-        getterBuilderStrategies.put(Integer.class, new IntegerGetterBuilderStrategy());
-        getterBuilderStrategies.put(LocalDate.class, new LocalDateGetterBuilderStrategy());
-        getterBuilderStrategies.put(LocalDateTime.class, new LocalDateTimeGetterBuilderStrategy());
-        getterBuilderStrategies.put(LocalTime.class, new LocalTimeGetterBuilderStrategy());
-        getterBuilderStrategies.put(Long.class, new LongGetterBuilderStrategy());
-        getterBuilderStrategies.put(Short.class, new ShortGetterBuilderStrategy());
-        getterBuilderStrategies.put(String.class, new StringGetterBuilderStrategy());
-        getterBuilderStrategies.put(Time.class, new TimeGetterBuilderStrategy());
-        getterBuilderStrategies.put(Timestamp.class, new TimestampGetterBuilderStrategy());
+        Map<Class<?>, GetterBuilderStrategy> getterBuilderStrategies = loadStrategies(GetterBuilderStrategy.class, GetterBuilderStrategy::typesToApply);
         return new GetterBuilderStrategyHolder(new DefaultGetterBuilderStrategy(), getterBuilderStrategies);
     }
 
     private SetterBuilderStrategyHolder initSetterBuilderStrategyHolder() {
-        Map<Class<?>, SetterBuilderStrategy> setterBuilderStrategies = new HashMap<>();
-        setterBuilderStrategies.put(Date.class, new DateSetterBuilderStrategy());
-        setterBuilderStrategies.put(LocalDate.class, new DateSetterBuilderStrategy());
-        setterBuilderStrategies.put(LocalDateTime.class, new LocalDateTimeSetterBuilderStrategy());
-        setterBuilderStrategies.put(LocalTime.class, new LocalTimeSetterBuilderStrategy());
-        setterBuilderStrategies.put(Timestamp.class, new TimestampSetterBuilderStrategy());
+        Map<Class<?>, SetterBuilderStrategy> setterBuilderStrategies = loadStrategies(SetterBuilderStrategy.class, SetterBuilderStrategy::typesToApply);
         return new SetterBuilderStrategyHolder(new DefaultSetterBuilderStrategy(), setterBuilderStrategies);
+    }
+
+    /**
+     * Strategies are registered in META-INF/services. They must be loaded with the class loader of the processor:
+     * javac and build tools load annotation processors in a separate class loader, so the default
+     * (thread context) class loader of ServiceLoader doesn't see them.
+     */
+    private static <T> Map<Class<?>, T> loadStrategies(Class<T> strategyType, Function<T, Set<Class<?>>> typesToApply) {
+        Map<Class<?>, T> strategies = new HashMap<>();
+        for (T strategy : ServiceLoader.load(strategyType, AnnotationProcessorContext.class.getClassLoader())) {
+            for (Class<?> type : typesToApply.apply(strategy)) {
+                T previous = strategies.put(type, strategy);
+                if (previous != null) {
+                    throw new IllegalStateException(String.format("Type %s is claimed by both %s and %s",
+                            type.getName(), previous.getClass().getName(), strategy.getClass().getName()));
+                }
+            }
+        }
+        return strategies;
     }
 
     public ActiveJdbcRequiredPropertyWrapperFactory init() {
