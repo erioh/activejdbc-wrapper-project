@@ -21,6 +21,8 @@
         <junit-dataprovider.version>1.13.1</junit-dataprovider.version>
         <mockito-core.version>3.9.0</mockito-core.version>
         <compile-testing.version>0.24.0</compile-testing.version>
+        <!-- 2.2.x is the last H2 line that runs on Java 8 -->
+        <h2.version>2.2.224</h2.version>
     </properties>
 
     <dependencies>
@@ -58,6 +60,12 @@
             <groupId>com.google.testing.compile</groupId>
             <artifactId>compile-testing</artifactId>
             <version>${compile-testing.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <version>${h2.version}</version>
             <scope>test</scope>
         </dependency>
 
@@ -114,6 +122,16 @@
                         <id>default-compile</id>
                         <configuration>
                             <compilerArgument>-proc:none</compilerArgument>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <!-- generates wrappers for the integration test models; named explicitly because
+                             JDK 23+ doesn't run processors that are only found on the classpath -->
+                        <id>default-testCompile</id>
+                        <configuration>
+                            <annotationProcessors>
+                                <annotationProcessor>activejdbc.wrapper.annotation.processor.ActiveJdbcRequiredPropertyProcessor</annotationProcessor>
+                            </annotationProcessors>
                         </configuration>
                     </execution>
                 </executions>
