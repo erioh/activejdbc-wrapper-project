@@ -26,6 +26,9 @@ When changing anything that affects compilation or tests, run `mvn test` on both
 - Profile `jdk9plus-compile-testing` (auto-activated on JDK 9+) adds `--add-exports jdk.compiler/...` to surefire, because compile-testing reaches into javac internals. Not needed and not active on JDK 8.
 - No linter or formatter is configured.
 
+### Releasing
+Published to Maven Central through the Central Portal (`central-publishing-maven-plugin`, `autoPublish` on). A release needs a Central Portal user token in the `central` server of `~/.m2/settings.xml` and a GPG key; set a non-SNAPSHOT version, then `mvn clean deploy`. Publishing to Maven Central can't be undone, so never run `deploy` without the maintainer explicitly asking. A dry run that builds and signs everything but uploads nothing: `mvn deploy -DskipPublishing=true` (still needs a `central` server entry, dummy credentials are fine).
+
 ## Architecture
 
 Pipeline (all under `src/main/java/activejdbc/wrapper/annotation/processor/`):
