@@ -22,12 +22,14 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.sql.Clob;
 import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -56,6 +58,10 @@ public class AnnotationProcessorContextTest {
                 {String.class, StringGetterBuilderStrategy.class},
                 {Time.class, TimeGetterBuilderStrategy.class},
                 {Timestamp.class, TimestampGetterBuilderStrategy.class},
+                {byte[].class, BytesGetterBuilderStrategy.class},
+                {java.util.Date.class, UtilDateGetterBuilderStrategy.class},
+                {Instant.class, InstantGetterBuilderStrategy.class},
+                {BigInteger.class, BigIntegerGetterBuilderStrategy.class},
                 {UUID.class, DefaultGetterBuilderStrategy.class},
         };
     }
@@ -79,6 +85,9 @@ public class AnnotationProcessorContextTest {
                 {LocalDateTime.class, LocalDateTimeSetterBuilderStrategy.class},
                 {LocalTime.class, LocalTimeSetterBuilderStrategy.class},
                 {Timestamp.class, TimestampSetterBuilderStrategy.class},
+                {java.util.Date.class, TimestampSetterBuilderStrategy.class},
+                {Instant.class, InstantSetterBuilderStrategy.class},
+                {BigInteger.class, BigIntegerSetterBuilderStrategy.class},
                 {String.class, DefaultSetterBuilderStrategy.class},
         };
     }

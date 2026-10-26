@@ -1,10 +1,13 @@
 activejdbc.wrapper.annotation.processor.adapter.builder.strategy.getter.BigDecimalGetterBuilderStrategy
+activejdbc.wrapper.annotation.processor.adapter.builder.strategy.getter.BigIntegerGetterBuilderStrategy
 activejdbc.wrapper.annotation.processor.adapter.builder.strategy.getter.BooleanGetterBuilderStrategy
+activejdbc.wrapper.annotation.processor.adapter.builder.strategy.getter.BytesGetterBuilderStrategy
 activejdbc.wrapper.annotation.processor.adapter.builder.strategy.getter.ClobGetterBuilderStrategy
 activejdbc.wrapper.annotation.processor.adapter.builder.strategy.getter.DateGetterBuilderStrategy
 activejdbc.wrapper.annotation.processor.adapter.builder.strategy.getter.DefaultGetterBuilderStrategy
 activejdbc.wrapper.annotation.processor.adapter.builder.strategy.getter.DoubleGetterBuilderStrategy
 activejdbc.wrapper.annotation.processor.adapter.builder.strategy.getter.FloatGetterBuilderStrategy
+activejdbc.wrapper.annotation.processor.adapter.builder.strategy.getter.InstantGetterBuilderStrategy
 activejdbc.wrapper.annotation.processor.adapter.builder.strategy.getter.IntegerGetterBuilderStrategy
 activejdbc.wrapper.annotation.processor.adapter.builder.strategy.getter.LocalDateGetterBuilderStrategy
 activejdbc.wrapper.annotation.processor.adapter.builder.strategy.getter.LocalDateTimeGetterBuilderStrategy
@@ -14,3 +17,4 @@ activejdbc.wrapper.annotation.processor.adapter.builder.strategy.getter.ShortGet
 activejdbc.wrapper.annotation.processor.adapter.builder.strategy.getter.StringGetterBuilderStrategy
 activejdbc.wrapper.annotation.processor.adapter.builder.strategy.getter.TimeGetterBuilderStrategy
 activejdbc.wrapper.annotation.processor.adapter.builder.strategy.getter.TimestampGetterBuilderStrategy
+activejdbc.wrapper.annotation.processor.adapter.builder.strategy.getter.UtilDateGetterBuilderStrategy

@@ -104,6 +104,11 @@ public class FancyTable extends Model {
 }
 ```
 
+Types with dedicated accessors: `String`, `Boolean`, `Short`, `Integer`, `Long`, `Float`, `Double`, `BigDecimal`,
+`BigInteger`, `byte[]`, `java.sql.Clob`, `java.sql.Date`, `java.sql.Time`, `java.sql.Timestamp`, `java.util.Date`,
+`LocalDate`, `LocalTime`, `LocalDateTime` and `Instant`. Any other (non-primitive) type works through a plain cast of
+`get(...)`/`set(...)`.
+
 3. Compile your project for the first time.
 
 That's it. In the same package where your ActiveJDBC classes are placed (in the same package, but folder would be

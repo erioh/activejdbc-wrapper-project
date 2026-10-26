@@ -19,10 +19,10 @@ if (this == o) return true;
 if (o == null || getClass() != o.getClass()) return false;
 ObjectClassNameWrapper that = (ObjectClassNameWrapper) o;
 return
-java.util.Objects.equals(this.getStringColumn(), that.getStringColumn());
+java.util.Objects.deepEquals(this.getStringColumn(), that.getStringColumn());
 }
 public int hashCode() {
-return java.util.Objects.hash(this.getStringColumn());
+return java.util.Arrays.deepHashCode(new java.lang.Object[]{this.getStringColumn()});
 }
 
 

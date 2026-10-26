@@ -40,7 +40,7 @@ public final class StringTemplates {
      * 1. generated call of getters
      */
     public static final String HASH_CODE_METHOD_TEMPLATE = "public int hashCode() {%n" +
-            "return java.util.Objects.hash(%s);%n" +
+            "return java.util.Arrays.deepHashCode(new java.lang.Object[]{%s});%n" +
             "}%n";
 
     /**

@@ -103,7 +103,7 @@ public class WrapperClassBuilder {
     public WrapperClassBuilder withEquals() {
         StringJoiner stringJoiner = new StringJoiner(" && ");
         for (String getter : propertyNamesAndGetters.values()) {
-            stringJoiner.add(String.format("%njava.util.Objects.equals(this.%s(), that.%s())", getter, getter));
+            stringJoiner.add(String.format("%njava.util.Objects.deepEquals(this.%s(), that.%s())", getter, getter));
         }
         equals = String.format(EQUALS_METHOD_TEMPLATE, wrapperClassName, wrapperClassName, stringJoiner);
         return this;
