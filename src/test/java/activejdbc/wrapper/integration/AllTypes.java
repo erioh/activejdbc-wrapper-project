@@ -19,6 +19,7 @@ import org.javalite.activejdbc.annotations.Table;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.sql.Clob;
 import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
@@ -29,7 +30,7 @@ import java.time.LocalTime;
 import java.util.UUID;
 
 /**
- * One column per type with a dedicated strategy, plus UUID for the default (cast) strategy.
+ * One column per type with a dedicated strategy, plus UUID and Clob for the default (cast) strategy.
  * Registered in activejdbc_models.properties, so it works without ActiveJDBC instrumentation.
  */
 @Table("ALL_TYPES")
@@ -52,5 +53,6 @@ import java.util.UUID;
 @ActiveJdbcRequiredProperty(columnName = "LOCAL_DATE_TIME_VALUE", clazz = LocalDateTime.class)
 @ActiveJdbcRequiredProperty(columnName = "INSTANT_VALUE", clazz = Instant.class)
 @ActiveJdbcRequiredProperty(columnName = "UUID_VALUE", clazz = UUID.class)
+@ActiveJdbcRequiredProperty(columnName = "CLOB_VALUE", clazz = Clob.class)
 public class AllTypes extends Model {
 }

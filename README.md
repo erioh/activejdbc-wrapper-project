@@ -105,9 +105,13 @@ public class FancyTable extends Model {
 ```
 
 Types with dedicated accessors: `String`, `Boolean`, `Short`, `Integer`, `Long`, `Float`, `Double`, `BigDecimal`,
-`BigInteger`, `byte[]`, `java.sql.Clob`, `java.sql.Date`, `java.sql.Time`, `java.sql.Timestamp`, `java.util.Date`,
+`BigInteger`, `byte[]`, `java.sql.Date`, `java.sql.Time`, `java.sql.Timestamp`, `java.util.Date`,
 `LocalDate`, `LocalTime`, `LocalDateTime` and `Instant`. Any other non-primitive type is read with a plain cast of
 `get(...)` and written with `set(...)`.
+
+For CLOB columns, `clazz = String.class` is usually the best choice: `getString(...)` reads the whole text. With
+`clazz = java.sql.Clob.class` the getter returns the driver's `Clob`, which typically can only be read while the
+connection is open, and models marked with `@Cached` hold CLOBs as `String`, so the cast fails for them.
 
 3. Compile your project for the first time.
 
