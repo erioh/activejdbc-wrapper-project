@@ -25,6 +25,8 @@ import activejdbc.wrapper.annotation.processor.util.StringUtils;
 import javax.annotation.processing.*;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.*;
+import javax.lang.model.type.TypeMirror;
+import javax.lang.model.util.ElementFilter;
 import javax.tools.Diagnostic;
 import javax.tools.JavaFileObject;
 import java.io.IOException;
@@ -44,6 +46,7 @@ public class ActiveJdbcRequiredPropertyProcessor extends AbstractProcessor {
     private static final String DEFAULT_WRAPPER_SUFFIX = "Wrapper";
     public static final String ACTIVEJDBC_WRAPPER_SUFFIX = "activejdbc.wrapper.suffix";
     public static final String ACTIVEJDBC_BUILDER_METHOD_PREFIX = "activejdbc.wrapper.builder.method.prefix";
+    private static final String MODEL_CLASS = "org.javalite.activejdbc.Model";
     private static final String ILLEGAL_CHARACTERS_MESSAGE = "%s has illegal characters. Please use only characters in uppercase and lowercase, underscore, and numbers.";
     // generated getters return null for NULL columns and toString compares with null, so primitives can't be used
     private static final Set<String> PRIMITIVE_TYPES = new HashSet<>(Arrays.asList("boolean", "byte", "char", "short", "int", "long", "float", "double"));
@@ -64,7 +67,7 @@ public class ActiveJdbcRequiredPropertyProcessor extends AbstractProcessor {
                     continue;
                 }
                 processingEnv.getMessager().printMessage(Diagnostic.Kind.NOTE, "found @ActiveJdbcRequiredProperty at " + element);
-                if (!isReachableFromWrapper((TypeElement) element)) {
+                if (!isReachableFromWrapper((TypeElement) element) || !isInstantiableModel((TypeElement) element)) {
                     continue;
                 }
                 List<? extends AnnotationMirror> annotationMirrors = filterNeededAnnotationMirrors(element.getAnnotationMirrors());
@@ -112,6 +115,29 @@ public class ActiveJdbcRequiredPropertyProcessor extends AbstractProcessor {
                 error(String.format("Class [%s] is private, the generated wrapper can't access it.", ((TypeElement) current).getQualifiedName()), element);
                 return false;
             }
+        }
+        return true;
+    }
+
+    /**
+     * The wrapper extends ActivejdbcWrapper&lt;T extends Model&gt; and creates the model with new T().
+     */
+    private boolean isInstantiableModel(TypeElement element) {
+        TypeElement model = processingEnv.getElementUtils().getTypeElement(MODEL_CLASS);
+        TypeMirror erasedType = processingEnv.getTypeUtils().erasure(element.asType());
+        if (model == null || !processingEnv.getTypeUtils().isSubtype(erasedType, model.asType())) {
+            error(String.format("Class [%s] must extend %s to be annotated with ActiveJdbcRequiredProperty.", element.getQualifiedName(), MODEL_CLASS), element);
+            return false;
+        }
+        if (element.getModifiers().contains(Modifier.ABSTRACT)) {
+            error(String.format("Class [%s] is abstract, but the wrapper needs to create its instances.", element.getQualifiedName()), element);
+            return false;
+        }
+        boolean hasAccessibleNoArgConstructor = ElementFilter.constructorsIn(element.getEnclosedElements()).stream()
+                .anyMatch(constructor -> constructor.getParameters().isEmpty() && !constructor.getModifiers().contains(Modifier.PRIVATE));
+        if (!hasAccessibleNoArgConstructor) {
+            error(String.format("Class [%s] needs a non-private constructor without parameters, the wrapper uses it to create instances.", element.getQualifiedName()), element);
+            return false;
         }
         return true;
     }
