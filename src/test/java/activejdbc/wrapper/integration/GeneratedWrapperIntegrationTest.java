@@ -22,6 +22,7 @@ import org.junit.Test;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.sql.Clob;
 import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
@@ -30,6 +31,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.UUID;
+
+import javax.sql.rowset.serial.SerialClob;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -63,7 +66,8 @@ public class GeneratedWrapperIntegrationTest {
                 "LOCAL_TIME_VALUE TIME, " +
                 "LOCAL_DATE_TIME_VALUE TIMESTAMP(3), " +
                 "INSTANT_VALUE TIMESTAMP(3), " +
-                "UUID_VALUE UUID)");
+                "UUID_VALUE UUID, " +
+                "CLOB_VALUE CLOB)");
     }
 
     @AfterClass
@@ -153,6 +157,20 @@ public class GeneratedWrapperIntegrationTest {
         // when | then
         assertThat(first).isEqualTo(second);
         assertThat(first.hashCode()).isEqualTo(second.hashCode());
+    }
+
+    @Test
+    public void should_read_back_clob_while_connection_is_open() throws Exception {
+        // given
+        AllTypesWrapper written = new AllTypesWrapper();
+        written.setClobValue(new SerialClob("hello clob".toCharArray()));
+
+        // when
+        AllTypesWrapper read = saveAndReload(written);
+
+        // then: the driver's own Clob, readable as long as the connection is open
+        Clob clob = read.getClobValue();
+        assertThat(clob.getSubString(1, (int) clob.length())).isEqualTo("hello clob");
     }
 
     private AllTypesWrapper saveAndReload(AllTypesWrapper wrapper) {

@@ -2,7 +2,6 @@ activejdbc.wrapper.annotation.processor.adapter.builder.strategy.getter.BigDecim
 activejdbc.wrapper.annotation.processor.adapter.builder.strategy.getter.BigIntegerGetterBuilderStrategy
 activejdbc.wrapper.annotation.processor.adapter.builder.strategy.getter.BooleanGetterBuilderStrategy
 activejdbc.wrapper.annotation.processor.adapter.builder.strategy.getter.BytesGetterBuilderStrategy
-activejdbc.wrapper.annotation.processor.adapter.builder.strategy.getter.ClobGetterBuilderStrategy
 activejdbc.wrapper.annotation.processor.adapter.builder.strategy.getter.DateGetterBuilderStrategy
 activejdbc.wrapper.annotation.processor.adapter.builder.strategy.getter.DefaultGetterBuilderStrategy
 activejdbc.wrapper.annotation.processor.adapter.builder.strategy.getter.DoubleGetterBuilderStrategy

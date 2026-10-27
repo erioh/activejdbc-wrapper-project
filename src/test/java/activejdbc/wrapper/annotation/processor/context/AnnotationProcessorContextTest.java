@@ -45,7 +45,8 @@ public class AnnotationProcessorContextTest {
         return new Object[][]{
                 {BigDecimal.class, BigDecimalGetterBuilderStrategy.class},
                 {Boolean.class, BooleanGetterBuilderStrategy.class},
-                {Clob.class, ClobGetterBuilderStrategy.class},
+                // Model has no getClob(), so Clob goes through the default cast of get(...)
+                {Clob.class, DefaultGetterBuilderStrategy.class},
                 {Date.class, DateGetterBuilderStrategy.class},
                 {Double.class, DoubleGetterBuilderStrategy.class},
                 {Float.class, FloatGetterBuilderStrategy.class},
