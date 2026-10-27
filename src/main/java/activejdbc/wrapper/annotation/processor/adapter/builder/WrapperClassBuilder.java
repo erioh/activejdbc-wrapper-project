@@ -15,6 +15,7 @@ package activejdbc.wrapper.annotation.processor.adapter.builder;
 
 import activejdbc.wrapper.annotation.processor.adapter.builder.strategy.StrategyHolder;
 import activejdbc.wrapper.annotation.processor.adapter.builder.strategy.WrapperBuilderClassBuilder;
+import activejdbc.wrapper.annotation.processor.adapter.builder.strategy.WrapperQueryClassBuilder;
 import activejdbc.wrapper.annotation.processor.adapter.builder.strategy.getter.GetterBuilderStrategy;
 import activejdbc.wrapper.annotation.processor.adapter.builder.strategy.setter.SetterBuilderStrategy;
 import activejdbc.wrapper.annotation.processor.context.AnnotationProcessorContext;
@@ -66,6 +67,7 @@ public class WrapperClassBuilder {
     private final List<ColumnContext> columnContexts;
     private final Map<String, String> propertyNamesAndGetters = new LinkedHashMap<>();
     private final WrapperBuilderClassBuilder wrapperBuilderClassBuilder;
+    private final WrapperQueryClassBuilder wrapperQueryClassBuilder;
     private final String generatedAnnotation;
     private String hashCode = StringUtils.EMPTY_STRING;
     private String equals = StringUtils.EMPTY_STRING;
@@ -73,6 +75,7 @@ public class WrapperClassBuilder {
     private String getObject = StringUtils.EMPTY_STRING;
     private String wrap = StringUtils.EMPTY_STRING;
     private String builderAndBuilderClass = StringUtils.EMPTY_STRING;
+    private String queryAndQueryClass = StringUtils.EMPTY_STRING;
 
     /**
      * @param activejdbcObjectClassName class name relative to its package: {@code Outer.Inner} for a nested class
@@ -86,6 +89,7 @@ public class WrapperClassBuilder {
         this.activejdbcObjectName = StringUtils.lowerCaseFirstCharacter(activejdbcObjectClassName.substring(activejdbcObjectClassName.lastIndexOf('.') + 1));
         this.columnContexts = columnContexts;
         this.wrapperBuilderClassBuilder = new WrapperBuilderClassBuilder(wrapperClassName, annotationProcessorContext, columnContexts);
+        this.wrapperQueryClassBuilder = new WrapperQueryClassBuilder(wrapperClassName, activejdbcObjectClassName, columnContexts);
         this.generatedAnnotation = annotationProcessorContext.getGeneratedAnnotation();
     }
 
@@ -108,7 +112,7 @@ public class WrapperClassBuilder {
                 : String.format(PACKAGE_AND_IMPORT_TEMPLATE, packageName, packageName, outermostClassName());
         String generatedAnnotationLine = StringUtils.isBlank(generatedAnnotation) ? StringUtils.EMPTY_STRING : String.format("%s%n", generatedAnnotation);
         return String.format(CLASS_TEMPLATE, packageAndImport, generatedAnnotationLine,
-                wrapperClassName, activejdbcObjectClassName, buildColumnNameConstants(), activejdbcObjectClassName, activejdbcObjectName, constructors, methods, builderAndBuilderClass);
+                wrapperClassName, activejdbcObjectClassName, buildColumnNameConstants(), activejdbcObjectClassName, activejdbcObjectName, constructors, methods, builderAndBuilderClass + queryAndQueryClass);
     }
 
     private String buildColumnNameConstants() {
@@ -210,6 +214,11 @@ public class WrapperClassBuilder {
 
     public WrapperClassBuilder withMethodGetActivejdbcObject() {
         getObject = String.format(METHOD_GET_OBJECT_TEMPLATE, activejdbcObjectClassName, activejdbcObjectName);
+        return this;
+    }
+
+    public WrapperClassBuilder withQuery() {
+        queryAndQueryClass = String.format("%n") + wrapperQueryClassBuilder.buildQueryMethod() + wrapperQueryClassBuilder.buildClassBody();
         return this;
     }
 

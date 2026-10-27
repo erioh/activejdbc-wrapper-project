@@ -41,6 +41,9 @@ Pipeline (all under `src/main/java/activejdbc/wrapper/annotation/processor/`):
 
 Property names: `ColumnContext.getPropertyName()` is the single source of truth — `desiredFieldName` if set, otherwise `StringUtils.buildPropertyNameFromColumnName` (`FIRST_NAME` → `firstName`). The processor validates columns before generating (property name must be a Java identifier and not a keyword; primitive types are rejected) and reports problems via `Messager` errors on the annotated element — don't throw exceptions from the processor. Generated setters reference the ActiveJDBC object as `this.<field>` because a property can have the same name as that field.
 
+### Query builder
+`FancyTableWrapper.query()` returns a generated nested `<Wrapper>Query` class (`WrapperQueryClassBuilder`) that only declares one method per column; all logic is hand-written runtime code in `activejdbc.wrapper.query` (`AbstractQuery`, `Condition`, `StringCondition`), which ships in the library jar. Sorting (`Condition.asc()/desc()`) and `limit`/`offset` are applied to the resulting `LazyList`. Queries run through `ModelDelegate.where/count/findAll` with the model class passed explicitly, so they work without ActiveJDBC instrumentation (and in the H2 tests). `Condition.toJdbc` converts parameters the same way as the setter strategies; keep them in sync when adding a type. Columns whose property name is in `WrapperQueryClassBuilder.RESERVED_METHOD_NAMES` are left out of the query class with a warning.
+
 ### Adding support for a new column type
 Add a getter (and, if needed, setter) strategy class with `typesToApply()`, list it in `META-INF/services/...GetterBuilderStrategy` / `...SetterBuilderStrategy`, add a matching `*StrategyTest` and a row in `AnnotationProcessorContextTest`.
 

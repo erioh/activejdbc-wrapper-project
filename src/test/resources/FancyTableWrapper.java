@@ -56,4 +56,22 @@ public class FancyTableWrapper extends activejdbc.wrapper.ActivejdbcWrapper<Fanc
             return fancyTableWrapper;
         }
     }
+
+    public static FancyTableWrapperQuery query() {
+        return new FancyTableWrapperQuery();
+    }
+
+    public static class FancyTableWrapperQuery extends activejdbc.wrapper.query.AbstractQuery<FancyTableWrapperQuery, FancyTable, FancyTableWrapper> {
+        public FancyTableWrapperQuery() {
+            super(FancyTable.class, FancyTableWrapper::new);
+        }
+
+        protected FancyTableWrapperQuery newQuery() {
+            return new FancyTableWrapperQuery();
+        }
+
+        public activejdbc.wrapper.query.Condition<FancyTableWrapperQuery, java.lang.Long> fancyTableId() {
+            return newCondition("FANCY_TABLE_ID");
+        }
+    }
 }

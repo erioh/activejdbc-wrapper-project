@@ -56,6 +56,8 @@ public class ActiveJdbcRequiredPropertyWrapperFactory {
                 .withHashCode()
                 // add builder method with builder class
                 .withBuilder()
+                // add query() method with typed query class
+                .withQuery()
                 .buildClassBody();
     }
 
