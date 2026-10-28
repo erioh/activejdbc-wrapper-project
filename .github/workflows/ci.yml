@@ -35,9 +35,16 @@ jobs:
           distribution: temurin
           java-version: '21'
           cache: maven
-      - uses: gradle/actions/setup-gradle@v6
-        with:
-          gradle-version: '9.8.0'
+      # the repository allows only GitHub's own actions, so Gradle is installed by hand
+      - name: Install Gradle
+        env:
+          GRADLE_VERSION: '9.8.0'
+          GRADLE_SHA256: bafd5ce9cfaea0fbccfdc8439a1ac42fbd4cd9c89dc9a988228d8a2639a58e6c
+        run: |
+          curl -sSfLo "$RUNNER_TEMP/gradle.zip" "https://services.gradle.org/distributions/gradle-$GRADLE_VERSION-bin.zip"
+          echo "$GRADLE_SHA256  $RUNNER_TEMP/gradle.zip" | sha256sum -c -
+          unzip -q "$RUNNER_TEMP/gradle.zip" -d "$RUNNER_TEMP"
+          echo "$RUNNER_TEMP/gradle-$GRADLE_VERSION/bin" >> "$GITHUB_PATH"
       - name: Install the library into the local Maven repository
         run: mvn -B install -Dgpg.skip -DskipTests
       - name: Build and test gradle-it
