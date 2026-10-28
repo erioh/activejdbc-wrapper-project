@@ -169,27 +169,63 @@ This runs `FIRST_NAME = ? AND (AMOUNT > ? OR ACTIVATED IS NULL)`. The value type
   `and(q -> ...)`, `or(q -> ...)` and `group(q -> ...)` put conditions in parentheses.
 * Sorting and paging: `amount().desc()`, `firstName().asc()` (applied in the order they are added), `limit(n)`,
   `offset(n)`.
-* `fetch()` returns wrappers, `fetchModels()` returns ActiveJDBC models (a `LazyList`), `fetchFirst()` returns an
-  `Optional` with the first matching wrapper (reading only that row), `fetchCount()` returns the number of matching
-  rows (sorting and paging don't apply to it). `getSql()`, `getOrderBy()` and `getParams()` show what will run.
 * Queries work with and without ActiveJDBC instrumentation.
 * A column whose property name clashes with a method of the query class (for example `TO_STRING` → `toString`)
   is left out of the query builder with a compiler warning; set `desiredFieldName` to use it.
 
-```java
-        Optional<FancyTableWrapper> newest = FancyTableWrapper.query()
-                .activated().eq(true)
-                .fancyTableId().desc()
-                .fetchFirst();
-```
+A query runs when one of its terminal operations is called. Each call runs it anew, so the same query object can be
+used more than once:
 
 ```java
-        List<FancyTableWrapper> page = FancyTableWrapper.query()
+        FancyTableWrapper.FancyTableWrapperQuery query = FancyTableWrapper.query()
                 .activated().eq(true)
-                .amount().desc().firstName().asc()
+                .amount().desc().firstName().asc();
+
+        // all matching rows as wrappers
+        List<FancyTableWrapper> rows = query.fetch();
+
+        // the first row only (the query is sent with limit 1); Optional.empty() if nothing matches
+        Optional<FancyTableWrapper> top = query.fetchFirst();
+
+        // ActiveJDBC models instead of wrappers, e.g. to call saveIt() or delete() on them
+        LazyList<FancyTable> models = query.fetchModels();
+
+        // the number of matching rows; sorting, limit and offset are ignored
+        Long count = query.fetchCount();
+```
+
+Paging: `limit(n)` and `offset(n)` apply to `fetch()`, `fetchModels()` and `fetchFirst()`:
+
+```java
+        List<FancyTableWrapper> thirdPage = FancyTableWrapper.query()
+                .activated().eq(true)
+                .fancyTableId().asc()
                 .limit(20).offset(40)
                 .fetch();
 ```
+
+Without `asc()`/`desc()` the database decides which row comes first, so sort when using `fetchFirst()` or paging.
+
+`getSql()`, `getParams()` and `getOrderBy()` run nothing: they show what the query will send, for logging and tests.
+They can also be passed to plain ActiveJDBC for what the builder doesn't offer, such as `include(...)`:
+
+```java
+        FancyTableWrapper.FancyTableWrapperQuery query = FancyTableWrapper.query()
+                .firstName().like("J%")
+                .and(q -> q.amount().gt(BigDecimal.TEN).or().activated().isNull())
+                .amount().desc();
+
+        query.getSql();     // "FIRST_NAME LIKE ? AND (AMOUNT > ? OR ACTIVATED IS NULL)"
+        query.getParams();  // ["J%", 10], already converted for JDBC (an enum becomes its name())
+        query.getOrderBy(); // "AMOUNT DESC"
+
+        LazyList<FancyTable> withOwners = FancyTable.where(query.getSql(), query.getParams().toArray())
+                .orderBy(query.getOrderBy())
+                .include(Owner.class);
+```
+
+`getSql()` is empty for a query without conditions and `getOrderBy()` without sorting; `limit` and `offset` are in
+neither of them.
 
 Each wrapper also has a constant per column, for raw SQL:
 
