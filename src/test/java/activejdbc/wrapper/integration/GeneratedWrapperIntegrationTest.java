@@ -353,6 +353,43 @@ public class GeneratedWrapperIntegrationTest {
     }
 
     @Test
+    public void should_fetch_the_only_row() {
+        // given
+        save(AllTypesWrapper.builder().stringValue("alpha").integerValue(1).build());
+        save(AllTypesWrapper.builder().stringValue("beta").integerValue(2).build());
+        save(AllTypesWrapper.builder().stringValue("gamma").integerValue(2).build());
+
+        // when | then
+        assertThat(AllTypesWrapper.query().integerValue().eq(1).fetchOne()).map(AllTypesWrapper::getStringValue).contains("alpha");
+        assertThat(AllTypesWrapper.query().stringValue().eq("omega").fetchOne()).isEmpty();
+        assertThatThrownBy(() -> AllTypesWrapper.query().integerValue().eq(2).fetchOne())
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessage("More than one row matches the query: INTEGER_VALUE = ? [2]");
+        // limit and offset apply as in fetch()
+        assertThat(AllTypesWrapper.query().integerValue().eq(2).stringValue().asc().limit(1).fetchOne())
+                .map(AllTypesWrapper::getStringValue).contains("beta");
+        assertThat(AllTypesWrapper.query().integerValue().asc().stringValue().asc().offset(2).fetchOne())
+                .map(AllTypesWrapper::getStringValue).contains("gamma");
+        assertThat(AllTypesWrapper.query().integerValue().eq(1).limit(0).fetchOne()).isEmpty();
+    }
+
+    @Test
+    public void should_check_whether_rows_exist() {
+        // given
+        save(AllTypesWrapper.builder().stringValue("alpha").integerValue(1).build());
+        save(AllTypesWrapper.builder().stringValue("beta").integerValue(2).build());
+
+        // when | then
+        assertThat(AllTypesWrapper.query().exists()).isTrue();
+        assertThat(AllTypesWrapper.query().integerValue().gt(1).exists()).isTrue();
+        assertThat(AllTypesWrapper.query().stringValue().eq("omega").exists()).isFalse();
+        // limit and offset apply as in fetch()
+        assertThat(AllTypesWrapper.query().offset(1).exists()).isTrue();
+        assertThat(AllTypesWrapper.query().offset(2).exists()).isFalse();
+        assertThat(AllTypesWrapper.query().limit(0).exists()).isFalse();
+    }
+
+    @Test
     public void should_find_row_by_every_type() {
         // given: the fully populated row and one with different values
         save(fullyPopulated());

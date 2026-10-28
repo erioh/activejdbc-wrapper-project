@@ -167,12 +167,42 @@ public abstract class AbstractQuery<Q extends AbstractQuery<Q, M, W>, M extends 
      * @return the wrapper of the first matching row, or empty if no row matches
      */
     public Optional<W> fetchFirst() {
+        List<M> models = fetchAtMost(1);
+        return models.isEmpty() ? Optional.empty() : Optional.of(wrapperFactory.apply(models.get(0)));
+    }
+
+    /**
+     * Runs the query for a row that is expected to be the only match, e.g. when looking up by a unique column.
+     * At most two rows are read from the database. {@link #limit(long)} and {@link #offset(long)} apply as in
+     * {@link #fetch()}. The query itself is not changed.
+     *
+     * @return the wrapper of the only matching row, or empty if no row matches
+     * @throws IllegalStateException if more than one row matches
+     */
+    public Optional<W> fetchOne() {
+        List<M> models = fetchAtMost(2);
+        if (models.size() > 1) {
+            throw new IllegalStateException("More than one row matches the query: " + getSql() + " " + getParams());
+        }
+        return models.isEmpty() ? Optional.empty() : Optional.of(wrapperFactory.apply(models.get(0)));
+    }
+
+    /**
+     * Checks whether {@link #fetch()} would return anything. At most one row is read from the database.
+     * {@link #limit(long)} and {@link #offset(long)} apply as in {@link #fetch()}. The query itself is not changed.
+     *
+     * @return {@code true} if at least one row matches
+     */
+    public boolean exists() {
+        return !fetchAtMost(1).isEmpty();
+    }
+
+    private List<M> fetchAtMost(long rows) {
         // limit is null until limit(n) is called; limit(0) means "no rows", as in fetch()
         if (limit != null && limit == 0) {
-            return Optional.empty();
+            return Collections.emptyList();
         }
-        LazyList<M> models = fetchModels(1L);
-        return models.isEmpty() ? Optional.empty() : Optional.of(wrapperFactory.apply(models.get(0)));
+        return fetchModels(limit == null ? rows : Math.min(limit, rows));
     }
 
     private LazyList<M> fetchModels(Long limit) {

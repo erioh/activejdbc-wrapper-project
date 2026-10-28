@@ -64,6 +64,9 @@ public class FancyTable extends Model {
 </dependency>
 ```
 
+   With `module-info.java`, the module name is `activejdbc.wrapper` (`requires activejdbc.wrapper;`), starting
+   with the next release.
+
 2. Add the ActiveJdbcRequiredProperty annotation with the column name and the expected type.
 
 ```java
@@ -209,14 +212,23 @@ used more than once:
         // the first row only (the query is sent with limit 1); Optional.empty() if nothing matches
         Optional<FancyTableWrapper> top = query.fetchFirst();
 
+        // whether anything matches (reads at most one row)
+        boolean any = query.exists();
+
         // ActiveJDBC models instead of wrappers, e.g. to call saveIt() or delete() on them
         LazyList<FancyTable> models = query.fetchModels();
 
         // the number of matching rows; sorting, limit and offset are ignored
         Long count = query.fetchCount();
+
+        // the only matching row, for a lookup that must not find two (reads at most two rows);
+        // Optional.empty() if nothing matches, IllegalStateException if more than one row does
+        Optional<FancyTableWrapper> john = FancyTableWrapper.query()
+                .firstName().eq("John")
+                .fetchOne();
 ```
 
-Paging: `limit(n)` and `offset(n)` apply to `fetch()`, `fetchModels()` and `fetchFirst()`:
+Paging: `limit(n)` and `offset(n)` apply to every operation except `fetchCount()`:
 
 ```java
         List<FancyTableWrapper> thirdPage = FancyTableWrapper.query()

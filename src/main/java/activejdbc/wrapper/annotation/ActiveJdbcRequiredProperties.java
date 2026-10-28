@@ -23,7 +23,7 @@ import java.lang.annotation.Target;
  * write it by hand.
  */
 @Target(ElementType.TYPE)
-@Retention(RetentionPolicy.SOURCE)
+@Retention(RetentionPolicy.CLASS)
 public @interface ActiveJdbcRequiredProperties {
     /**
      * The repeated annotations.
