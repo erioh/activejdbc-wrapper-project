@@ -67,7 +67,8 @@ public class GeneratedWrapperIntegrationTest {
                 "LOCAL_DATE_TIME_VALUE TIMESTAMP(3), " +
                 "INSTANT_VALUE TIMESTAMP(3), " +
                 "UUID_VALUE UUID, " +
-                "CLOB_VALUE CLOB)");
+                "CLOB_VALUE CLOB, " +
+                "ENUM_VALUE VARCHAR(10))");
     }
 
     @AfterClass
@@ -110,6 +111,7 @@ public class GeneratedWrapperIntegrationTest {
         assertThat(read.getLocalDateTimeValue()).isEqualTo(LocalDateTime.of(2026, 10, 27, 13, 45, 30, 123_000_000));
         assertThat(read.getInstantValue()).isEqualTo(Instant.parse("2026-10-27T10:15:30.123Z"));
         assertThat(read.getUuidValue()).isEqualTo(UUID.fromString("123e4567-e89b-12d3-a456-426614174000"));
+        assertThat(read.getEnumValue()).isEqualTo(Color.GREEN);
     }
 
     @Test
@@ -159,6 +161,20 @@ public class GeneratedWrapperIntegrationTest {
         assertThat(oneAndAHalf).isEqualTo(sameWithTrailingZero).hasSameHashCodeAs(sameWithTrailingZero);
         assertThat(oneAndAHalf).isNotEqualTo(other).isNotEqualTo(new AllTypesWrapper());
         assertThat(new AllTypesWrapper()).isNotEqualTo(oneAndAHalf);
+    }
+
+    @Test
+    public void should_store_enums_by_name() {
+        // given
+        AllTypesWrapper written = new AllTypesWrapper();
+        written.setEnumValue(Color.RED);
+
+        // when
+        AllTypesWrapper read = saveAndReload(written);
+
+        // then
+        assertThat(Base.firstCell("SELECT ENUM_VALUE FROM ALL_TYPES")).isEqualTo("RED");
+        assertThat(read.getEnumValue()).isEqualTo(Color.RED);
     }
 
     @Test
@@ -272,6 +288,8 @@ public class GeneratedWrapperIntegrationTest {
         assertMatchesOnlyPopulatedRow(AllTypesWrapper.query().localDateTimeValue().eq(expected.getLocalDateTimeValue()));
         assertMatchesOnlyPopulatedRow(AllTypesWrapper.query().instantValue().eq(expected.getInstantValue()));
         assertMatchesOnlyPopulatedRow(AllTypesWrapper.query().uuidValue().eq(expected.getUuidValue()));
+        assertMatchesOnlyPopulatedRow(AllTypesWrapper.query().enumValue().eq(expected.getEnumValue()));
+        assertMatchesOnlyPopulatedRow(AllTypesWrapper.query().enumValue().in(Color.GREEN, Color.RED));
         assertMatchesOnlyPopulatedRow(AllTypesWrapper.query().localDateValue().between(LocalDate.of(2026, 1, 1), LocalDate.of(2026, 12, 31)));
     }
 
@@ -300,6 +318,7 @@ public class GeneratedWrapperIntegrationTest {
                 .localDateTimeValue(LocalDateTime.of(2026, 10, 27, 13, 45, 30, 123_000_000))
                 .instantValue(Instant.parse("2026-10-27T10:15:30.123Z"))
                 .uuidValue(UUID.fromString("123e4567-e89b-12d3-a456-426614174000"))
+                .enumValue(Color.GREEN)
                 .build();
     }
 

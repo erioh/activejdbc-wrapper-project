@@ -144,6 +144,21 @@ public class ActiveJdbcRequiredPropertyProcessorTest {
     }
 
     @Test
+    public void should_store_enums_by_name() throws IOException {
+        // given
+        JavaFileObject color = JavaFileObjects.forSourceString("e.Color", "package e; public enum Color { RED }");
+        JavaFileObject car = model("e.Car", "@ActiveJdbcRequiredProperty(columnName = \"PAINT\", clazz = Color.class)");
+        // when
+        Compilation compilation = compile(color, car);
+        // then
+        assertThat(compilation).succeededWithoutWarnings();
+        String source = compilation.generatedSourceFile("e.CarWrapper").get().getCharContent(true).toString();
+        Assertions.assertThat(source)
+                .contains("this.car.set(\"PAINT\", paint == null ? null : paint.name());")
+                .contains(".map(e.Color::valueOf)");
+    }
+
+    @Test
     public void should_use_dedicated_accessors_for_supported_types() throws IOException {
         // given
         JavaFileObject javaFileObject = model("t.Typed",

@@ -54,5 +54,6 @@ import java.util.UUID;
 @ActiveJdbcRequiredProperty(columnName = "INSTANT_VALUE", clazz = Instant.class)
 @ActiveJdbcRequiredProperty(columnName = "UUID_VALUE", clazz = UUID.class)
 @ActiveJdbcRequiredProperty(columnName = "CLOB_VALUE", clazz = Clob.class)
+@ActiveJdbcRequiredProperty(columnName = "ENUM_VALUE", clazz = Color.class)
 public class AllTypes extends Model {
 }

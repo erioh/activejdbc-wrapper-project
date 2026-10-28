@@ -106,7 +106,8 @@ public class FancyTable extends Model {
 
 Types with dedicated accessors: `String`, `Boolean`, `Short`, `Integer`, `Long`, `Float`, `Double`, `BigDecimal`,
 `BigInteger`, `byte[]`, `java.sql.Date`, `java.sql.Time`, `java.sql.Timestamp`, `java.util.Date`,
-`LocalDate`, `LocalTime`, `LocalDateTime` and `Instant`. Any other non-primitive type is read with a plain cast of
+`LocalDate`, `LocalTime`, `LocalDateTime` and `Instant`. Enums are stored by name in a text column (`name()` on
+write, `valueOf` on read, also in the query builder). Any other non-primitive type is read with a plain cast of
 `get(...)` and written with `set(...)`.
 
 For CLOB columns, `clazz = String.class` is usually the best choice: `getString(...)` reads the whole text. With

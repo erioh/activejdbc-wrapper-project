@@ -16,7 +16,9 @@ package activejdbc.wrapper.annotation.processor.adapter.builder;
 import activejdbc.wrapper.annotation.processor.adapter.builder.strategy.StrategyHolder;
 import activejdbc.wrapper.annotation.processor.adapter.builder.strategy.WrapperBuilderClassBuilder;
 import activejdbc.wrapper.annotation.processor.adapter.builder.strategy.WrapperQueryClassBuilder;
+import activejdbc.wrapper.annotation.processor.adapter.builder.strategy.getter.EnumGetterBuilderStrategy;
 import activejdbc.wrapper.annotation.processor.adapter.builder.strategy.getter.GetterBuilderStrategy;
+import activejdbc.wrapper.annotation.processor.adapter.builder.strategy.setter.EnumSetterBuilderStrategy;
 import activejdbc.wrapper.annotation.processor.adapter.builder.strategy.setter.SetterBuilderStrategy;
 import activejdbc.wrapper.annotation.processor.context.AnnotationProcessorContext;
 import activejdbc.wrapper.annotation.processor.context.ColumnContext;
@@ -56,6 +58,8 @@ public class WrapperClassBuilder {
     private static final String PACKAGE_AND_IMPORT_TEMPLATE = "package %s;%n" +
             "import %s.%s;%n";
 
+    private static final GetterBuilderStrategy ENUM_GETTER_STRATEGY = new EnumGetterBuilderStrategy();
+    private static final SetterBuilderStrategy ENUM_SETTER_STRATEGY = new EnumSetterBuilderStrategy();
     private final StrategyHolder<GetterBuilderStrategy> getterBuilderStrategyHolder;
     private final StrategyHolder<SetterBuilderStrategy> setterBuilderStrategyHolder;
     private final String packageName;
@@ -207,7 +211,9 @@ public class WrapperClassBuilder {
         this.columnContexts.forEach(columnContext -> {
             String propertyName = columnContext.getPropertyName();
             String methodName = StringUtils.buildMethodName(propertyName, "get");
-            GetterBuilderStrategy strategy = getterBuilderStrategyHolder.getStrategy(columnContext.getClazz());
+            GetterBuilderStrategy strategy = columnContext.isEnumType()
+                    ? ENUM_GETTER_STRATEGY
+                    : getterBuilderStrategyHolder.getStrategy(columnContext.getClazz());
             gettersBody.add(strategy.buildGetterBody(columnContext, activejdbcObjectName));
             propertyNamesAndGetters.put(propertyName, methodName);
         });
@@ -216,7 +222,9 @@ public class WrapperClassBuilder {
 
     public WrapperClassBuilder withSetters() {
         this.columnContexts.forEach(columnContext -> {
-            SetterBuilderStrategy strategy = setterBuilderStrategyHolder.getStrategy(columnContext.getClazz());
+            SetterBuilderStrategy strategy = columnContext.isEnumType()
+                    ? ENUM_SETTER_STRATEGY
+                    : setterBuilderStrategyHolder.getStrategy(columnContext.getClazz());
             settersBody.add(strategy.buildSetterBody(columnContext, activejdbcObjectName));
         });
         return this;
