@@ -73,6 +73,17 @@ public class WrapperQueryClassBuilder {
             "return %s(\"%s\");%n" +
             "}%n";
 
+    /**
+     * 1. Query class name
+     * 2. property type
+     * 3. property name
+     * 4. column name
+     * 5. converter field name
+     */
+    private static final String CONVERTING_COLUMN_METHOD_TEMPLATE = "public activejdbc.wrapper.query.Condition<%s, %s> %s() {%n" +
+            "return newCondition(\"%s\", %s::toDatabase);%n" +
+            "}%n";
+
     private final String wrapperClassName;
     private final String activejdbcObjectClassName;
     private final String queryClassName;
@@ -103,6 +114,12 @@ public class WrapperQueryClassBuilder {
         columnContexts.stream()
                 .filter(columnContext -> !RESERVED_METHOD_NAMES.contains(columnContext.getPropertyName()))
                 .forEach(columnContext -> {
+                    if (columnContext.hasConverter()) {
+                        // no LIKE: a pattern isn't a property value the converter could convert
+                        columnMethods.append(String.format(CONVERTING_COLUMN_METHOD_TEMPLATE, queryClassName, columnContext.getClazz(),
+                                columnContext.getPropertyName(), columnContext.getColumnName(), columnContext.getConverterFieldName()));
+                        return;
+                    }
                     boolean string = "java.lang.String".equals(columnContext.getClazz()) || "String".equals(columnContext.getClazz());
                     String conditionType = string
                             ? String.format("activejdbc.wrapper.query.StringCondition<%s>", queryClassName)

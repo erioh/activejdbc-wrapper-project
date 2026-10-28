@@ -273,6 +273,18 @@ public abstract class AbstractQuery<Q extends AbstractQuery<Q, M, W>, M extends 
     }
 
     /**
+     * Used by the generated column methods of columns with a {@code ColumnConverter}.
+     *
+     * @param column     the column name
+     * @param toDatabase the converter's {@code toDatabase}, applied to every parameter
+     * @param <T>        the property's Java type
+     * @return a condition on the column
+     */
+    protected <T> Condition<Q, T> newCondition(String column, Function<? super T, ?> toDatabase) {
+        return new Condition<>(self(), column, toDatabase);
+    }
+
+    /**
      * Used by the generated column methods of String columns.
      *
      * @param column the column name

@@ -30,6 +30,8 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.YearMonth;
+import java.util.Arrays;
 import java.util.UUID;
 
 import javax.sql.rowset.serial.SerialClob;
@@ -69,7 +71,10 @@ public class GeneratedWrapperIntegrationTest {
                 "INSTANT_VALUE TIMESTAMP(3), " +
                 "UUID_VALUE UUID, " +
                 "CLOB_VALUE CLOB, " +
-                "ENUM_VALUE VARCHAR(10))");
+                "ENUM_VALUE VARCHAR(10), " +
+                "MONEY_VALUE DECIMAL(10, 2), " +
+                "YEAR_MONTH_VALUE DATE, " +
+                "TAGS_VALUE VARCHAR(100))");
     }
 
     @AfterClass
@@ -419,6 +424,34 @@ public class GeneratedWrapperIntegrationTest {
         assertMatchesOnlyPopulatedRow(AllTypesWrapper.query().enumValue().eq(expected.getEnumValue()));
         assertMatchesOnlyPopulatedRow(AllTypesWrapper.query().enumValue().in(Color.GREEN, Color.RED));
         assertMatchesOnlyPopulatedRow(AllTypesWrapper.query().localDateValue().between(LocalDate.of(2026, 1, 1), LocalDate.of(2026, 12, 31)));
+        assertMatchesOnlyPopulatedRow(AllTypesWrapper.query().moneyValue().eq(expected.getMoneyValue()));
+        assertMatchesOnlyPopulatedRow(AllTypesWrapper.query().yearMonthValue().eq(expected.getYearMonthValue()));
+        assertMatchesOnlyPopulatedRow(AllTypesWrapper.query().tagsValue().eq(expected.getTagsValue()));
+    }
+
+    @Test
+    public void should_convert_properties_with_column_converter() {
+        // given
+        AllTypesWrapper saved = saveAndReload(fullyPopulated());
+
+        // when | then: stored as the converter's database type
+        assertThat(saved.getMoneyValue()).isEqualTo(Money.of("19.99"));
+        assertThat(saved.getYearMonthValue()).isEqualTo(YearMonth.of(2026, 10));
+        assertThat(saved.getTagsValue()).containsExactly("red", "blue");
+        assertThat(Base.firstCell("SELECT MONEY_VALUE FROM ALL_TYPES")).isEqualTo(new BigDecimal("19.99"));
+        assertThat(Base.firstCell("SELECT TAGS_VALUE FROM ALL_TYPES")).isEqualTo("red,blue");
+        assertThat(Base.firstCell("SELECT YEAR_MONTH_VALUE FROM ALL_TYPES").toString()).isEqualTo("2026-10-01");
+        // NULL never reaches the converter
+        AllTypesWrapper empty = saveAndReload(AllTypesWrapper.builder().stringValue("empty").build());
+        assertThat(empty.getMoneyValue()).isNull();
+        assertThat(empty.getTagsValue()).isNull();
+        empty.setYearMonthValue(null);
+        assertThat(empty.getYearMonthValue()).isNull();
+        // query parameters are converted too, including ranges and lists
+        assertThat(AllTypesWrapper.query().moneyValue().gt(Money.of("10")).fetch()).containsExactly(saved);
+        assertThat(AllTypesWrapper.query().yearMonthValue().between(YearMonth.of(2026, 1), YearMonth.of(2026, 12)).fetch()).containsExactly(saved);
+        assertThat(AllTypesWrapper.query().moneyValue().in(Money.of("19.99"), Money.of("5")).fetch()).containsExactly(saved);
+        assertThat(AllTypesWrapper.query().moneyValue().isNull().fetch()).extracting(AllTypesWrapper::getStringValue).containsExactly("empty");
     }
 
     private static void assertMatchesOnlyPopulatedRow(AllTypesWrapper.AllTypesWrapperQuery query) {
@@ -447,6 +480,9 @@ public class GeneratedWrapperIntegrationTest {
                 .instantValue(Instant.parse("2026-10-27T10:15:30.123Z"))
                 .uuidValue(UUID.fromString("123e4567-e89b-12d3-a456-426614174000"))
                 .enumValue(Color.GREEN)
+                .moneyValue(Money.of("19.99"))
+                .yearMonthValue(YearMonth.of(2026, 10))
+                .tagsValue(Arrays.asList("red", "blue"))
                 .build();
     }
 

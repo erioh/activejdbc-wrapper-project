@@ -29,6 +29,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.StringJoiner;
+import java.util.function.Function;
 
 /**
  * Condition on one column of a generated query; every operator adds the condition and returns the query.
@@ -40,10 +41,18 @@ import java.util.StringJoiner;
 public class Condition<Q extends AbstractQuery<Q, ?, ?>, T> {
     private final Q query;
     private final String column;
+    // the column's converter, applied before toJdbc; identity without one
+    private final Function<Object, ?> toDatabase;
 
     Condition(Q query, String column) {
+        this(query, column, Function.identity());
+    }
+
+    @SuppressWarnings("unchecked")
+    Condition(Q query, String column, Function<? super T, ?> toDatabase) {
         this.query = query;
         this.column = column;
+        this.toDatabase = (Function<Object, ?>) toDatabase;
     }
 
     /**
@@ -115,7 +124,7 @@ public class Condition<Q extends AbstractQuery<Q, ?, ?>, T> {
      */
     public Q between(T from, T to) {
         return query.append(column + " BETWEEN ? AND ?",
-                Arrays.asList(toJdbc(requireValue(from, "between")), toJdbc(requireValue(to, "between"))));
+                Arrays.asList(toParameter(requireValue(from, "between")), toParameter(requireValue(to, "between"))));
     }
 
     /**
@@ -204,7 +213,7 @@ public class Condition<Q extends AbstractQuery<Q, ?, ?>, T> {
      * @return the query
      */
     protected Q compare(String operator, Object value) {
-        return query.append(column + " " + operator + " ?", Collections.singletonList(toJdbc(value)));
+        return query.append(column + " " + operator + " ?", Collections.singletonList(toParameter(value)));
     }
 
     /**
@@ -224,9 +233,14 @@ public class Condition<Q extends AbstractQuery<Q, ?, ?>, T> {
         List<Object> converted = new ArrayList<>(values.size());
         for (T value : values) {
             placeholders.add("?");
-            converted.add(toJdbc(value));
+            converted.add(toParameter(value));
         }
         return query.append(placeholders.toString(), converted);
+    }
+
+    // a converter never sees null, as in the generated setters
+    private Object toParameter(Object value) {
+        return toJdbc(value == null ? null : toDatabase.apply(value));
     }
 
     /**

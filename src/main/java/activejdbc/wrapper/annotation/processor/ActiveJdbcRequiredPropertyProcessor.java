@@ -32,6 +32,7 @@ import javax.tools.Diagnostic;
 import javax.tools.JavaFileObject;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -72,8 +73,8 @@ public class ActiveJdbcRequiredPropertyProcessor extends AbstractProcessor {
                     continue;
                 }
                 List<? extends AnnotationMirror> annotationMirrors = filterNeededAnnotationMirrors(element.getAnnotationMirrors());
-                List<ColumnContext> columnContexts = wrapperFactory.getColumnContexts(annotationMirrors);
-                if (!hasValidColumns(columnContexts, element)) {
+                List<ColumnContext> columnContexts = withConverters(annotationMirrors, wrapperFactory.getColumnContexts(annotationMirrors), (TypeElement) element);
+                if (columnContexts == null || !hasValidColumns(columnContexts, element)) {
                     continue;
                 }
                 for (ColumnContext leftOut : WrapperQueryClassBuilder.columnsLeftOut(columnContexts)) {
@@ -146,6 +147,21 @@ public class ActiveJdbcRequiredPropertyProcessor extends AbstractProcessor {
             return false;
         }
         return true;
+    }
+
+    /**
+     * @return the columns with their converters, or null if a converter can't be used (errors are reported)
+     */
+    private List<ColumnContext> withConverters(List<? extends AnnotationMirror> annotationMirrors, List<ColumnContext> columnContexts, TypeElement element) {
+        ConverterResolver converterResolver = new ConverterResolver(processingEnv);
+        List<ColumnContext> resolved = new ArrayList<>(columnContexts.size());
+        boolean valid = true;
+        for (int i = 0; i < columnContexts.size(); i++) {
+            ColumnContext columnContext = converterResolver.resolve(annotationMirrors.get(i), columnContexts.get(i), element);
+            valid &= columnContext != null;
+            resolved.add(columnContext);
+        }
+        return valid ? resolved : null;
     }
 
     private boolean hasValidColumns(List<ColumnContext> columnContexts, Element element) {

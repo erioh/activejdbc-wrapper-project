@@ -625,6 +625,119 @@ public class ActiveJdbcRequiredPropertyProcessorTest {
         Assertions.assertThat(source).contains("return true;", "new java.lang.Object[]{}");
     }
 
+    private static final String MONEY = "package u;\n"
+            + "public class Money {\n"
+            + "    public final java.math.BigDecimal amount;\n"
+            + "    public Money(java.math.BigDecimal amount) { this.amount = amount; }\n"
+            + "}";
+
+    private static JavaFileObject converter(String qualifiedName, String declaration) {
+        return JavaFileObjects.forSourceString(qualifiedName, "package " + qualifiedName.substring(0, qualifiedName.lastIndexOf('.')) + ";\n"
+                + "import activejdbc.wrapper.ColumnConverter;\n"
+                + declaration);
+    }
+
+    private static final String MONEY_CONVERTER_BODY = "{\n"
+            + "    public java.math.BigDecimal toDatabase(u.Money value) { return value.amount; }\n"
+            + "    public u.Money fromDatabase(java.math.BigDecimal value) { return new u.Money(value); }\n"
+            + "}";
+
+    @Test
+    public void should_generate_converting_property() throws IOException {
+        // given
+        JavaFileObject money = JavaFileObjects.forSourceString("u.Money", MONEY);
+        JavaFileObject converter = converter("v.MoneyConverter",
+                "public class MoneyConverter implements ColumnConverter<u.Money, java.math.BigDecimal> " + MONEY_CONVERTER_BODY);
+        JavaFileObject model = model("u.Order",
+                "@ActiveJdbcRequiredProperty(columnName = \"PRICE\", clazz = Money.class, converter = v.MoneyConverter.class)");
+        // when
+        Compilation compilation = compile(money, converter, model);
+        // then
+        assertThat(compilation).succeededWithoutWarnings();
+        String source = compilation.generatedSourceFile("u.OrderWrapper").get().getCharContent(true).toString().replaceAll("\\s+", " ");
+        Assertions.assertThat(source).contains(
+                "private static final v.MoneyConverter priceConverter = new v.MoneyConverter();",
+                "private java.math.BigDecimal readPrice() { return order.getBigDecimal(\"PRICE\"); }",
+                "public u.Money getPrice() { java.math.BigDecimal value = this.readPrice(); return value == null ? null : priceConverter.fromDatabase(value); }",
+                "public void setPrice(u.Money price) { this.writePrice(price == null ? null : priceConverter.toDatabase(price)); }",
+                "private void writePrice(java.math.BigDecimal price) { this.order.set(\"PRICE\", price); }",
+                "public activejdbc.wrapper.query.Condition<OrderWrapperQuery, u.Money> price() { return newCondition(\"PRICE\", priceConverter::toDatabase); }");
+    }
+
+    @Test
+    public void should_use_generic_property_type_of_converter() throws IOException {
+        // given
+        JavaFileObject converter = converter("u.TagsConverter",
+                "public class TagsConverter implements ColumnConverter<java.util.List<String>, String> {\n"
+                        + "    public String toDatabase(java.util.List<String> value) { return String.join(\",\", value); }\n"
+                        + "    public java.util.List<String> fromDatabase(String value) { return java.util.Arrays.asList(value.split(\",\")); }\n"
+                        + "}");
+        JavaFileObject model = model("u.Post",
+                "@ActiveJdbcRequiredProperty(columnName = \"TAGS\", clazz = java.util.List.class, converter = TagsConverter.class)");
+        // when
+        Compilation compilation = compile(converter, model);
+        // then
+        assertThat(compilation).succeededWithoutWarnings();
+        String source = compilation.generatedSourceFile("u.PostWrapper").get().getCharContent(true).toString();
+        Assertions.assertThat(source).contains("public java.util.List<java.lang.String> getTags()",
+                "public void setTags(java.util.List<java.lang.String> tags)", "private java.lang.String readTags()");
+    }
+
+    @DataProvider
+    public static Object[][] data_for_should_fail_on_unusable_converter() {
+        String body = MONEY_CONVERTER_BODY;
+        return new Object[][]{
+                {"public class C implements ColumnConverter<String, java.math.BigDecimal> {\n"
+                        + "    public java.math.BigDecimal toDatabase(String value) { return null; }\n"
+                        + "    public String fromDatabase(java.math.BigDecimal value) { return null; }\n"
+                        + "}", "converts [java.lang.String], but the column's clazz is [u.Money]"},
+                {"public abstract class C implements ColumnConverter<u.Money, java.math.BigDecimal> " + body,
+                        "must be a class that isn't abstract"},
+                {"public class C implements ColumnConverter<u.Money, java.math.BigDecimal> {\n"
+                        + "    public C(int unused) {}\n"
+                        + "    public java.math.BigDecimal toDatabase(u.Money value) { return value.amount; }\n"
+                        + "    public u.Money fromDatabase(java.math.BigDecimal value) { return new u.Money(value); }\n"
+                        + "}", "needs a public constructor without parameters"},
+                {"public class C<X> implements ColumnConverter<u.Money, java.math.BigDecimal> " + body,
+                        "must not have type parameters"},
+                {"public class C implements ColumnConverter {\n"
+                        + "    public Object toDatabase(Object value) { return value; }\n"
+                        + "    public Object fromDatabase(Object value) { return value; }\n"
+                        + "}", "must implement ColumnConverter with concrete type arguments"},
+        };
+    }
+
+    @Test
+    @UseDataProvider("data_for_should_fail_on_unusable_converter")
+    public void should_fail_on_unusable_converter(String converterDeclaration, String expectedError) {
+        // given: the converter in another package than the model
+        JavaFileObject money = JavaFileObjects.forSourceString("u.Money", MONEY);
+        JavaFileObject converter = converter("v.C", converterDeclaration);
+        JavaFileObject model = model("u.Order",
+                "@ActiveJdbcRequiredProperty(columnName = \"PRICE\", clazz = Money.class, converter = v.C.class)");
+        // when
+        Compilation compilation = compile(money, converter, model);
+        // then
+        assertThat(compilation).hadErrorContaining(expectedError);
+        assertThat(compilation).hadErrorCount(1);
+    }
+
+    @Test
+    public void should_fail_on_inner_converter_class() {
+        // given: javac accepts Outer.C.class in the annotation, but the wrapper can't create an inner class
+        JavaFileObject money = JavaFileObjects.forSourceString("u.Money", MONEY);
+        JavaFileObject converter = converter("v.Outer", "public class Outer {\n"
+                + "    public class C implements ColumnConverter<u.Money, java.math.BigDecimal> " + MONEY_CONVERTER_BODY + "\n"
+                + "}");
+        JavaFileObject model = model("u.Order",
+                "@ActiveJdbcRequiredProperty(columnName = \"PRICE\", clazz = Money.class, converter = v.Outer.C.class)");
+        // when
+        Compilation compilation = compile(money, converter, model);
+        // then
+        assertThat(compilation).hadErrorContaining("Converter [v.Outer.C] of column [PRICE] must be accessible from the wrapper in package [u]");
+        assertThat(compilation).hadErrorCount(1);
+    }
+
     @Test
     public void should_fail_when_interface_is_annotated() {
         // given

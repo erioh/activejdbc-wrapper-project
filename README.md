@@ -125,6 +125,37 @@ Two optional flags per column:
         excludeFromEqualsAndHashCode = true)
 ```
 
+For a type the wrapper doesn't support by itself (a value object, JSON, an enum stored by code), add a
+`ColumnConverter`. It converts the property to a type the wrapper supports and back:
+
+```java
+public class MoneyConverter implements ColumnConverter<Money, BigDecimal> {
+    @Override
+    public BigDecimal toDatabase(Money value) {
+        return value.getAmount();
+    }
+
+    @Override
+    public Money fromDatabase(BigDecimal value) {
+        return new Money(value);
+    }
+}
+```
+
+```java
+@ActiveJdbcRequiredProperty(columnName = "PRICE", clazz = Money.class, converter = MoneyConverter.class)
+```
+
+* The column is read and written as the second type argument (`BigDecimal` here), with the same accessor as a
+  `BigDecimal` property. The property gets the first one, which must be `clazz`. It may be generic:
+  `ColumnConverter<List<String>, String>` with `clazz = List.class` gives a `List<String>` property.
+* The converter is never called with `null`: NULL in the column is `null` in the property and the other way round.
+* The query builder converts parameters with it too: `price().gt(Money.of("10"))`. `like` is not offered for
+  columns with a converter.
+* The wrapper creates one instance per column and shares it, so the converter needs a public constructor without
+  parameters and must be thread-safe (stateless is easiest). A class the wrapper can't create (abstract, generic,
+  inner) or whose type doesn't match `clazz` is a compilation error.
+
 `toBuilder()` starts a builder from an existing wrapper, for a copy with some properties changed. It copies every
 property the builder can set into a new model, so read-only properties (such as that ID) stay empty and saving the
 copy inserts a new row. The original wrapper is not changed.
