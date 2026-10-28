@@ -169,12 +169,19 @@ This runs `FIRST_NAME = ? AND (AMOUNT > ? OR ACTIVATED IS NULL)`. The value type
   `and(q -> ...)`, `or(q -> ...)` and `group(q -> ...)` put conditions in parentheses.
 * Sorting and paging: `amount().desc()`, `firstName().asc()` (applied in the order they are added), `limit(n)`,
   `offset(n)`.
-* `fetch()` returns wrappers, `fetchModels()` returns ActiveJDBC models (a `LazyList`), `fetchCount()` returns the
-  number of matching rows (sorting and paging don't apply to it). `getSql()`, `getOrderBy()` and `getParams()` show
-  what will run.
+* `fetch()` returns wrappers, `fetchModels()` returns ActiveJDBC models (a `LazyList`), `fetchFirst()` returns an
+  `Optional` with the first matching wrapper (reading only that row), `fetchCount()` returns the number of matching
+  rows (sorting and paging don't apply to it). `getSql()`, `getOrderBy()` and `getParams()` show what will run.
 * Queries work with and without ActiveJDBC instrumentation.
 * A column whose property name clashes with a method of the query class (for example `TO_STRING` → `toString`)
   is left out of the query builder with a compiler warning; set `desiredFieldName` to use it.
+
+```java
+        Optional<FancyTableWrapper> newest = FancyTableWrapper.query()
+                .activated().eq(true)
+                .fancyTableId().desc()
+                .fetchFirst();
+```
 
 ```java
         List<FancyTableWrapper> page = FancyTableWrapper.query()

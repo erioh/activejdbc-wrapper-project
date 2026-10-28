@@ -306,6 +306,24 @@ public class GeneratedWrapperIntegrationTest {
     }
 
     @Test
+    public void should_fetch_first_row_only() {
+        // given
+        save(AllTypesWrapper.builder().stringValue("alpha").integerValue(1).build());
+        save(AllTypesWrapper.builder().stringValue("beta").integerValue(2).build());
+        save(AllTypesWrapper.builder().stringValue("gamma").integerValue(3).build());
+        AllTypesWrapper.AllTypesWrapperQuery query = AllTypesWrapper.query().integerValue().gt(1).integerValue().desc();
+
+        // when | then
+        assertThat(query.fetchFirst()).map(AllTypesWrapper::getStringValue).contains("gamma");
+        assertThat(AllTypesWrapper.query().integerValue().asc().offset(1).fetchFirst())
+                .map(AllTypesWrapper::getStringValue).contains("beta");
+        assertThat(AllTypesWrapper.query().stringValue().eq("omega").fetchFirst()).isEmpty();
+        assertThat(AllTypesWrapper.query().limit(0).fetchFirst()).isEmpty();
+        // the query itself is unchanged
+        assertThat(query.fetch()).extracting(AllTypesWrapper::getStringValue).containsExactly("gamma", "beta");
+    }
+
+    @Test
     public void should_find_row_by_every_type() {
         // given: the fully populated row and one with different values
         save(fullyPopulated());
