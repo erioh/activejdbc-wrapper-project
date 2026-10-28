@@ -47,10 +47,7 @@ public class TimeGetterBuilderStrategyTest {
         String type = "Time";
         String objectName = "object";
         String expectedGetter = String.format("public Time %s() {%n" +
-                "return java.util.Optional.ofNullable(object.getDate(\"COLUMN_NAME\"))%n" +
-                ".map(java.sql.Date::getTime)%n" +
-                ".map(java.sql.Time::new)%n" +
-                ".orElse(null);%n" +
+                "return activejdbc.wrapper.TemporalReader.time(object, \"COLUMN_NAME\");%n" +
                 "}%n", expectedMethod);
         ColumnContext columnContext = new ColumnContext(type, columnName, desiredFieldName);
 

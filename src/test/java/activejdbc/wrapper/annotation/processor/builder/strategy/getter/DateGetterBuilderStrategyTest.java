@@ -47,7 +47,7 @@ public class DateGetterBuilderStrategyTest {
         String type = "Date";
         String objectName = "object";
         String expectedGetter = String.format("public Date %s() {%n" +
-                "return object.getDate(\"COLUMN_NAME\");%n" +
+                "return activejdbc.wrapper.TemporalReader.sqlDate(object, \"COLUMN_NAME\");%n" +
                 "}%n", expectedMethod);
         ColumnContext columnContext = new ColumnContext(type, columnName, desiredFieldName);
 
