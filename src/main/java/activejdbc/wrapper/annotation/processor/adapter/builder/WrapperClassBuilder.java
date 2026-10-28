@@ -123,6 +123,10 @@ public class WrapperClassBuilder {
         StringBuilder constants = new StringBuilder();
         columnContexts.forEach(columnContext -> constants.append(String.format(COLUMN_NAME_CONSTANT_TEMPLATE,
                 StringUtils.buildConstantName(columnContext.getColumnName()), columnContext.getColumnName())));
+        columnContexts.stream().filter(ColumnContext::hasConverter).forEach(columnContext -> {
+            String converterClass = columnContext.getConverter().getClassName();
+            constants.append(String.format(CONVERTER_FIELD_TEMPLATE, converterClass, columnContext.getConverterFieldName(), converterClass));
+        });
         return constants.toString();
     }
 
@@ -219,10 +223,11 @@ public class WrapperClassBuilder {
         this.columnContexts.forEach(columnContext -> {
             String propertyName = columnContext.getPropertyName();
             String methodName = StringUtils.buildMethodName(propertyName, "get");
-            GetterBuilderStrategy strategy = columnContext.isEnumType()
-                    ? ENUM_GETTER_STRATEGY
-                    : getterBuilderStrategyHolder.getStrategy(columnContext.getClazz());
-            gettersBody.add(strategy.buildGetterBody(columnContext, activejdbcObjectName));
+            if (columnContext.hasConverter()) {
+                gettersBody.add(buildConvertingGetter(columnContext, methodName));
+            } else {
+                gettersBody.add(getterStrategy(columnContext).buildGetterBody(columnContext, activejdbcObjectName));
+            }
             propertyNamesAndGetters.put(propertyName, methodName);
         });
         return this;
@@ -230,12 +235,58 @@ public class WrapperClassBuilder {
 
     public WrapperClassBuilder withSetters() {
         this.columnContexts.stream().filter(columnContext -> !columnContext.isReadOnly()).forEach(columnContext -> {
-            SetterBuilderStrategy strategy = columnContext.isEnumType()
-                    ? ENUM_SETTER_STRATEGY
-                    : setterBuilderStrategyHolder.getStrategy(columnContext.getClazz());
-            settersBody.add(strategy.buildSetterBody(columnContext, activejdbcObjectName));
+            if (columnContext.hasConverter()) {
+                settersBody.add(buildConvertingSetter(columnContext));
+            } else {
+                settersBody.add(setterStrategy(columnContext).buildSetterBody(columnContext, activejdbcObjectName));
+            }
         });
         return this;
+    }
+
+    private GetterBuilderStrategy getterStrategy(ColumnContext columnContext) {
+        return columnContext.isEnumType()
+                ? ENUM_GETTER_STRATEGY
+                : getterBuilderStrategyHolder.getStrategy(columnContext.getClazz());
+    }
+
+    private SetterBuilderStrategy setterStrategy(ColumnContext columnContext) {
+        return columnContext.isEnumType()
+                ? ENUM_SETTER_STRATEGY
+                : setterBuilderStrategyHolder.getStrategy(columnContext.getClazz());
+    }
+
+    /**
+     * A private readX() reads the column as the converter's database type with the usual strategy for that type,
+     * the public getter converts what it returns.
+     */
+    private String buildConvertingGetter(ColumnContext columnContext, String getterName) {
+        ColumnContext databaseColumn = columnContext.getDatabaseColumn();
+        String readMethodName = StringUtils.buildMethodName(columnContext.getPropertyName(), "read");
+        String readMethod = String.format(getterStrategy(databaseColumn).getTemplate(), databaseColumn.getClazz(),
+                readMethodName, activejdbcObjectName, columnContext.getColumnName());
+        return asPrivate(readMethod) + String.format(CONVERTING_GETTER_TEMPLATE, columnContext.getClazz(), getterName,
+                databaseColumn.getClazz(), readMethodName, columnContext.getConverterFieldName());
+    }
+
+    /**
+     * The public setter converts the value, a private writeX() writes it with the usual strategy for the converter's
+     * database type.
+     */
+    private String buildConvertingSetter(ColumnContext columnContext) {
+        ColumnContext databaseColumn = columnContext.getDatabaseColumn();
+        String propertyName = columnContext.getPropertyName();
+        String writeMethodName = StringUtils.buildMethodName(propertyName, "write");
+        String writeMethod = String.format(setterStrategy(databaseColumn).getTemplate(), writeMethodName,
+                databaseColumn.getClazz(), propertyName, activejdbcObjectName, columnContext.getColumnName(), propertyName);
+        return String.format(CONVERTING_SETTER_TEMPLATE, StringUtils.buildMethodName(propertyName, "set"),
+                columnContext.getClazz(), propertyName, writeMethodName, propertyName, columnContext.getConverterFieldName(), propertyName)
+                + asPrivate(writeMethod);
+    }
+
+    // every strategy template starts with "public "
+    private static String asPrivate(String method) {
+        return "private " + method.substring("public ".length());
     }
 
     public WrapperClassBuilder withWrapMethod() {

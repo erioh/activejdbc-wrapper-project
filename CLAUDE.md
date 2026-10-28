@@ -44,6 +44,8 @@ Pipeline (all under `src/main/java/activejdbc/wrapper/annotation/processor/`):
 
 Per-column flags from the annotation live in `ColumnContext`: `readOnly` drops the setter, the builder method and the property's line in `toBuilder()` (the getter, `toString`, `equals` and the query method stay), `excludeFromEqualsAndHashCode` drops the property from `equals`/`hashCode` only.
 
+Converters (`@ActiveJdbcRequiredProperty(converter = ...)`, runtime interface `activejdbc.wrapper.ColumnConverter<T, D>`): `ConverterResolver` checks the converter and reads `T`/`D` from its supertypes; the column's `clazz` becomes `T` as written (may be generic), and `ColumnContext.getDatabaseColumn()` is the same column typed as `D`. `WrapperClassBuilder` generates a private `readX()`/`writeX()` with the normal strategy for `D` (strategy templates all start with `public `, which is swapped for `private `) and a public getter/setter that convert, skipping null; the converter instance is a `private static final <property>Converter` field. The query method passes `converter::toDatabase` to `AbstractQuery.newCondition`, which `Condition` applies before `toJdbc`.
+
 Property names: `ColumnContext.getPropertyName()` is the single source of truth — `desiredFieldName` if set, otherwise `StringUtils.buildPropertyNameFromColumnName` (`FIRST_NAME` → `firstName`). The processor validates columns before generating (property name must be a Java identifier and not a keyword; primitive types are rejected) and reports problems via `Messager` errors on the annotated element — don't throw exceptions from the processor. Generated setters reference the ActiveJDBC object as `this.<field>` because a property can have the same name as that field.
 
 ### Query builder

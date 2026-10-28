@@ -13,6 +13,8 @@ limitations under the License.
 
 package activejdbc.wrapper.annotation;
 
+import activejdbc.wrapper.ColumnConverter;
+
 import java.lang.annotation.*;
 
 /**
@@ -58,4 +60,13 @@ public @interface ActiveJdbcRequiredProperty {
      * @return {@code true} to ignore the property in {@code equals} and {@code hashCode}
      */
     boolean excludeFromEqualsAndHashCode() default false;
+
+    /**
+     * Converts the property to the column's type and back, for types the wrapper doesn't support by itself; see
+     * {@link activejdbc.wrapper.ColumnConverter}. Its first type argument must be {@link #clazz()}.
+     *
+     * @return the converter class; {@code ColumnConverter.class} (the default) means no converter
+     */
+    @SuppressWarnings("rawtypes")
+    Class<? extends ColumnConverter> converter() default ColumnConverter.class;
 }

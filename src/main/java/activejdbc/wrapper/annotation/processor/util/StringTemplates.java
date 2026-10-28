@@ -38,6 +38,35 @@ public final class StringTemplates {
      */
     public static final String COLUMN_NAME_CONSTANT_TEMPLATE = "public static final java.lang.String %s = \"%s\";%n";
     /**
+     * 1. converter class
+     * 2. field name
+     * 3. converter class
+     */
+    public static final String CONVERTER_FIELD_TEMPLATE = "private static final %s %s = new %s();%n";
+    /**
+     * 1. property type
+     * 2. getter name
+     * 3. database type
+     * 4. read method name
+     * 5. converter field name
+     */
+    public static final String CONVERTING_GETTER_TEMPLATE = "public %s %s() {%n" +
+            "%s value = this.%s();%n" +
+            "return value == null ? null : %s.fromDatabase(value);%n" +
+            "}%n";
+    /**
+     * 1. setter name
+     * 2. property type
+     * 3. property name
+     * 4. write method name
+     * 5. property name
+     * 6. converter field name
+     * 7. property name
+     */
+    public static final String CONVERTING_SETTER_TEMPLATE = "public void %s(%s %s) {%n" +
+            "this.%s(%s == null ? null : %s.toDatabase(%s));%n" +
+            "}%n";
+    /**
      * 1. toString implementation
      */
     public static final String TO_STRING_METHOD_TEMPLATE = "public java.lang.String toString() {%n" +

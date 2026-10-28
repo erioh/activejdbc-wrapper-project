@@ -27,6 +27,8 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.YearMonth;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -56,5 +58,8 @@ import java.util.UUID;
 @ActiveJdbcRequiredProperty(columnName = "UUID_VALUE", clazz = UUID.class)
 @ActiveJdbcRequiredProperty(columnName = "CLOB_VALUE", clazz = Clob.class)
 @ActiveJdbcRequiredProperty(columnName = "ENUM_VALUE", clazz = Color.class)
+@ActiveJdbcRequiredProperty(columnName = "MONEY_VALUE", clazz = Money.class, converter = MoneyConverter.class)
+@ActiveJdbcRequiredProperty(columnName = "YEAR_MONTH_VALUE", clazz = YearMonth.class, converter = YearMonthConverter.class)
+@ActiveJdbcRequiredProperty(columnName = "TAGS_VALUE", clazz = List.class, converter = TagsConverter.class)
 public class AllTypes extends Model {
 }
