@@ -90,6 +90,15 @@ public final class StringTemplates {
 
     /**
      * 1. Builder class name
+     * 2. Builder class name
+     * 3. builder method calls copying the properties, each starting on a new line
+     */
+    public static final String TO_BUILDER_METHOD_TEMPLATE = " public %s toBuilder() {%n" +
+            "return new %s()%s;%n" +
+            "}%n";
+
+    /**
+     * 1. Builder class name
      * 2. Method name
      * 3. Column type
      * 4. Column name

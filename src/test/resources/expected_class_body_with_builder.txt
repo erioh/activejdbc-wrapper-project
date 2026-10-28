@@ -13,6 +13,9 @@ this.objectClassName = objectClassName;
  public static ObjectClassNameWrapperBuilder builder() {
 return new ObjectClassNameWrapperBuilder();
 }
+ public ObjectClassNameWrapperBuilder toBuilder() {
+return new ObjectClassNameWrapperBuilder();
+}
  public static class ObjectClassNameWrapperBuilder {
 private final ObjectClassNameWrapper objectClassNameWrapper = new ObjectClassNameWrapper();
 

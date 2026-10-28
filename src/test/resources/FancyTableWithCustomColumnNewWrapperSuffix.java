@@ -45,6 +45,10 @@ public class FancyTableWithCustomColumnNewWrapperSuffix extends activejdbc.wrapp
     public static FancyTableWithCustomColumnNewWrapperSuffixBuilder builder() {
         return new FancyTableWithCustomColumnNewWrapperSuffixBuilder();
     }
+    public FancyTableWithCustomColumnNewWrapperSuffixBuilder toBuilder() {
+        return new FancyTableWithCustomColumnNewWrapperSuffixBuilder()
+            .withCustomColumn(this.getCustomColumn());
+    }
     public static class FancyTableWithCustomColumnNewWrapperSuffixBuilder {
         private final FancyTableWithCustomColumnNewWrapperSuffix fancyTableWithCustomColumnNewWrapperSuffix = new FancyTableWithCustomColumnNewWrapperSuffix();
         public FancyTableWithCustomColumnNewWrapperSuffixBuilder withCustomColumn(java.lang.Long customColumn) {

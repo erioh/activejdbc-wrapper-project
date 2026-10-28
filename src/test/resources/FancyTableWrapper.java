@@ -45,6 +45,10 @@ public class FancyTableWrapper extends activejdbc.wrapper.ActivejdbcWrapper<Fanc
     public static FancyTableWrapperBuilder builder() {
         return new FancyTableWrapperBuilder();
     }
+    public FancyTableWrapperBuilder toBuilder() {
+        return new FancyTableWrapperBuilder()
+            .fancyTableId(this.getFancyTableId());
+    }
     public static class FancyTableWrapperBuilder {
         private final FancyTableWrapper fancyTableWrapper = new FancyTableWrapper();
         public FancyTableWrapperBuilder fancyTableId(java.lang.Long fancyTableId) {

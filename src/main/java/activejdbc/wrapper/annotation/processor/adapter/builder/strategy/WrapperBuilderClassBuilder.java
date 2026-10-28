@@ -21,6 +21,7 @@ import java.util.List;
 
 import static activejdbc.wrapper.annotation.processor.util.StringTemplates.BUILDER_METHOD_TEMPLATE;
 import static activejdbc.wrapper.annotation.processor.util.StringTemplates.BUILDER_SETTER_TEMPLATE;
+import static activejdbc.wrapper.annotation.processor.util.StringTemplates.TO_BUILDER_METHOD_TEMPLATE;
 
 public class WrapperBuilderClassBuilder {
     /**
@@ -51,8 +52,26 @@ public class WrapperBuilderClassBuilder {
         this.methodPrefix = annotationProcessorContext.getBuilderMethodPrefix();
     }
 
+    private java.util.stream.Stream<ColumnContext> writableColumns() {
+        return columnContexts.stream().filter(columnContext -> !columnContext.isReadOnly());
+    }
+
     public String buildBuildMethodName() {
         return String.format(BUILDER_METHOD_TEMPLATE, builderClassName, builderClassName);
+    }
+
+    /**
+     * toBuilder() copies what the builder can set; read-only properties (an ID, database-filled columns) stay empty,
+     * so the copy is saved as a new row.
+     */
+    public String buildToBuilderMethod() {
+        StringBuilder calls = new StringBuilder();
+        writableColumns().forEach(columnContext -> {
+            String propertyName = columnContext.getPropertyName();
+            calls.append(String.format("%n.%s(this.%s())", StringUtils.buildMethodName(propertyName, methodPrefix),
+                    StringUtils.buildMethodName(propertyName, "get")));
+        });
+        return String.format(TO_BUILDER_METHOD_TEMPLATE, builderClassName, builderClassName, calls);
     }
 
     public String buildClassBody() {

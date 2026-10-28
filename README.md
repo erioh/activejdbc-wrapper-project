@@ -125,6 +125,16 @@ Two optional flags per column:
         excludeFromEqualsAndHashCode = true)
 ```
 
+`toBuilder()` starts a builder from an existing wrapper, for a copy with some properties changed. It copies every
+property the builder can set into a new model, so read-only properties (such as that ID) stay empty and saving the
+copy inserts a new row. The original wrapper is not changed.
+
+```java
+        FancyTableWrapper copy = existing.toBuilder()
+                .firstName("Another name")
+                .build();
+```
+
 For CLOB columns, `clazz = String.class` is usually the best choice: `getString(...)` reads the whole text. With
 `clazz = java.sql.Clob.class` the getter returns the driver's `Clob`, which typically can only be read while the
 connection is open, and models marked with `@Cached` hold CLOBs as `String`, so the cast fails for them.

@@ -45,6 +45,10 @@ public class FancyTableWithCustomColumnWrapper extends activejdbc.wrapper.Active
     public static FancyTableWithCustomColumnWrapperBuilder builder() {
         return new FancyTableWithCustomColumnWrapperBuilder();
     }
+    public FancyTableWithCustomColumnWrapperBuilder toBuilder() {
+        return new FancyTableWithCustomColumnWrapperBuilder()
+            .customColumn(this.getCustomColumn());
+    }
     public static class FancyTableWithCustomColumnWrapperBuilder {
         private final FancyTableWithCustomColumnWrapper fancyTableWithCustomColumnWrapper = new FancyTableWithCustomColumnWrapper();
         public FancyTableWithCustomColumnWrapperBuilder customColumn(java.lang.Long customColumn) {
