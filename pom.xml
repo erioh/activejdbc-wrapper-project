@@ -111,7 +111,7 @@
                     <!-- pinned: the JDK 9+ profile configures it, and Maven warns about a plugin without a version -->
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-surefire-plugin</artifactId>
-                    <version>3.6.0</version>
+                    <version>3.6.1</version>
                 </plugin>
             </plugins>
         </pluginManagement>
