@@ -149,6 +149,20 @@
                 </executions>
             </plugin>
             <plugin>
+                <!-- a stable module name for users with module-info.java; without it the name is derived from the
+                     jar file name -->
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>3.5.1</version>
+                <configuration>
+                    <archive>
+                        <manifestEntries>
+                            <Automatic-Module-Name>activejdbc.wrapper</Automatic-Module-Name>
+                        </manifestEntries>
+                    </archive>
+                </configuration>
+            </plugin>
+            <plugin>
                 <!-- publishes to Maven Central via the Central Portal (OSSRH was shut down in June 2025);
                      credentials: a user token in the "central" server of ~/.m2/settings.xml -->
                 <groupId>org.sonatype.central</groupId>
