@@ -123,9 +123,26 @@ public class GeneratedWrapperIntegrationTest {
 
         // then
         assertThat(read).isEqualTo(new AllTypesWrapper());
+        assertThat(read.getBooleanValue()).isNull();
         assertThat(read.getLocalDateValue()).isNull();
         assertThat(read.getInstantValue()).isNull();
         assertThat(read.getBigIntegerValue()).isNull();
+    }
+
+    @Test
+    public void should_tell_null_boolean_from_false() {
+        // given
+        AllTypesWrapper unset = new AllTypesWrapper();
+        AllTypesWrapper no = new AllTypesWrapper();
+        no.setBooleanValue(false);
+
+        // when
+        AllTypesWrapper readNo = saveAndReload(no);
+
+        // then
+        assertThat(unset.getBooleanValue()).isNull();
+        assertThat(readNo.getBooleanValue()).isFalse();
+        assertThat(unset).isNotEqualTo(no);
     }
 
     @Test
