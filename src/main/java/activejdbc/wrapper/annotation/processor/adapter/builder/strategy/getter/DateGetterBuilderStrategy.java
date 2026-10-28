@@ -25,7 +25,7 @@ public class DateGetterBuilderStrategy implements GetterBuilderStrategy {
      * 4. column name
      */
     private static final String GETTER_TEMPLATE = "public %s %s() {%n" +
-            "return %s.getDate(\"%s\");%n" +
+            "return activejdbc.wrapper.TemporalReader.sqlDate(%s, \"%s\");%n" +
             "}%n";
 
     @Override

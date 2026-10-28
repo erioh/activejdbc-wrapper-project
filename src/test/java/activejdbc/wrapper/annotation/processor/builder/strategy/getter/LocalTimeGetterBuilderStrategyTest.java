@@ -47,9 +47,7 @@ public class LocalTimeGetterBuilderStrategyTest {
         String type = "LocalTime";
         String objectName = "object";
         String expectedGetter = String.format("public LocalTime %s() {%n" +
-                "return java.util.Optional.ofNullable(object.getTime(\"COLUMN_NAME\"))%n" +
-                ".map(java.sql.Time::toLocalTime)%n" +
-                ".orElse(null);%n" +
+                "return activejdbc.wrapper.TemporalReader.localTime(object, \"COLUMN_NAME\");%n" +
                 "}%n", expectedMethod);
         ColumnContext columnContext = new ColumnContext(type, columnName, desiredFieldName);
 

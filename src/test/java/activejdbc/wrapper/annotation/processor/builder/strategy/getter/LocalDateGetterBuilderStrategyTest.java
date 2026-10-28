@@ -47,9 +47,7 @@ public class LocalDateGetterBuilderStrategyTest {
         String type = "LocalDate";
         String objectName = "object";
         String expectedGetter = String.format("public LocalDate %s() {%n" +
-                "return java.util.Optional.ofNullable(object.getDate(\"COLUMN_NAME\"))%n" +
-                ".map(java.sql.Date::toLocalDate)%n" +
-                ".orElse(null);%n" +
+                "return activejdbc.wrapper.TemporalReader.localDate(object, \"COLUMN_NAME\");%n" +
                 "}%n", expectedMethod);
         ColumnContext columnContext = new ColumnContext(type, columnName, desiredFieldName);
 

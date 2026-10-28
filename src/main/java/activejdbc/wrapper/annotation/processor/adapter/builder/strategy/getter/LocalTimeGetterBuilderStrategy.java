@@ -25,9 +25,7 @@ public class LocalTimeGetterBuilderStrategy implements GetterBuilderStrategy {
      * 4. column name
      */
     private static final String GETTER_TEMPLATE = "public %s %s() {%n" +
-            "return java.util.Optional.ofNullable(%s.getTime(\"%s\"))%n" +
-            ".map(java.sql.Time::toLocalTime)%n" +
-            ".orElse(null);%n" +
+            "return activejdbc.wrapper.TemporalReader.localTime(%s, \"%s\");%n" +
             "}%n";
 
     @Override

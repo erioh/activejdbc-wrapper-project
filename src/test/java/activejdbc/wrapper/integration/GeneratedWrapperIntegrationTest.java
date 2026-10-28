@@ -35,6 +35,7 @@ import java.util.UUID;
 import javax.sql.rowset.serial.SerialClob;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * Runs the generated AllTypesWrapper against a real database: values written through the wrapper must come back
@@ -175,6 +176,49 @@ public class GeneratedWrapperIntegrationTest {
         // then
         assertThat(Base.firstCell("SELECT ENUM_VALUE FROM ALL_TYPES")).isEqualTo("RED");
         assertThat(read.getEnumValue()).isEqualTo(Color.RED);
+    }
+
+    @Test
+    public void should_read_dates_and_times_from_values_only_get_timestamp_parses() {
+        // given: like oracle.sql.TIMESTAMP, which Oracle returns for TIMESTAMP columns
+        Object driverTimestamp = new Object() {
+            @Override
+            public String toString() {
+                return "2026-10-27 13:45:30.5";
+            }
+        };
+        AllTypes model = new AllTypes();
+        model.set("SQL_DATE_VALUE", driverTimestamp);
+        model.set("TIME_VALUE", driverTimestamp);
+        model.set("LOCAL_DATE_VALUE", driverTimestamp);
+        model.set("LOCAL_TIME_VALUE", driverTimestamp);
+        long millis = Timestamp.valueOf("2026-10-27 13:45:30.5").getTime();
+
+        // when
+        AllTypesWrapper wrapper = new AllTypesWrapper(model);
+
+        // then
+        assertThat(wrapper.getSqlDateValue()).isEqualTo(new Date(millis));
+        assertThat(wrapper.getTimeValue()).isEqualTo(new Time(millis));
+        assertThat(wrapper.getLocalDateValue()).isEqualTo(LocalDate.of(2026, 10, 27));
+        assertThat(wrapper.getLocalTimeValue()).isEqualTo(LocalTime.of(13, 45, 30));
+    }
+
+    @Test
+    public void should_still_read_dates_and_times_in_their_own_format() {
+        // given
+        AllTypes model = new AllTypes();
+        model.set("LOCAL_DATE_VALUE", "2026-10-27");
+        model.set("LOCAL_TIME_VALUE", "13:45:30");
+        model.set("SQL_DATE_VALUE", "not a date");
+
+        // when
+        AllTypesWrapper wrapper = new AllTypesWrapper(model);
+
+        // then
+        assertThat(wrapper.getLocalDateValue()).isEqualTo(LocalDate.of(2026, 10, 27));
+        assertThat(wrapper.getLocalTimeValue()).isEqualTo(LocalTime.of(13, 45, 30));
+        assertThatThrownBy(wrapper::getSqlDateValue).hasMessageContaining("not a date");
     }
 
     @Test

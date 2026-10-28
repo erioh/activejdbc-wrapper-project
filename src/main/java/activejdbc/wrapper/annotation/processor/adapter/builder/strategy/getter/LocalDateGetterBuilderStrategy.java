@@ -26,9 +26,7 @@ public class LocalDateGetterBuilderStrategy implements GetterBuilderStrategy {
      * 4. column name
      */
     private static final String GETTER_TEMPLATE = "public %s %s() {%n" +
-            "return java.util.Optional.ofNullable(%s.getDate(\"%s\"))%n" +
-            ".map(java.sql.Date::toLocalDate)%n" +
-            ".orElse(null);%n" +
+            "return activejdbc.wrapper.TemporalReader.localDate(%s, \"%s\");%n" +
             "}%n";
 
     @Override
