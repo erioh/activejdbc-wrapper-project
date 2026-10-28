@@ -256,6 +256,7 @@ public class WrapperClassBuilder {
     public WrapperClassBuilder withBuilder() {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append(wrapperBuilderClassBuilder.buildBuildMethodName());
+        stringBuilder.append(wrapperBuilderClassBuilder.buildToBuilderMethod());
         stringBuilder.append(wrapperBuilderClassBuilder.buildClassBody());
         builderAndBuilderClass = stringBuilder.toString();
         return this;

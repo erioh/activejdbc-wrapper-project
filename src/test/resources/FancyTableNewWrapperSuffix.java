@@ -45,6 +45,10 @@ public class FancyTableNewWrapperSuffix extends activejdbc.wrapper.ActivejdbcWra
     public static FancyTableNewWrapperSuffixBuilder builder() {
         return new FancyTableNewWrapperSuffixBuilder();
     }
+    public FancyTableNewWrapperSuffixBuilder toBuilder() {
+        return new FancyTableNewWrapperSuffixBuilder()
+            .withFancyTableId(this.getFancyTableId());
+    }
     public static class FancyTableNewWrapperSuffixBuilder {
         private final FancyTableNewWrapperSuffix fancyTableNewWrapperSuffix = new FancyTableNewWrapperSuffix();
         public FancyTableNewWrapperSuffixBuilder withFancyTableId(java.lang.Long fancyTableId) {

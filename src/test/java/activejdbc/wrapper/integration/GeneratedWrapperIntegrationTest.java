@@ -317,6 +317,24 @@ public class GeneratedWrapperIntegrationTest {
     }
 
     @Test
+    public void should_copy_wrapper_with_to_builder() {
+        // given
+        AllTypesWrapper saved = saveAndReload(fullyPopulated());
+
+        // when
+        AllTypesWrapper copy = saved.toBuilder().stringValue("copy").build();
+
+        // then: every writable property is copied, the read-only ID is not, the original is unchanged
+        assertThat(copy.getId()).isNull();
+        assertThat(copy).isEqualTo(fullyPopulated().toBuilder().stringValue("copy").build());
+        assertThat(saved.getStringValue()).isEqualTo("text");
+        // so the copy is saved as a new row
+        save(copy);
+        assertThat(copy.getId()).isNotNull().isNotEqualTo(saved.getId());
+        assertThat(AllTypesWrapper.query().fetchCount()).isEqualTo(2L);
+    }
+
+    @Test
     public void should_fetch_first_row_only() {
         // given
         save(AllTypesWrapper.builder().stringValue("alpha").integerValue(1).build());

@@ -565,6 +565,27 @@ public class ActiveJdbcRequiredPropertyProcessorTest {
     }
 
     @Test
+    public void should_copy_writable_properties_in_to_builder() throws IOException {
+        // given
+        JavaFileObject model = model("u.Account",
+                "@ActiveJdbcRequiredProperty(columnName = \"ID\", clazz = Long.class, readOnly = true)\n"
+                        + "@ActiveJdbcRequiredProperty(columnName = \"NAME\", clazz = String.class)\n"
+                        + "@ActiveJdbcRequiredProperty(columnName = \"AMOUNT\", clazz = java.math.BigDecimal.class)");
+        // when
+        Compilation compilation = javac()
+                .withProcessors(new ActiveJdbcRequiredPropertyProcessor())
+                .withOptions("-Aactivejdbc.wrapper.builder.method.prefix=with")
+                .compile(model);
+        // then
+        assertThat(compilation).succeededWithoutWarnings();
+        String source = compilation.generatedSourceFile("u.AccountWrapper").get().getCharContent(true).toString();
+        String toBuilder = source.substring(source.indexOf("public AccountWrapperBuilder toBuilder()"), source.indexOf("public static class AccountWrapperBuilder"));
+        Assertions.assertThat(toBuilder.replaceAll("\\s+", ""))
+                .isEqualTo("publicAccountWrapperBuildertoBuilder(){returnnewAccountWrapperBuilder()"
+                        + ".withName(this.getName()).withAmount(this.getAmount());}");
+    }
+
+    @Test
     public void should_leave_excluded_column_out_of_equals_and_hash_code() throws IOException {
         // given
         JavaFileObject model = model("u.Account",
