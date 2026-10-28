@@ -47,6 +47,12 @@ public abstract class AbstractQuery<Q extends AbstractQuery<Q, M, W>, M extends 
     private Long limit;
     private Long offset;
 
+    /**
+     * Constructor for the generated query classes.
+     *
+     * @param modelClass     the ActiveJDBC model to query
+     * @param wrapperFactory wraps a found model, e.g. {@code FancyTableWrapper::new}
+     */
     protected AbstractQuery(Class<M> modelClass, Function<M, W> wrapperFactory) {
         this.modelClass = modelClass;
         this.wrapperFactory = wrapperFactory;
@@ -54,6 +60,8 @@ public abstract class AbstractQuery<Q extends AbstractQuery<Q, M, W>, M extends 
 
     /**
      * Joins the previous and the next condition with AND. Same as not calling anything between them.
+     *
+     * @return this query
      */
     public Q and() {
         return connector("AND");
@@ -61,6 +69,8 @@ public abstract class AbstractQuery<Q extends AbstractQuery<Q, M, W>, M extends 
 
     /**
      * Joins the previous and the next condition with OR. As in SQL, AND binds tighter than OR; use groups to change it.
+     *
+     * @return this query
      */
     public Q or() {
         return connector("OR");
@@ -68,6 +78,9 @@ public abstract class AbstractQuery<Q extends AbstractQuery<Q, M, W>, M extends 
 
     /**
      * Shortcut for {@code and().group(group)}.
+     *
+     * @param group adds the conditions to put in parentheses to the query it's given
+     * @return this query
      */
     public Q and(Function<Q, Q> group) {
         return and().group(group);
@@ -75,6 +88,9 @@ public abstract class AbstractQuery<Q extends AbstractQuery<Q, M, W>, M extends 
 
     /**
      * Shortcut for {@code or().group(group)}.
+     *
+     * @param group adds the conditions to put in parentheses to the query it's given
+     * @return this query
      */
     public Q or(Function<Q, Q> group) {
         return or().group(group);
@@ -82,6 +98,9 @@ public abstract class AbstractQuery<Q extends AbstractQuery<Q, M, W>, M extends 
 
     /**
      * Adds the conditions built by {@code group} in parentheses, e.g. {@code group(q -> q.a().eq(1).or().b().eq(2))}.
+     *
+     * @param group adds the conditions to the query it's given and returns it; no sorting or paging inside
+     * @return this query
      */
     public Q group(Function<Q, Q> group) {
         // typed as AbstractQuery: private members can't be reached through the type variable Q
@@ -99,6 +118,9 @@ public abstract class AbstractQuery<Q extends AbstractQuery<Q, M, W>, M extends 
     /**
      * Returns at most {@code limit} rows. Without sorting the database decides which ones, so it's usually combined
      * with {@link Condition#asc()} / {@link Condition#desc()}.
+     *
+     * @param limit maximum number of rows, at least 0
+     * @return this query
      */
     public Q limit(long limit) {
         this.limit = requireNotNegative(limit, "limit");
@@ -107,6 +129,9 @@ public abstract class AbstractQuery<Q extends AbstractQuery<Q, M, W>, M extends 
 
     /**
      * Skips the first {@code offset} rows; meant for paging together with {@link #limit(long)} and sorting.
+     *
+     * @param offset number of rows to skip, at least 0
+     * @return this query
      */
     public Q offset(long offset) {
         this.offset = requireNotNegative(offset, "offset");
@@ -114,7 +139,9 @@ public abstract class AbstractQuery<Q extends AbstractQuery<Q, M, W>, M extends 
     }
 
     /**
-     * @return wrappers of all matching rows
+     * Runs the query.
+     *
+     * @return wrappers of the matching rows, sorted and limited as requested
      */
     public List<W> fetch() {
         return fetchModels().stream()
@@ -123,6 +150,8 @@ public abstract class AbstractQuery<Q extends AbstractQuery<Q, M, W>, M extends 
     }
 
     /**
+     * Runs the query and returns the models instead of wrappers.
+     *
      * @return matching models, sorted and limited as requested
      */
     public LazyList<M> fetchModels() {
@@ -143,6 +172,8 @@ public abstract class AbstractQuery<Q extends AbstractQuery<Q, M, W>, M extends 
     }
 
     /**
+     * Counts the matching rows.
+     *
      * @return number of all matching rows; sorting, {@link #limit(long)} and {@link #offset(long)} don't apply
      */
     public Long fetchCount() {
@@ -153,6 +184,8 @@ public abstract class AbstractQuery<Q extends AbstractQuery<Q, M, W>, M extends 
     }
 
     /**
+     * Shows the conditions, for debugging and tests.
+     *
      * @return the WHERE clause built so far, with {@code ?} placeholders for {@link #getParams()}
      */
     public String getSql() {
@@ -160,6 +193,8 @@ public abstract class AbstractQuery<Q extends AbstractQuery<Q, M, W>, M extends 
     }
 
     /**
+     * Shows the sorting, for debugging and tests.
+     *
      * @return the ORDER BY clause built so far, e.g. {@code AMOUNT DESC, FIRST_NAME ASC}; empty without sorting
      */
     public String getOrderBy() {
@@ -167,22 +202,39 @@ public abstract class AbstractQuery<Q extends AbstractQuery<Q, M, W>, M extends 
     }
 
     /**
+     * Shows the parameters, for debugging and tests.
+     *
      * @return values for the placeholders in {@link #getSql()}, already converted for JDBC
      */
     public List<Object> getParams() {
         return Collections.unmodifiableList(params);
     }
 
+    /**
+     * Used by the generated column methods.
+     *
+     * @param column the column name
+     * @param <T>    the column's Java type
+     * @return a condition on the column
+     */
     protected <T> Condition<Q, T> newCondition(String column) {
         return new Condition<>(self(), column);
     }
 
+    /**
+     * Used by the generated column methods of String columns.
+     *
+     * @param column the column name
+     * @return a condition on the column, with LIKE
+     */
     protected StringCondition<Q> newStringCondition(String column) {
         return new StringCondition<>(self(), column);
     }
 
     /**
-     * @return an empty query of the same type, used for groups
+     * Creates an empty query of the same type, used for groups.
+     *
+     * @return a new query
      */
     protected abstract Q newQuery();
 

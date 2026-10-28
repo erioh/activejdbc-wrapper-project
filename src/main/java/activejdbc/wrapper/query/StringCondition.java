@@ -26,11 +26,20 @@ public class StringCondition<Q extends AbstractQuery<Q, ?, ?>> extends Condition
 
     /**
      * {@code column LIKE pattern}, with SQL wildcards: {@code like("Jo%")}.
+     *
+     * @param pattern the pattern, not null
+     * @return the query
      */
     public Q like(String pattern) {
         return compare("LIKE", requireValue(pattern, "like"));
     }
 
+    /**
+     * {@code column NOT LIKE pattern}.
+     *
+     * @param pattern the pattern, not null
+     * @return the query
+     */
     public Q notLike(String pattern) {
         return compare("NOT LIKE", requireValue(pattern, "notLike"));
     }

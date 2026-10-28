@@ -13,6 +13,7 @@ updates:
           - org.mockito:*
           - com.tngtech.java:*
           - com.google.testing.compile:*
+          - org.slf4j:*
     ignore:
       # provided dependency: the processor must keep working with the ActiveJDBC version users already have
       - dependency-name: org.javalite:activejdbc
@@ -23,6 +24,8 @@ updates:
         versions: [">= 5"]          # Mockito 5 needs Java 11, 4.x is the last line for Java 8
       - dependency-name: org.assertj:assertj-core
         versions: [">= 4"]          # AssertJ 4 needs Java 17
+      - dependency-name: org.slf4j:slf4j-nop
+        versions: [">= 2"]          # must match ActiveJDBC's slf4j-api 1.7, 2.x bindings aren't found by it
   - package-ecosystem: github-actions
     directory: /
     schedule:
