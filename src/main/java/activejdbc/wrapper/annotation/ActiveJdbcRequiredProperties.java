@@ -18,8 +18,17 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+/**
+ * Container of repeated {@link ActiveJdbcRequiredProperty} annotations; the compiler creates it, there is no need to
+ * write it by hand.
+ */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.SOURCE)
 public @interface ActiveJdbcRequiredProperties {
+    /**
+     * The repeated annotations.
+     *
+     * @return the repeated annotations
+     */
     ActiveJdbcRequiredProperty[] value();
 }

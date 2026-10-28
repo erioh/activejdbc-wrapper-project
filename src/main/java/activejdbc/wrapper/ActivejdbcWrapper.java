@@ -15,6 +15,23 @@ package activejdbc.wrapper;
 
 import org.javalite.activejdbc.Model;
 
+/**
+ * Base class of the generated wrappers.
+ *
+ * @param <T> the wrapped ActiveJDBC model
+ */
 public abstract class ActivejdbcWrapper<T extends Model> {
+
+    /**
+     * Constructor for the generated subclasses.
+     */
+    protected ActivejdbcWrapper() {
+    }
+
+    /**
+     * Gives the model behind the wrapper; reachable from outside through {@link ActivejdbcWrapperManipulator}.
+     *
+     * @return the wrapped model
+     */
     protected abstract T getActivejdbcObject();
 }

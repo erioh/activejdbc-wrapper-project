@@ -23,6 +23,7 @@
         <compile-testing.version>0.24.0</compile-testing.version>
         <!-- 2.2.x is the last H2 line that runs on Java 8 -->
         <h2.version>2.2.224</h2.version>
+        <slf4j-nop.version>1.7.36</slf4j-nop.version>
     </properties>
 
     <dependencies>
@@ -68,6 +69,13 @@
             <version>${h2.version}</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <!-- ActiveJDBC logs through SLF4J 1.7; without a binding the H2 tests print a warning about it -->
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-nop</artifactId>
+            <version>${slf4j-nop.version}</version>
+            <scope>test</scope>
+        </dependency>
 
     </dependencies>
 
@@ -97,6 +105,16 @@
     </scm>
 
     <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <!-- pinned: the JDK 9+ profile configures it, and Maven warns about a plugin without a version -->
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <version>3.6.0</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -105,6 +123,10 @@
                 <configuration>
                     <source>8</source>
                     <target>8</target>
+                    <compilerArgs>
+                        <!-- JDK 21+ warns that source/target 8 will go away one day; the code must stay on Java 8 -->
+                        <arg>-Xlint:-options</arg>
+                    </compilerArgs>
                 </configuration>
                 <executions>
                     <execution>
@@ -156,6 +178,11 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
                 <version>3.12.0</version>
+                <configuration>
+                    <!-- the processor's internals are not API: users only touch the annotations, the wrappers'
+                         base classes and the query builder -->
+                    <excludePackageNames>activejdbc.wrapper.annotation.processor:activejdbc.wrapper.annotation.processor.*</excludePackageNames>
+                </configuration>
                 <executions>
                     <execution>
                         <id>attach-javadocs</id>

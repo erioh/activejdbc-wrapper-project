@@ -37,6 +37,13 @@ public final class TemporalReader {
     private TemporalReader() {
     }
 
+    /**
+     * Reads a {@code java.sql.Date} property.
+     *
+     * @param model  the model
+     * @param column the column name
+     * @return the value, or null
+     */
     public static Date sqlDate(Model model, String column) {
         if (needsGetTimestamp(model.get(column))) {
             Timestamp timestamp = model.getTimestamp(column);
@@ -45,11 +52,25 @@ public final class TemporalReader {
         return model.getDate(column);
     }
 
+    /**
+     * Reads a {@code LocalDate} property.
+     *
+     * @param model  the model
+     * @param column the column name
+     * @return the value, or null
+     */
     public static LocalDate localDate(Model model, String column) {
         Date date = sqlDate(model, column);
         return date == null ? null : date.toLocalDate();
     }
 
+    /**
+     * Reads a {@code java.sql.Time} property.
+     *
+     * @param model  the model
+     * @param column the column name
+     * @return the value, or null
+     */
     public static Time time(Model model, String column) {
         if (needsGetTimestamp(model.get(column))) {
             Timestamp timestamp = model.getTimestamp(column);
@@ -58,6 +79,13 @@ public final class TemporalReader {
         return model.getTime(column);
     }
 
+    /**
+     * Reads a {@code LocalTime} property.
+     *
+     * @param model  the model
+     * @param column the column name
+     * @return the value, or null
+     */
     public static LocalTime localTime(Model model, String column) {
         Time time = time(model, column);
         return time == null ? null : time.toLocalTime();

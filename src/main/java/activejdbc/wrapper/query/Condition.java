@@ -48,6 +48,9 @@ public class Condition<Q extends AbstractQuery<Q, ?, ?>, T> {
 
     /**
      * {@code column = value}; {@code eq(null)} means {@code IS NULL}, since {@code = NULL} never matches in SQL.
+     *
+     * @param value the value, or null
+     * @return the query
      */
     public Q eq(T value) {
         return value == null ? isNull() : compare("=", value);
@@ -55,35 +58,72 @@ public class Condition<Q extends AbstractQuery<Q, ?, ?>, T> {
 
     /**
      * {@code column <> value}; {@code ne(null)} means {@code IS NOT NULL}.
+     *
+     * @param value the value, or null
+     * @return the query
      */
     public Q ne(T value) {
         return value == null ? isNotNull() : compare("<>", value);
     }
 
+    /**
+     * {@code column > value}.
+     *
+     * @param value the value, not null
+     * @return the query
+     */
     public Q gt(T value) {
         return compare(">", requireValue(value, "gt"));
     }
 
+    /**
+     * {@code column >= value}.
+     *
+     * @param value the value, not null
+     * @return the query
+     */
     public Q ge(T value) {
         return compare(">=", requireValue(value, "ge"));
     }
 
+    /**
+     * {@code column < value}.
+     *
+     * @param value the value, not null
+     * @return the query
+     */
     public Q lt(T value) {
         return compare("<", requireValue(value, "lt"));
     }
 
+    /**
+     * {@code column <= value}.
+     *
+     * @param value the value, not null
+     * @return the query
+     */
     public Q le(T value) {
         return compare("<=", requireValue(value, "le"));
     }
 
     /**
      * {@code column BETWEEN from AND to}, both ends included.
+     *
+     * @param from the lower end, not null
+     * @param to   the upper end, not null
+     * @return the query
      */
     public Q between(T from, T to) {
         return query.append(column + " BETWEEN ? AND ?",
                 Arrays.asList(toJdbc(requireValue(from, "between")), toJdbc(requireValue(to, "between"))));
     }
 
+    /**
+     * {@code column IN (...)}; no values match nothing.
+     *
+     * @param values the values
+     * @return the query
+     */
     @SafeVarargs
     public final Q in(T... values) {
         return in(Arrays.asList(values));
@@ -91,11 +131,20 @@ public class Condition<Q extends AbstractQuery<Q, ?, ?>, T> {
 
     /**
      * {@code column IN (...)}; an empty collection matches nothing.
+     *
+     * @param values the values
+     * @return the query
      */
     public Q in(Collection<? extends T> values) {
         return values.isEmpty() ? query.append("1 = 0", Collections.emptyList()) : list("IN", values);
     }
 
+    /**
+     * {@code column NOT IN (...)}; no values match everything.
+     *
+     * @param values the values
+     * @return the query
+     */
     @SafeVarargs
     public final Q notIn(T... values) {
         return notIn(Arrays.asList(values));
@@ -103,21 +152,36 @@ public class Condition<Q extends AbstractQuery<Q, ?, ?>, T> {
 
     /**
      * {@code column NOT IN (...)}; an empty collection matches everything.
+     *
+     * @param values the values
+     * @return the query
      */
     public Q notIn(Collection<? extends T> values) {
         return values.isEmpty() ? query.append("1 = 1", Collections.emptyList()) : list("NOT IN", values);
     }
 
+    /**
+     * {@code column IS NULL}.
+     *
+     * @return the query
+     */
     public Q isNull() {
         return query.append(column + " IS NULL", Collections.emptyList());
     }
 
+    /**
+     * {@code column IS NOT NULL}.
+     *
+     * @return the query
+     */
     public Q isNotNull() {
         return query.append(column + " IS NOT NULL", Collections.emptyList());
     }
 
     /**
      * Sorts by this column, ascending; sort columns apply in the order they are added.
+     *
+     * @return the query
      */
     public Q asc() {
         return query.addOrder(column, "ASC");
@@ -125,15 +189,32 @@ public class Condition<Q extends AbstractQuery<Q, ?, ?>, T> {
 
     /**
      * Sorts by this column, descending; sort columns apply in the order they are added.
+     *
+     * @return the query
      */
     public Q desc() {
         return query.addOrder(column, "DESC");
     }
 
+    /**
+     * Adds {@code column <operator> ?}.
+     *
+     * @param operator SQL operator, e.g. {@code >=}
+     * @param value    the value, converted for JDBC here
+     * @return the query
+     */
     protected Q compare(String operator, Object value) {
         return query.append(column + " " + operator + " ?", Collections.singletonList(toJdbc(value)));
     }
 
+    /**
+     * Rejects null for operators where it has no meaning.
+     *
+     * @param value    the value
+     * @param operator method name for the message
+     * @param <V>      the value type
+     * @return the value
+     */
     protected static <V> V requireValue(V value, String operator) {
         return Objects.requireNonNull(value, operator + "() needs a value; use isNull()/isNotNull() for NULL");
     }

@@ -15,13 +15,32 @@ package activejdbc.wrapper.annotation;
 
 import java.lang.annotation.*;
 
+/**
+ * Declares one column of an ActiveJDBC model; the annotation processor generates a {@code <Model>Wrapper} with a
+ * typed property for every declared column. Repeat it for each column.
+ */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.SOURCE)
 @Repeatable(value = ActiveJdbcRequiredProperties.class)
 public @interface ActiveJdbcRequiredProperty {
+    /**
+     * The database column.
+     *
+     * @return the column name, as ActiveJDBC knows it, e.g. {@code FIRST_NAME}
+     */
     String columnName();
 
+    /**
+     * The type of the generated property.
+     *
+     * @return the Java type of the property; not a primitive
+     */
     Class<?> clazz();
 
+    /**
+     * The name of the generated property, for when the derived one doesn't fit.
+     *
+     * @return the property name; by default it's derived from the column name ({@code FIRST_NAME} → {@code firstName})
+     */
     String desiredFieldName() default "";
 }
