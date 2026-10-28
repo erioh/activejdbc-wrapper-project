@@ -534,6 +534,19 @@ public class ActiveJdbcRequiredPropertyProcessorTest {
     }
 
     @Test
+    public void should_leave_out_column_clashing_with_fetch_first() throws IOException {
+        // given
+        JavaFileObject model = model("u.Queue", "@ActiveJdbcRequiredProperty(columnName = \"FETCH_FIRST\", clazz = Boolean.class)");
+        // when
+        Compilation compilation = compile(model);
+        // then
+        assertThat(compilation).succeeded();
+        assertThat(compilation).hadWarningContaining("Column [FETCH_FIRST] is not available in the query builder");
+        String source = compilation.generatedSourceFile("u.QueueWrapper").get().getCharContent(true).toString();
+        Assertions.assertThat(source.substring(source.indexOf("class QueueWrapperQuery"))).doesNotContain("\"FETCH_FIRST\"");
+    }
+
+    @Test
     public void should_fail_when_interface_is_annotated() {
         // given
         JavaFileObject javaFileObject = JavaFileObjects.forSourceString("i.Api",

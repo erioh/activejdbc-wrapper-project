@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -155,6 +156,26 @@ public abstract class AbstractQuery<Q extends AbstractQuery<Q, M, W>, M extends 
      * @return matching models, sorted and limited as requested
      */
     public LazyList<M> fetchModels() {
+        return fetchModels(limit);
+    }
+
+    /**
+     * Runs the query for one row only: the first one of what {@link #fetch()} would return, sorted and offset as
+     * requested. Only that row is read from the database. Without sorting the database decides which row comes first.
+     * The query itself is not changed, {@link #fetch()} still returns all rows afterwards.
+     *
+     * @return the wrapper of the first matching row, or empty if no row matches
+     */
+    public Optional<W> fetchFirst() {
+        // limit is null until limit(n) is called; limit(0) means "no rows", as in fetch()
+        if (limit != null && limit == 0) {
+            return Optional.empty();
+        }
+        LazyList<M> models = fetchModels(1L);
+        return models.isEmpty() ? Optional.empty() : Optional.of(wrapperFactory.apply(models.get(0)));
+    }
+
+    private LazyList<M> fetchModels(Long limit) {
         checkComplete();
         LazyList<M> models = sql.length() == 0
                 ? ModelDelegate.findAll(modelClass)
