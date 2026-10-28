@@ -23,8 +23,9 @@ public class BooleanGetterBuilderStrategy implements GetterBuilderStrategy{
      * 3. activejdbc object
      * 4. column name
      */
-    private static final String GETTER_TEMPLATE = "public %s %s() {%n" +
-            "return %s.getBoolean(\"%s\");%n" +
+    // getBoolean alone would turn NULL into false
+    private static final String GETTER_TEMPLATE = "public %1$s %2$s() {%n" +
+            "return %3$s.get(\"%4$s\") == null ? null : %3$s.getBoolean(\"%4$s\");%n" +
             "}%n";
 
     @Override

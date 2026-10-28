@@ -47,7 +47,7 @@ public class BooleanGetterBuilderStrategyTest {
         String type = "Boolean";
         String objectName = "object";
         String expectedGetter = String.format("public Boolean %s() {%n" +
-                "return object.getBoolean(\"COLUMN_NAME\");%n" +
+                "return object.get(\"COLUMN_NAME\") == null ? null : object.getBoolean(\"COLUMN_NAME\");%n" +
                 "}%n", expectedMethod);
         ColumnContext columnContext = new ColumnContext(type, columnName, desiredFieldName);
 
