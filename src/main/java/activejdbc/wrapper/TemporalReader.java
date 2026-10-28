@@ -19,24 +19,30 @@ import java.sql.Time;
 import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.regex.Pattern;
 
 /**
- * Reads date and time properties for the generated getters. ActiveJDBC's getDate/getTime only convert java.util.Date
- * values and strings in their own format; some drivers return other objects, e.g. Oracle's oracle.sql.TIMESTAMP for
- * TIMESTAMP columns, which only getTimestamp can parse. Such values are read through getTimestamp instead.
+ * Reads date and time properties for the generated getters. ActiveJDBC's getDate/getTime convert java.util.Date
+ * values, numbers and strings in the date or time format. Some drivers return their own objects instead, e.g.
+ * Oracle's oracle.sql.TIMESTAMP for TIMESTAMP columns, whose toString() is in the timestamp format: getDate/getTime
+ * fail on them, getTimestamp parses them. Such values are read through getTimestamp, everything else exactly as
+ * before.
  */
 public final class TemporalReader {
+
+    /** What {@link Timestamp#valueOf(String)} accepts. */
+    private static final Pattern TIMESTAMP_FORMAT =
+            Pattern.compile("\\d{4}-\\d{1,2}-\\d{1,2} \\d{1,2}:\\d{1,2}:\\d{1,2}(\\.\\d{1,9})?");
 
     private TemporalReader() {
     }
 
     public static Date sqlDate(Model model, String column) {
-        try {
-            return model.getDate(column);
-        } catch (RuntimeException notADate) {
-            Timestamp timestamp = timestamp(model, column, notADate);
+        if (needsGetTimestamp(model.get(column))) {
+            Timestamp timestamp = model.getTimestamp(column);
             return timestamp == null ? null : new Date(timestamp.getTime());
         }
+        return model.getDate(column);
     }
 
     public static LocalDate localDate(Model model, String column) {
@@ -45,12 +51,11 @@ public final class TemporalReader {
     }
 
     public static Time time(Model model, String column) {
-        try {
-            return model.getTime(column);
-        } catch (RuntimeException notATime) {
-            Timestamp timestamp = timestamp(model, column, notATime);
+        if (needsGetTimestamp(model.get(column))) {
+            Timestamp timestamp = model.getTimestamp(column);
             return timestamp == null ? null : new Time(timestamp.getTime());
         }
+        return model.getTime(column);
     }
 
     public static LocalTime localTime(Model model, String column) {
@@ -58,12 +63,14 @@ public final class TemporalReader {
         return time == null ? null : time.toLocalTime();
     }
 
-    private static Timestamp timestamp(Model model, String column, RuntimeException original) {
-        try {
-            return model.getTimestamp(column);
-        } catch (RuntimeException alsoNotATimestamp) {
-            original.addSuppressed(alsoNotATimestamp);
-            throw original;
-        }
+    /**
+     * java.util.Date values (java.sql types included) and numbers are converted by getDate/getTime directly; other
+     * values are converted through toString(), which getDate/getTime can't parse when it holds date and time.
+     */
+    static boolean needsGetTimestamp(Object value) {
+        return value != null
+                && !(value instanceof java.util.Date)
+                && !(value instanceof Number)
+                && TIMESTAMP_FORMAT.matcher(value.toString().trim()).matches();
     }
 }
