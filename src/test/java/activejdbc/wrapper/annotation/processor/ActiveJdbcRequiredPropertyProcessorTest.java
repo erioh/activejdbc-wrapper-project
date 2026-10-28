@@ -533,17 +533,27 @@ public class ActiveJdbcRequiredPropertyProcessorTest {
         Assertions.assertThat(source).contains("public java.lang.String getToString()");
     }
 
+    @DataProvider
+    public static Object[][] data_for_should_leave_out_column_clashing_with_query_method() {
+        return new Object[][]{
+                {"FETCH_FIRST"},
+                {"FETCH_ONE"},
+                {"EXISTS"},
+        };
+    }
+
     @Test
-    public void should_leave_out_column_clashing_with_fetch_first() throws IOException {
+    @UseDataProvider("data_for_should_leave_out_column_clashing_with_query_method")
+    public void should_leave_out_column_clashing_with_query_method(String columnName) throws IOException {
         // given
-        JavaFileObject model = model("u.Queue", "@ActiveJdbcRequiredProperty(columnName = \"FETCH_FIRST\", clazz = Boolean.class)");
+        JavaFileObject model = model("u.Queue", "@ActiveJdbcRequiredProperty(columnName = \"" + columnName + "\", clazz = Boolean.class)");
         // when
         Compilation compilation = compile(model);
         // then
         assertThat(compilation).succeeded();
-        assertThat(compilation).hadWarningContaining("Column [FETCH_FIRST] is not available in the query builder");
+        assertThat(compilation).hadWarningContaining("Column [" + columnName + "] is not available in the query builder");
         String source = compilation.generatedSourceFile("u.QueueWrapper").get().getCharContent(true).toString();
-        Assertions.assertThat(source.substring(source.indexOf("class QueueWrapperQuery"))).doesNotContain("\"FETCH_FIRST\"");
+        Assertions.assertThat(source.substring(source.indexOf("class QueueWrapperQuery"))).doesNotContain("\"" + columnName + "\"");
     }
 
     @Test
