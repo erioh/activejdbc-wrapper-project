@@ -1,0 +1,28 @@
+// Checks that the processor works in a Gradle build, as a user would set it up. Not published.
+// Needs the library in the local Maven repository first: (in the parent directory) mvn install -Dgpg.skip
+// Run: gradle test -PactivejdbcWrapperVersion=<version from pom.xml>
+plugins {
+    id 'java'
+}
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+}
+
+def activejdbcWrapperVersion = providers.gradleProperty('activejdbcWrapperVersion').get()
+
+dependencies {
+    implementation "io.github.erioh:activejdbc-wrapper:${activejdbcWrapperVersion}"
+    annotationProcessor "io.github.erioh:activejdbc-wrapper:${activejdbcWrapperVersion}"
+    implementation 'org.javalite:activejdbc:2.2'
+
+    testImplementation 'junit:junit:4.13.2'
+    testRuntimeOnly 'com.h2database:h2:2.2.224'
+}
+
+tasks.withType(JavaCompile).configureEach {
+    // the library supports Java 8; Gradle itself needs a newer JDK to run
+    options.release = 8
+    options.compilerArgs << "-Xlint:-options"
+}

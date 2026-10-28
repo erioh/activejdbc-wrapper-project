@@ -20,7 +20,7 @@ import java.lang.annotation.*;
  * typed property for every declared column. Repeat it for each column.
  */
 @Target(ElementType.TYPE)
-@Retention(RetentionPolicy.SOURCE)
+@Retention(RetentionPolicy.CLASS)
 @Repeatable(value = ActiveJdbcRequiredProperties.class)
 public @interface ActiveJdbcRequiredProperty {
     /**

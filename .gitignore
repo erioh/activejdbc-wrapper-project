@@ -5,3 +5,5 @@
 target
 git
 *.versionsBackup
+.gradle
+gradle-it/build

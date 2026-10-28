@@ -23,3 +23,31 @@ jobs:
           cache: maven
       # no signing key in CI
       - run: mvn -B verify -Dgpg.skip
+
+  gradle:
+    # the processor in a Gradle build, set up as the README tells users to
+    runs-on: ubuntu-latest
+    name: Gradle
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+      - uses: gradle/actions/setup-gradle@v6
+        with:
+          gradle-version: '9.8.0'
+      - name: Install the library into the local Maven repository
+        run: mvn -B install -Dgpg.skip -DskipTests
+      - name: Build and test gradle-it
+        working-directory: gradle-it
+        run: |
+          version=$(mvn -q -f ../pom.xml help:evaluate -Dexpression=project.version -DforceStdout)
+          gradle test -PactivejdbcWrapperVersion="$version"
+          # the processor is declared isolating: a change in one class must not recompile the whole project,
+          # and the wrapper of a model whose annotation references the changed class must be regenerated
+          echo "// changed" >> src/main/java/gradleit/Status.java
+          gradle test -PactivejdbcWrapperVersion="$version" --info > compile.log
+          if grep "Full recompilation is required" compile.log; then exit 1; fi
+          grep "Incremental compilation of" compile.log
