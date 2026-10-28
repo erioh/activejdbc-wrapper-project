@@ -167,6 +167,9 @@ public class Condition<Q extends AbstractQuery<Q, ?, ?>, T> {
         if (value instanceof BigInteger) {
             return new BigDecimal((BigInteger) value);
         }
+        if (value instanceof Enum) {
+            return ((Enum<?>) value).name();
+        }
         // java.sql.Date/Time/Timestamp extend java.util.Date and are passed as they are
         if (value != null && value.getClass() == java.util.Date.class) {
             return new Timestamp(((java.util.Date) value).getTime());

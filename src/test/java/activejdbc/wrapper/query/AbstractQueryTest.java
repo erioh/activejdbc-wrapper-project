@@ -119,6 +119,7 @@ public class AbstractQueryTest {
                 {new BigInteger("12345678901234567890"), new BigDecimal("12345678901234567890")},
                 {new java.util.Date(1793000000123L), new Timestamp(1793000000123L)},
                 {Timestamp.valueOf("2026-10-27 13:45:00"), Timestamp.valueOf("2026-10-27 13:45:00")},
+                {java.time.DayOfWeek.MONDAY, "MONDAY"},
                 {"text", "text"},
         };
     }

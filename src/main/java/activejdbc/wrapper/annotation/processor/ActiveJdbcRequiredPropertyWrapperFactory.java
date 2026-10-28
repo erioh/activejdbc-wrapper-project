@@ -21,6 +21,8 @@ import activejdbc.wrapper.annotation.processor.util.StringUtils;
 
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.AnnotationValue;
+import javax.lang.model.element.ElementKind;
+import javax.lang.model.type.DeclaredType;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -65,7 +67,15 @@ public class ActiveJdbcRequiredPropertyWrapperFactory {
         String clazz = extract(annotationMirror, "clazz");
         String columnName = extract(annotationMirror, "columnName");
         String desiredFieldName = extract(annotationMirror, "desiredFieldName");
-        return new ColumnContext(clazz, columnName, desiredFieldName);
+        return new ColumnContext(clazz, columnName, desiredFieldName, isEnum(annotationMirror));
+    }
+
+    private boolean isEnum(AnnotationMirror annotationMirror) {
+        return AnnotationValueExtractor.extract(annotationMirror.getElementValues(), "clazz")
+                .map(AnnotationValue::getValue)
+                .filter(DeclaredType.class::isInstance)
+                .map(type -> ((DeclaredType) type).asElement().getKind() == ElementKind.ENUM)
+                .orElse(false);
     }
 
     private String extract(AnnotationMirror annotationMirror, String property) {
