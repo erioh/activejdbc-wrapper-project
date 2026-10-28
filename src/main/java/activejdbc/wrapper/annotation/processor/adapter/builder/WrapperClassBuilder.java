@@ -138,20 +138,35 @@ public class WrapperClassBuilder {
 
     public WrapperClassBuilder withHashCode() {
         StringJoiner stringJoiner = new StringJoiner(", ");
-        for (String getter : propertyNamesAndGetters.values()) {
-            stringJoiner.add(String.format("this.%s()", getter));
-        }
+        columnContexts.forEach(columnContext -> {
+            String getter = propertyNamesAndGetters.get(columnContext.getPropertyName());
+            stringJoiner.add(isBigDecimal(columnContext)
+                    ? String.format("this.%s() == null ? null : this.%s().stripTrailingZeros()", getter, getter)
+                    : String.format("this.%s()", getter));
+        });
         hashCode = String.format(HASH_CODE_METHOD_TEMPLATE, stringJoiner);
         return this;
     }
 
     public WrapperClassBuilder withEquals() {
         StringJoiner stringJoiner = new StringJoiner(" && ");
-        for (String getter : propertyNamesAndGetters.values()) {
-            stringJoiner.add(String.format("%njava.util.Objects.deepEquals(this.%s(), that.%s())", getter, getter));
-        }
+        columnContexts.forEach(columnContext -> {
+            String getter = propertyNamesAndGetters.get(columnContext.getPropertyName());
+            stringJoiner.add(isBigDecimal(columnContext)
+                    ? String.format("%njava.util.Objects.compare(this.%s(), that.%s(), "
+                            + "java.util.Comparator.nullsFirst(java.util.Comparator.naturalOrder())) == 0", getter, getter)
+                    : String.format("%njava.util.Objects.deepEquals(this.%s(), that.%s())", getter, getter));
+        });
         equals = String.format(EQUALS_METHOD_TEMPLATE, wrapperClassName, wrapperClassName, stringJoiner);
         return this;
+    }
+
+    /**
+     * BigDecimal.equals compares the scale too, but databases don't always keep it (Oracle NUMBER returns 1.5 for
+     * 1.50), so a saved wrapper wouldn't equal the same row read back. Compare by value instead.
+     */
+    private static boolean isBigDecimal(ColumnContext columnContext) {
+        return "java.math.BigDecimal".equals(columnContext.getClazz());
     }
 
     public WrapperClassBuilder withToString() {

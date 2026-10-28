@@ -146,6 +146,22 @@ public class GeneratedWrapperIntegrationTest {
     }
 
     @Test
+    public void should_compare_big_decimals_by_value() {
+        // given
+        AllTypesWrapper oneAndAHalf = new AllTypesWrapper();
+        oneAndAHalf.setBigDecimalValue(new BigDecimal("1.5"));
+        AllTypesWrapper sameWithTrailingZero = new AllTypesWrapper();
+        sameWithTrailingZero.setBigDecimalValue(new BigDecimal("1.50"));
+        AllTypesWrapper other = new AllTypesWrapper();
+        other.setBigDecimalValue(new BigDecimal("1.51"));
+
+        // when | then
+        assertThat(oneAndAHalf).isEqualTo(sameWithTrailingZero).hasSameHashCodeAs(sameWithTrailingZero);
+        assertThat(oneAndAHalf).isNotEqualTo(other).isNotEqualTo(new AllTypesWrapper());
+        assertThat(new AllTypesWrapper()).isNotEqualTo(oneAndAHalf);
+    }
+
+    @Test
     public void should_consider_wrappers_with_same_values_equal() {
         // given
         AllTypesWrapper first = AllTypesWrapper.builder().stringValue("a").bytesValue(new byte[]{1, 2}).build();
