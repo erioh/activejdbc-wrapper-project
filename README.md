@@ -1,5 +1,8 @@
 # activejdbc-wrapper-project
 
+> **Note:** this README describes the upcoming 1.1.0, i.e. the code on `master`. The latest release on Maven Central
+> is 1.0.4; its documentation is at [v1.0.4](https://github.com/erioh/activejdbc-wrapper-project/tree/v1.0.4).
+
 The main goal of this project is to simplify the usage of ActiveJDBC by generating wrapper classes.
 
 You may have noticed that ActiveJDBC code sometimes looks a bit ugly. On top of that, you have to remember the names
