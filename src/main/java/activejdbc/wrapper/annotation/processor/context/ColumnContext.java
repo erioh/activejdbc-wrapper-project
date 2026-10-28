@@ -9,16 +9,25 @@ public final class ColumnContext {
     private final String columnName;
     private final String desiredFieldName;
     private final boolean enumType;
+    private final boolean readOnly;
+    private final boolean excludedFromEqualsAndHashCode;
 
     public ColumnContext(String clazz, String columnName, String desiredFieldName) {
         this(clazz, columnName, desiredFieldName, false);
     }
 
     public ColumnContext(String clazz, String columnName, String desiredFieldName, boolean enumType) {
+        this(clazz, columnName, desiredFieldName, enumType, false, false);
+    }
+
+    public ColumnContext(String clazz, String columnName, String desiredFieldName, boolean enumType,
+                         boolean readOnly, boolean excludedFromEqualsAndHashCode) {
         this.clazz = clazz;
         this.columnName = columnName;
         this.desiredFieldName = desiredFieldName;
         this.enumType = enumType;
+        this.readOnly = readOnly;
+        this.excludedFromEqualsAndHashCode = excludedFromEqualsAndHashCode;
     }
 
     public String getClazz() {
@@ -40,6 +49,17 @@ public final class ColumnContext {
         return enumType;
     }
 
+    /**
+     * Whether only a getter is generated: no setter, no builder method.
+     */
+    public boolean isReadOnly() {
+        return readOnly;
+    }
+
+    public boolean isExcludedFromEqualsAndHashCode() {
+        return excludedFromEqualsAndHashCode;
+    }
+
     public String getPropertyName() {
         return StringUtils.isBlank(desiredFieldName)
                 ? StringUtils.buildPropertyNameFromColumnName(columnName)
@@ -51,11 +71,12 @@ public final class ColumnContext {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         ColumnContext that = (ColumnContext) o;
-        return Objects.equals(getClazz(), that.getClazz()) && Objects.equals(getColumnName(), that.getColumnName()) && Objects.equals(getDesiredFieldName(), that.getDesiredFieldName()) && enumType == that.enumType;
+        return Objects.equals(getClazz(), that.getClazz()) && Objects.equals(getColumnName(), that.getColumnName()) && Objects.equals(getDesiredFieldName(), that.getDesiredFieldName()) && enumType == that.enumType
+                && readOnly == that.readOnly && excludedFromEqualsAndHashCode == that.excludedFromEqualsAndHashCode;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getClazz(), getColumnName(), getDesiredFieldName(), enumType);
+        return Objects.hash(getClazz(), getColumnName(), getDesiredFieldName(), enumType, readOnly, excludedFromEqualsAndHashCode);
     }
 }

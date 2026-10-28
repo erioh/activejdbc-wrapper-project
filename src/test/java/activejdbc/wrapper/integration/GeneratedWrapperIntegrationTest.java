@@ -306,6 +306,17 @@ public class GeneratedWrapperIntegrationTest {
     }
 
     @Test
+    public void should_compare_wrappers_without_read_only_id() {
+        // given
+        AllTypesWrapper saved = saveAndReload(fullyPopulated());
+
+        // when | then: the ID comes from the database and is not part of equals/hashCode
+        assertThat(saved.getId()).isNotNull();
+        assertThat(saved).isEqualTo(fullyPopulated()).hasSameHashCodeAs(fullyPopulated());
+        assertThat(AllTypesWrapper.query().id().eq(saved.getId()).fetch()).containsExactly(fullyPopulated());
+    }
+
+    @Test
     public void should_fetch_first_row_only() {
         // given
         save(AllTypesWrapper.builder().stringValue("alpha").integerValue(1).build());

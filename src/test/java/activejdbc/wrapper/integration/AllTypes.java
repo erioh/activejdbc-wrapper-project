@@ -34,6 +34,7 @@ import java.util.UUID;
  * Registered in activejdbc_models.properties, so it works without ActiveJDBC instrumentation.
  */
 @Table("ALL_TYPES")
+@ActiveJdbcRequiredProperty(columnName = "ID", clazz = Long.class, readOnly = true, excludeFromEqualsAndHashCode = true)
 @ActiveJdbcRequiredProperty(columnName = "STRING_VALUE", clazz = String.class)
 @ActiveJdbcRequiredProperty(columnName = "BOOLEAN_VALUE", clazz = Boolean.class)
 @ActiveJdbcRequiredProperty(columnName = "SHORT_VALUE", clazz = Short.class)
