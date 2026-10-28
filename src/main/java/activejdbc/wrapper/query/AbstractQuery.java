@@ -167,6 +167,7 @@ public abstract class AbstractQuery<Q extends AbstractQuery<Q, M, W>, M extends 
      * @return the wrapper of the first matching row, or empty if no row matches
      */
     public Optional<W> fetchFirst() {
+        // limit is null until limit(n) is called; limit(0) means "no rows", as in fetch()
         if (limit != null && limit == 0) {
             return Optional.empty();
         }
