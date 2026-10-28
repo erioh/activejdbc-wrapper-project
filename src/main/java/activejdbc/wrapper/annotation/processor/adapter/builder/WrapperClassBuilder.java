@@ -142,7 +142,7 @@ public class WrapperClassBuilder {
 
     public WrapperClassBuilder withHashCode() {
         StringJoiner stringJoiner = new StringJoiner(", ");
-        columnContexts.forEach(columnContext -> {
+        columnsInEqualsAndHashCode().forEach(columnContext -> {
             String getter = propertyNamesAndGetters.get(columnContext.getPropertyName());
             stringJoiner.add(isBigDecimal(columnContext)
                     ? String.format("this.%s() == null ? null : this.%s().stripTrailingZeros()", getter, getter)
@@ -154,7 +154,9 @@ public class WrapperClassBuilder {
 
     public WrapperClassBuilder withEquals() {
         StringJoiner stringJoiner = new StringJoiner(" && ");
-        columnContexts.forEach(columnContext -> {
+        // with every property excluded, all wrappers of the class are equal, as their hashCode is the same
+        stringJoiner.setEmptyValue(" true");
+        columnsInEqualsAndHashCode().forEach(columnContext -> {
             String getter = propertyNamesAndGetters.get(columnContext.getPropertyName());
             stringJoiner.add(isBigDecimal(columnContext)
                     ? String.format("%njava.util.Objects.compare(this.%s(), that.%s(), "
@@ -163,6 +165,12 @@ public class WrapperClassBuilder {
         });
         equals = String.format(EQUALS_METHOD_TEMPLATE, wrapperClassName, wrapperClassName, stringJoiner);
         return this;
+    }
+
+    private List<ColumnContext> columnsInEqualsAndHashCode() {
+        List<ColumnContext> columns = new ArrayList<>(columnContexts);
+        columns.removeIf(ColumnContext::isExcludedFromEqualsAndHashCode);
+        return columns;
     }
 
     /**
@@ -221,7 +229,7 @@ public class WrapperClassBuilder {
     }
 
     public WrapperClassBuilder withSetters() {
-        this.columnContexts.forEach(columnContext -> {
+        this.columnContexts.stream().filter(columnContext -> !columnContext.isReadOnly()).forEach(columnContext -> {
             SetterBuilderStrategy strategy = columnContext.isEnumType()
                     ? ENUM_SETTER_STRATEGY
                     : setterBuilderStrategyHolder.getStrategy(columnContext.getClazz());

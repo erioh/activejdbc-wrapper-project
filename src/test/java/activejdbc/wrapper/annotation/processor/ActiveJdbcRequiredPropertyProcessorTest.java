@@ -547,6 +547,54 @@ public class ActiveJdbcRequiredPropertyProcessorTest {
     }
 
     @Test
+    public void should_generate_only_getter_for_read_only_column() throws IOException {
+        // given
+        JavaFileObject model = model("u.Account",
+                "@ActiveJdbcRequiredProperty(columnName = \"ID\", clazz = Long.class, readOnly = true)\n"
+                        + "@ActiveJdbcRequiredProperty(columnName = \"NAME\", clazz = String.class)");
+        // when
+        Compilation compilation = compile(model);
+        // then
+        assertThat(compilation).succeededWithoutWarnings();
+        String source = compilation.generatedSourceFile("u.AccountWrapper").get().getCharContent(true).toString();
+        Assertions.assertThat(source)
+                .contains("public java.lang.Long getId()", "public void setName(", "public AccountWrapperBuilder name(")
+                .doesNotContain("setId(", "AccountWrapperBuilder id(")
+                // still compared, printed and queryable
+                .contains("that.getId()", "id = ", "Condition<AccountWrapperQuery, java.lang.Long> id()");
+    }
+
+    @Test
+    public void should_leave_excluded_column_out_of_equals_and_hash_code() throws IOException {
+        // given
+        JavaFileObject model = model("u.Account",
+                "@ActiveJdbcRequiredProperty(columnName = \"ID\", clazz = Long.class, excludeFromEqualsAndHashCode = true)\n"
+                        + "@ActiveJdbcRequiredProperty(columnName = \"NAME\", clazz = String.class)");
+        // when
+        Compilation compilation = compile(model);
+        // then
+        assertThat(compilation).succeededWithoutWarnings();
+        String source = compilation.generatedSourceFile("u.AccountWrapper").get().getCharContent(true).toString();
+        String equalsAndHashCode = source.substring(source.indexOf("public boolean equals"), source.indexOf("public static AccountWrapperBuilder builder()"));
+        Assertions.assertThat(equalsAndHashCode).contains("that.getName()", "{this.getName()}").doesNotContain("getId");
+        // the rest of the wrapper still has the column
+        Assertions.assertThat(source).contains("public void setId(", "AccountWrapperBuilder id(", "id = ");
+    }
+
+    @Test
+    public void should_compile_when_every_column_is_excluded_from_equals_and_hash_code() throws IOException {
+        // given
+        JavaFileObject model = model("u.Account",
+                "@ActiveJdbcRequiredProperty(columnName = \"ID\", clazz = Long.class, readOnly = true, excludeFromEqualsAndHashCode = true)");
+        // when
+        Compilation compilation = compile(model);
+        // then
+        assertThat(compilation).succeededWithoutWarnings();
+        String source = compilation.generatedSourceFile("u.AccountWrapper").get().getCharContent(true).toString();
+        Assertions.assertThat(source).contains("return true;", "new java.lang.Object[]{}");
+    }
+
+    @Test
     public void should_fail_when_interface_is_annotated() {
         // given
         JavaFileObject javaFileObject = JavaFileObjects.forSourceString("i.Api",

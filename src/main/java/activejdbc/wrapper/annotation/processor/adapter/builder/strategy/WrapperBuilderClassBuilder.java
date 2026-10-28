@@ -58,7 +58,7 @@ public class WrapperBuilderClassBuilder {
     public String buildClassBody() {
         StringBuilder stringBuilder = new StringBuilder();
         String wrapperObjectName = StringUtils.lowerCaseFirstCharacter(wrapperClassName);
-        columnContexts.forEach(columnContext -> {
+        columnContexts.stream().filter(columnContext -> !columnContext.isReadOnly()).forEach(columnContext -> {
             String propertyName = columnContext.getPropertyName();
             String withMethodName = StringUtils.buildMethodName(propertyName, methodPrefix);
             // todo refactor this thing

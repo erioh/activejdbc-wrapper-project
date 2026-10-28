@@ -43,4 +43,19 @@ public @interface ActiveJdbcRequiredProperty {
      * @return the property name; by default it's derived from the column name ({@code FIRST_NAME} → {@code firstName})
      */
     String desiredFieldName() default "";
+
+    /**
+     * Generates only the getter, for columns the application doesn't write: an ID, a column filled by the database.
+     *
+     * @return {@code true} to leave out the setter and the builder method
+     */
+    boolean readOnly() default false;
+
+    /**
+     * Leaves the property out of the generated {@code equals} and {@code hashCode}, e.g. an ID or a timestamp, so that
+     * wrappers can be compared by their content.
+     *
+     * @return {@code true} to ignore the property in {@code equals} and {@code hashCode}
+     */
+    boolean excludeFromEqualsAndHashCode() default false;
 }

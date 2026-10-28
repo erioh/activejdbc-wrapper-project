@@ -110,6 +110,18 @@ Types with dedicated accessors: `String`, `Boolean`, `Short`, `Integer`, `Long`,
 write, `valueOf` on read, also in the query builder). Any other non-primitive type is read with a plain cast of
 `get(...)` and written with `set(...)`.
 
+Two optional flags per column:
+
+* `readOnly = true` generates only the getter: no setter and no builder method. For columns the application doesn't
+  write, like an ID or a column filled by the database.
+* `excludeFromEqualsAndHashCode = true` leaves the property out of `equals` and `hashCode`, so wrappers can be
+  compared by content, e.g. a row read back from the database with one built in a test.
+
+```java
+@ActiveJdbcRequiredProperty(columnName = "FANCY_TABLE_ID", clazz = Long.class, readOnly = true,
+        excludeFromEqualsAndHashCode = true)
+```
+
 For CLOB columns, `clazz = String.class` is usually the best choice: `getString(...)` reads the whole text. With
 `clazz = java.sql.Clob.class` the getter returns the driver's `Clob`, which typically can only be read while the
 connection is open, and models marked with `@Cached` hold CLOBs as `String`, so the cast fails for them.
