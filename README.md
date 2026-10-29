@@ -117,12 +117,12 @@ Two optional flags per column:
 
 * `readOnly = true` generates only the getter: no setter and no builder method. For columns the application doesn't
   write, like an ID or a column filled by the database.
-* `excludeFromEqualsAndHashCode = true` leaves the property out of `equals` and `hashCode`, so wrappers can be
+* `excludeEqualsAndHashCode = true` leaves the property out of `equals` and `hashCode`, so wrappers can be
   compared by content, e.g. a row read back from the database with one built in a test.
 
 ```java
 @ActiveJdbcRequiredProperty(columnName = "FANCY_TABLE_ID", clazz = Long.class, readOnly = true,
-        excludeFromEqualsAndHashCode = true)
+        excludeEqualsAndHashCode = true)
 ```
 
 For a type the wrapper doesn't support by itself (a value object, JSON, an enum stored by code), add a

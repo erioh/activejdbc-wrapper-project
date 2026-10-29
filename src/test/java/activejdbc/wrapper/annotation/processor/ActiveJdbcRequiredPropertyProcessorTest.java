@@ -599,7 +599,7 @@ public class ActiveJdbcRequiredPropertyProcessorTest {
     public void should_leave_excluded_column_out_of_equals_and_hash_code() throws IOException {
         // given
         JavaFileObject model = model("u.Account",
-                "@ActiveJdbcRequiredProperty(columnName = \"ID\", clazz = Long.class, excludeFromEqualsAndHashCode = true)\n"
+                "@ActiveJdbcRequiredProperty(columnName = \"ID\", clazz = Long.class, excludeEqualsAndHashCode = true)\n"
                         + "@ActiveJdbcRequiredProperty(columnName = \"NAME\", clazz = String.class)");
         // when
         Compilation compilation = compile(model);
@@ -616,7 +616,7 @@ public class ActiveJdbcRequiredPropertyProcessorTest {
     public void should_compile_when_every_column_is_excluded_from_equals_and_hash_code() throws IOException {
         // given
         JavaFileObject model = model("u.Account",
-                "@ActiveJdbcRequiredProperty(columnName = \"ID\", clazz = Long.class, readOnly = true, excludeFromEqualsAndHashCode = true)");
+                "@ActiveJdbcRequiredProperty(columnName = \"ID\", clazz = Long.class, readOnly = true, excludeEqualsAndHashCode = true)");
         // when
         Compilation compilation = compile(model);
         // then

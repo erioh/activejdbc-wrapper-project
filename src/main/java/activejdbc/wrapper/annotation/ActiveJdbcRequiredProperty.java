@@ -59,7 +59,7 @@ public @interface ActiveJdbcRequiredProperty {
      *
      * @return {@code true} to ignore the property in {@code equals} and {@code hashCode}
      */
-    boolean excludeFromEqualsAndHashCode() default false;
+    boolean excludeEqualsAndHashCode() default false;
 
     /**
      * Converts the property to the column's type and back, for types the wrapper doesn't support by itself; see

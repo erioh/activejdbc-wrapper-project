@@ -68,7 +68,7 @@ public class ActiveJdbcRequiredPropertyWrapperFactory {
         String columnName = extract(annotationMirror, "columnName");
         String desiredFieldName = extract(annotationMirror, "desiredFieldName");
         boolean readOnly = Boolean.parseBoolean(extract(annotationMirror, "readOnly"));
-        boolean excludedFromEqualsAndHashCode = Boolean.parseBoolean(extract(annotationMirror, "excludeFromEqualsAndHashCode"));
+        boolean excludedFromEqualsAndHashCode = Boolean.parseBoolean(extract(annotationMirror, "excludeEqualsAndHashCode"));
         return new ColumnContext(clazz, columnName, desiredFieldName, isEnum(annotationMirror), readOnly, excludedFromEqualsAndHashCode);
     }
 
