@@ -65,7 +65,7 @@ public class FancyTable extends Model {
 ```
 
    With `module-info.java`, the module name is `activejdbc.wrapper` (`requires activejdbc.wrapper;`), starting
-   with the next release.
+   with 1.2.0.
 
 2. Add the ActiveJdbcRequiredProperty annotation with the column name and the expected type.
 
