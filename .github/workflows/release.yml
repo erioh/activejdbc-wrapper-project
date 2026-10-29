@@ -1,0 +1,83 @@
+name: Release
+
+# Run by hand from the Actions tab, on master or on a release/* branch.
+# Publishing to Maven Central can't be undone; the release job waits for approval in the "release" environment.
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Version to release, e.g. 1.2.0
+        required: true
+      dry-run:
+        description: Build and sign everything, but don't upload, tag or push
+        type: boolean
+        default: false
+
+concurrency: release
+
+jobs:
+  check:
+    uses: ./.github/workflows/ci.yml
+
+  release:
+    needs: check
+    runs-on: ubuntu-latest
+    environment: release
+    permissions:
+      contents: write
+    env:
+      VERSION: ${{ inputs.version }}
+      DRY_RUN: ${{ inputs.dry-run }}
+      BRANCH: ${{ github.ref_name }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - name: Check the input
+        run: |
+          if ! [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then echo "::error::version must look like 1.2.0"; exit 1; fi
+          if [[ "$BRANCH" != master && "$BRANCH" != release/* ]]; then echo "::error::run it on master or a release/* branch"; exit 1; fi
+          if git rev-parse -q --verify "refs/tags/v$VERSION" > /dev/null; then echo "::error::tag v$VERSION already exists"; exit 1; fi
+      # sources target Java 8, so the release is built on 8 like the code users compile against
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '8'
+          cache: maven
+          server-id: central
+          server-username: CENTRAL_USERNAME
+          server-password: CENTRAL_PASSWORD
+          gpg-private-key: ${{ secrets.GPG_PRIVATE_KEY }}
+          gpg-passphrase: MAVEN_GPG_PASSPHRASE
+      - name: Set the version
+        run: |
+          previous=$(git describe --tags --abbrev=0 --match 'v*' | sed 's/^v//')
+          mvn -B -q versions:set -DnewVersion="$VERSION" -DgenerateBackupPoms=false
+          # the dependency examples in the README name the released version
+          sed -i "s|<version>$previous</version>|<version>$VERSION</version>|" README.md
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -qam "Release $VERSION"
+      - name: Build, sign and publish
+        env:
+          CENTRAL_USERNAME: ${{ secrets.CENTRAL_USERNAME }}
+          CENTRAL_PASSWORD: ${{ secrets.CENTRAL_PASSWORD }}
+          MAVEN_GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+        run: mvn -B deploy -DskipPublishing="$DRY_RUN"
+      - name: Tag, merge into master, start the next version
+        if: ${{ !inputs.dry-run }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git tag -a "v$VERSION" -m "Release $VERSION"
+          git push origin HEAD:"$BRANCH" "v$VERSION"
+          if [[ "$BRANCH" != master ]]; then
+            git checkout -q master
+            git merge --no-edit "v$VERSION"
+          fi
+          IFS=. read -r major minor patch <<< "$VERSION"
+          next="$major.$minor.$((patch + 1))-SNAPSHOT"
+          mvn -B -q versions:set -DnewVersion="$next" -DgenerateBackupPoms=false
+          git commit -qam "Prepare $next"
+          git push origin master
+          gh release create "v$VERSION" --verify-tag --generate-notes --title "$VERSION" target/activejdbc-wrapper-"$VERSION"*.jar
