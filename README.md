@@ -60,7 +60,7 @@ public class FancyTable extends Model {
 <dependency>
     <groupId>io.github.erioh</groupId>
     <artifactId>activejdbc-wrapper</artifactId>
-    <version>1.1.0</version>
+    <version>1.2.0</version>
 </dependency>
 ```
 
@@ -189,7 +189,7 @@ model `Outer.Inner`, the wrapper is called `Outer_InnerWrapper`.
 >             <path>
 >                 <groupId>io.github.erioh</groupId>
 >                 <artifactId>activejdbc-wrapper</artifactId>
->                 <version>1.1.0</version>
+>                 <version>1.2.0</version>
 >             </path>
 >         </annotationProcessorPaths>
 >     </configuration>
