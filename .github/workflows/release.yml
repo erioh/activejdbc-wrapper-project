@@ -1,6 +1,6 @@
 name: Release
 
-# Run by hand from the Actions tab, on master or on a release/* branch.
+# Run by hand from the Actions tab on dev: master only ever gets released code, moved forward to the release tag.
 # Publishing to Maven Central can't be undone; the release job waits for approval in the "release" environment.
 on:
   workflow_dispatch:
@@ -36,7 +36,9 @@ jobs:
       - name: Check the input
         run: |
           if ! [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then echo "::error::version must look like 1.2.0"; exit 1; fi
-          if [[ "$BRANCH" != master && "$BRANCH" != release/* ]]; then echo "::error::run it on master or a release/* branch"; exit 1; fi
+          if [[ "$BRANCH" != dev ]]; then echo "::error::run it on dev"; exit 1; fi
+          # checked before publishing: master must move forward to the release without a merge
+          if ! git merge-base --is-ancestor origin/master HEAD; then echo "::error::master has commits that dev doesn't, merge master into dev first"; exit 1; fi
           if git rev-parse -q --verify "refs/tags/v$VERSION" > /dev/null; then echo "::error::tag v$VERSION already exists"; exit 1; fi
       # sources target Java 8, so the release is built on 8 like the code users compile against
       - uses: actions/setup-java@v6
@@ -64,20 +66,17 @@ jobs:
           CENTRAL_PASSWORD: ${{ secrets.CENTRAL_PASSWORD }}
           MAVEN_GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
         run: mvn -B deploy -DskipPublishing="$DRY_RUN"
-      - name: Tag, merge into master, start the next version
+      - name: Tag, move master to the release, start the next version on dev
         if: ${{ !inputs.dry-run }}
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           git tag -a "v$VERSION" -m "Release $VERSION"
-          git push origin HEAD:"$BRANCH" "v$VERSION"
-          if [[ "$BRANCH" != master ]]; then
-            git checkout -q master
-            git merge --no-edit "v$VERSION"
-          fi
           IFS=. read -r major minor patch <<< "$VERSION"
           next="$major.$minor.$((patch + 1))-SNAPSHOT"
+          release=$(git rev-parse HEAD)
           mvn -B -q versions:set -DnewVersion="$next" -DgenerateBackupPoms=false
           git commit -qam "Prepare $next"
-          git push origin master
+          # one push: the tag, master at the release commit (fast-forward) and dev with the next version
+          git push --atomic origin "v$VERSION" "$release:refs/heads/master" HEAD:dev
           gh release create "v$VERSION" --verify-tag --generate-notes --title "$VERSION" target/activejdbc-wrapper-"$VERSION"*.jar
