@@ -2,6 +2,8 @@ version: 2
 updates:
   - package-ecosystem: maven
     directory: /
+    # master only gets released code; updates go out with the next release
+    target-branch: dev
     schedule:
       interval: weekly
     groups:
@@ -28,5 +30,6 @@ updates:
         versions: [">= 2"]          # must match ActiveJDBC's slf4j-api 1.7, 2.x bindings aren't found by it
   - package-ecosystem: github-actions
     directory: /
+    target-branch: dev
     schedule:
       interval: weekly
