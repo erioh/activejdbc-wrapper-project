@@ -56,7 +56,8 @@ jobs:
           previous=$(git describe --tags --abbrev=0 --match 'v*' | sed 's/^v//')
           mvn -B -q versions:set -DnewVersion="$VERSION" -DgenerateBackupPoms=false
           # the dependency examples in the README name the released version
-          sed -i "s|<version>$previous</version>|<version>$VERSION</version>|" README.md
+          sed -i -e "s|<version>$previous</version>|<version>$VERSION</version>|" \
+                 -e "s|activejdbc-wrapper:$previous'|activejdbc-wrapper:$VERSION'|" README.md
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git commit -qam "Release $VERSION"
