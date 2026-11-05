@@ -1,46 +1,84 @@
-# activejdbc-wrapper-project
+# activejdbc-wrapper
 
-The main goal of this project is to simplify the usage of ActiveJDBC by generating wrapper classes.
+[![Maven Central](https://img.shields.io/maven-central/v/io.github.erioh/activejdbc-wrapper)](https://central.sonatype.com/artifact/io.github.erioh/activejdbc-wrapper)
+[![CI](https://github.com/erioh/activejdbc-wrapper-project/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/erioh/activejdbc-wrapper-project/actions/workflows/ci.yml)
+[![License](https://img.shields.io/badge/license-Apache%202.0-blue)](LICENSE)
 
-You may have noticed that ActiveJDBC code sometimes looks a bit ugly. On top of that, you have to remember the names
-and types of all the fields.
+Typed wrappers for [ActiveJDBC](https://javalite.io/activejdbc) models, generated at compile time: getters and setters
+instead of `getString("FIRST_NAME")`, builders, `equals`/`hashCode`/`toString` for test assertions, and a type-safe
+query builder.
 
-If you use ActiveJDBC in your e2e/integration tests, you can't write simple assertions. You're forced to call a ton of
-getters to fetch the data you need. You may also really miss the equals and toString methods, and you don't want to
-write them yourself.
-
-With this project, instead of this:
-
-```java
-        FancyTable activejdbcObject=new FancyTable();
-        activejdbcObject.setString("FIRST_NAME","Some value");
-        activejdbcObject.setBigDecimal("AMOUNT",BigDecimal.TEN);
-        // 100500 billion other setters
-        activejdbcObject.setBoolean("ACTIVATED",false);
-```
-
-you can write this:
+Annotate a model with the columns you use:
 
 ```java
-        FancyTableWrapper fancyTableWrapper=new FancyTableWrapper();
-        fancyTableWrapper.setFirstName("Some value");
-        fancyTableWrapper.setAmount(BigDecimal.TEN);
-        fancyTableWrapper.setActivated(false);
+@Table("PRODUCT")
+@ActiveJdbcRequiredProperty(columnName = "NAME", clazz = String.class)
+@ActiveJdbcRequiredProperty(columnName = "PRICE", clazz = BigDecimal.class)
+@ActiveJdbcRequiredProperty(columnName = "STATUS", clazz = Status.class)
+public class Product extends Model {
+}
 ```
 
-If you prefer builders, you can use them as well :)
+and the annotation processor generates `ProductWrapper`:
 
 ```java
-        SomeTableWrapper someTableWrapper=SomeTableWrapper.builder()
-        .someId(1L)
-        .aaa("some value")
-        .build();
+        // instead of product.set("PRICE", ...) and product.getBigDecimal("PRICE")
+        ProductWrapper pen = ProductWrapper.builder()
+                .name("Pen")
+                .price(new BigDecimal("1.50"))
+                .status(Status.ACTIVE)
+                .build();
+        BigDecimal price = pen.getPrice();
+        // the ActiveJDBC model behind the wrapper, for saveIt(), delete() and so on (see step 4)
+        new ActivejdbcWrapperManipulator().getActivejdbcObject(pen).saveIt();
+
+        // conditions on properties, value types checked by the compiler
+        List<ProductWrapper> cheap = ProductWrapper.query()
+                .status().eq(Status.ACTIVE)
+                .price().lt(BigDecimal.TEN)
+                .price().asc()
+                .fetch();
+
+        // equals compares the column values: a wrapper built in a test equals the row read back
+        assertThat(cheap).containsExactly(pen);
 ```
 
-All setters and getters are generated automatically. The equals/hashCode/toString methods are overridden automatically
-as well, so they are ready to use.
+## Features
 
-# So, what do you need to get started?
+* Typed getters and setters for strings, numbers, booleans, `byte[]`, `java.sql` and `java.time` types and enums.
+* A builder, `toBuilder()`, and `equals`/`hashCode`/`toString`.
+* A type-safe query builder: comparisons, `in`, `like`, `and`/`or` and groups, sorting, paging; `fetch()`,
+  `fetchFirst()`, `fetchOne()`, `exists()`, `fetchCount()`.
+* Converters for your own types: value objects, JSON, enums stored by code.
+* Read-only columns, columns left out of `equals`/`hashCode`, and a constant per column for raw SQL.
+* Java 8 and newer, Maven and Gradle (incremental builds included), no dependencies besides ActiveJDBC. Tested on H2,
+  Oracle Free 23ai and Oracle XE 21c.
+
+## Installation
+
+Maven:
+
+```xml
+<dependency>
+    <groupId>io.github.erioh</groupId>
+    <artifactId>activejdbc-wrapper</artifactId>
+    <version>1.2.0</version>
+</dependency>
+```
+
+Gradle:
+
+```groovy
+dependencies {
+    implementation 'io.github.erioh:activejdbc-wrapper:1.2.0'
+    annotationProcessor 'io.github.erioh:activejdbc-wrapper:1.2.0'
+}
+```
+
+On JDK 23 and newer, Maven needs the processor enabled explicitly (see step 3 below). With `module-info.java`, the
+module name is `activejdbc.wrapper` (`requires activejdbc.wrapper;`), starting with 1.2.0.
+
+# Getting started
 
 0. Let's assume that you already have some ActiveJDBC classes, everything works, and you only want to simplify their
    usage.
@@ -53,19 +91,7 @@ public class FancyTable extends Model {
 }
 ```
 
-1. Add the dependency to your pom.xml file.
-
-```xml
-
-<dependency>
-    <groupId>io.github.erioh</groupId>
-    <artifactId>activejdbc-wrapper</artifactId>
-    <version>1.2.0</version>
-</dependency>
-```
-
-   With `module-info.java`, the module name is `activejdbc.wrapper` (`requires activejdbc.wrapper;`), starting
-   with 1.2.0.
+1. Add the dependency, see [Installation](#installation).
 
 2. Add the ActiveJdbcRequiredProperty annotation with the column name and the expected type.
 
